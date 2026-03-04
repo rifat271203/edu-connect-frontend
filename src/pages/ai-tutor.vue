@@ -1,9 +1,10 @@
 <template>
-  <div class="h-[calc(100vh-65px)] lg:h-screen flex bg-dark-950 text-dark-100">
+  <div class="h-[100dvh] lg:h-screen flex bg-dark-950 text-dark-100">
     <div class="flex-1 min-w-0 flex flex-col">
       <AiTutorHeader
         :message-count="messages.length"
         :saved-chat-count="chatHistory.length"
+        @go-back="handleMobileBack"
         @clear-chat="clearChat"
       />
 
@@ -121,6 +122,7 @@ const renderMarkdown = (content: string): string => {
 }
 
 const userStore = useUserStore()
+const router = useRouter()
 
 type MessageListExpose = {
   scrollToBottom: () => void
@@ -168,6 +170,15 @@ const composerPlaceholder = computed(() => {
 
 const setCategory = (category: TutorCategory) => {
   selectedCategory.value = category
+}
+
+const handleMobileBack = () => {
+  if (process.client && window.history.length > 1) {
+    router.back()
+    return
+  }
+
+  router.push('/home')
 }
 
 const emptyStateDescription = computed(() => {
@@ -610,7 +621,12 @@ const renderMathInMessages = () => {
 }
 .katex-display > .katex { color: #f0f0f5 !important; }
 
-.ai-message { line-height: 1.72; font-size: 0.875rem; }
+.ai-message {
+  line-height: 1.72;
+  font-size: 0.875rem;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 .ai-message h1,
 .ai-message h2,
 .ai-message h3,
@@ -658,4 +674,10 @@ const renderMathInMessages = () => {
 .ai-message th,
 .ai-message td { border: 1px solid rgba(255,255,255,0.1); padding: 0.4em; text-align: left; }
 .ai-message th { background: rgba(0,0,0,0.2); }
+
+@media (max-width: 640px) {
+  .ai-message { font-size: 0.8125rem; line-height: 1.66; }
+  .ai-message pre { padding: 0.65em; margin: 0.6em 0; }
+  .ai-message table { font-size: 0.78em; }
+}
 </style>

@@ -1,7 +1,7 @@
 <template>
-  <div class="border-t border-dark-700/60 bg-dark-950/95 backdrop-blur-xl px-4 lg:px-6 py-4">
+  <div class="composer-shell border-t border-dark-700/60 bg-dark-950/95 backdrop-blur-xl px-4 lg:px-6 pt-3">
     <div class="max-w-4xl mx-auto">
-      <div class="rounded-2xl border border-dark-700/70 bg-dark-900/60 p-2.5 flex items-end gap-2">
+      <div class="rounded-2xl border border-dark-700/70 bg-dark-900/60 p-2 flex items-end gap-2">
         <div class="flex-1 relative">
           <textarea
             :value="modelValue"
@@ -10,7 +10,7 @@
             :placeholder="placeholder"
             rows="1"
             maxlength="2000"
-            class="w-full bg-transparent border-none rounded-xl px-2 py-2.5 pr-10 text-dark-50 placeholder:text-dark-500 focus:outline-none resize-none text-sm leading-relaxed"
+            class="w-full min-h-[44px] max-h-36 bg-transparent border-none rounded-xl px-2 py-2.5 pr-10 text-dark-50 placeholder:text-dark-500 focus:outline-none resize-none text-sm leading-relaxed"
             :disabled="disabled"
           ></textarea>
 
@@ -39,7 +39,8 @@
       </div>
 
       <div class="flex items-center justify-between mt-2 px-1">
-        <p class="text-xs text-dark-500">Enter to send • Shift+Enter for line break • LaTeX supported</p>
+        <p class="hidden sm:block text-xs text-dark-500">Enter to send • Shift+Enter for line break • LaTeX supported</p>
+        <p class="sm:hidden text-[11px] text-dark-500">Enter to send</p>
         <p class="text-xs text-dark-500">{{ modelValue.length }}/2000</p>
       </div>
     </div>
@@ -70,3 +71,9 @@ const emitSend = () => {
   emit('send', props.modelValue)
 }
 </script>
+
+<style scoped>
+.composer-shell {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+</style>

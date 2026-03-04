@@ -1,12 +1,12 @@
 <template>
-  <div ref="container" class="flex-1 overflow-y-auto px-4 lg:px-6 py-5 space-y-5 pb-28 lg:pb-6 scrollbar-hide">
+  <div ref="container" class="flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 pb-6 scrollbar-hide">
     <div
       v-for="(message, index) in messages"
       :key="index"
       class="flex"
       :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
     >
-      <div v-if="message.role === 'assistant'" class="flex items-start gap-3 w-full max-w-[92%] sm:max-w-[78%]">
+      <div v-if="message.role === 'assistant'" class="flex items-start gap-2.5 sm:gap-3 w-full max-w-[88%] sm:max-w-[80%] lg:max-w-[76%]">
         <div class="w-8 h-8 rounded-lg bg-accent/15 border border-accent/35 text-accent-light flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -30,11 +30,19 @@
             @reveal-progress="onMathRevealProgress"
           />
 
-          <div
-            v-else
-            class="ai-message bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-4 text-dark-100 whitespace-pre-wrap shadow-sm"
-            v-html="renderMarkdown(message.content)"
-          ></div>
+          <div v-else>
+            <div
+              v-if="message.isStreaming"
+              class="bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-3.5 sm:p-4 text-dark-100 shadow-sm"
+            >
+              <p class="whitespace-pre-wrap text-sm leading-relaxed">{{ message.content }}</p>
+            </div>
+            <div
+              v-else
+              class="ai-message bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-3.5 sm:p-4 text-dark-100 whitespace-pre-wrap shadow-sm"
+              v-html="renderMarkdown(message.content)"
+            ></div>
+          </div>
 
           <ReactionDiagram
             v-if="message.diagram && message.showDiagram"
@@ -52,16 +60,16 @@
         </div>
       </div>
 
-      <div v-else class="flex items-start gap-3 w-full max-w-[92%] sm:max-w-[78%] flex-row-reverse">
+      <div v-else class="flex items-start gap-2.5 sm:gap-3 w-full max-w-[86%] sm:max-w-[78%] lg:max-w-[74%] flex-row-reverse">
         <UiAvatar
           :src="userAvatar"
           :name="userName"
           size="sm"
           class="flex-shrink-0"
         />
-        <div class="min-w-0">
+        <div class="min-w-0 w-full">
           <p class="text-[11px] uppercase tracking-wide text-dark-400 mb-1 text-right">You</p>
-          <div class="bg-dark-800/90 rounded-2xl rounded-tr-md p-4 border border-dark-700/75 shadow-sm">
+          <div class="bg-dark-800/90 rounded-2xl rounded-tr-md p-3.5 sm:p-4 border border-dark-700/75 shadow-sm">
             <p class="text-dark-100 whitespace-pre-wrap text-sm leading-relaxed">{{ message.content }}</p>
           </div>
         </div>
@@ -69,13 +77,13 @@
     </div>
 
     <div v-if="isTyping" class="flex justify-start">
-      <div class="flex items-start gap-3 max-w-[92%] sm:max-w-[78%]">
+      <div class="flex items-start gap-2.5 sm:gap-3 max-w-[88%] sm:max-w-[80%] lg:max-w-[76%]">
         <div class="w-8 h-8 rounded-lg bg-accent/15 border border-accent/35 text-accent-light flex items-center justify-center">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
-        <div class="bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
+        <div class="bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md px-3.5 sm:px-4 py-3 shadow-sm">
           <p class="text-[11px] text-dark-400 mb-2">AI Tutor is generating a response...</p>
           <div class="flex gap-1.5">
             <span class="w-2 h-2 bg-accent-light rounded-full animate-bounce" style="animation-delay: 0ms"></span>

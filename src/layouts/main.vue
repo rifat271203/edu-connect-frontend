@@ -6,7 +6,7 @@
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col lg:ml-64">
       <!-- Mobile Header -->
-      <header class="topbar lg:hidden sticky top-0 z-40 backdrop-blur-lg">
+      <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40 backdrop-blur-lg">
         <div class="flex items-center justify-between px-4 py-3">
           <NuxtLink to="/home" class="flex items-center gap-2 group">
             <div class="w-8 h-8 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center shadow-[var(--shadow-sm)] transition-all duration-150 group-hover:bg-[var(--primary-hover)]">
@@ -58,7 +58,7 @@
     </div>
     
     <!-- Mobile Bottom Navigation -->
-    <LayoutMobileNav class="lg:hidden" />
+    <LayoutMobileNav v-if="!isAiTutorRoute" class="lg:hidden" />
 
     <!-- First-login profile picture modal -->
     <div
@@ -207,6 +207,8 @@ const toggleMobileMenu = () => {
 
 // Close menu on route change
 const route = useRoute()
+const isAiTutorRoute = computed(() => route.path === '/ai-tutor')
+
 watch(() => route.path, () => {
   showMobileMenu.value = false
 })
