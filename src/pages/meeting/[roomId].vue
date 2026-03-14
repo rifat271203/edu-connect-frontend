@@ -1,65 +1,122 @@
 <template>
-  <div class="min-h-screen bg-dark-950 px-4 py-6 text-dark-50 md:px-8">
-    <div class="mx-auto flex w-full max-w-7xl flex-col gap-5">
-      <header class="rounded-2xl border border-surface-glass-border bg-dark-900/70 p-4">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 class="text-2xl font-semibold">Meeting Room</h1>
+  <div class="relative min-h-screen overflow-hidden bg-dark-950 text-dark-50">
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+      <div class="absolute -right-16 top-24 h-72 w-72 rounded-full bg-purple-500/20 blur-3xl" />
+      <div class="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-secondary-500/10 blur-3xl" />
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_55%)]" />
+    </div>
+
+    <div class="relative z-10 px-4 py-6 md:px-8 md:py-8">
+      <div class="mx-auto flex w-full max-w-7xl flex-col gap-5">
+        <header class="rounded-3xl border border-surface-glass-border bg-dark-900/75 p-5 shadow-card backdrop-blur-xl md:p-6">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-[0.22em] text-dark-300">EduConnect Live Session</p>
+              <h1 class="mt-1 text-2xl font-semibold md:text-3xl">Meeting Room</h1>
+              <p class="mt-2 text-sm text-dark-300">
+                Room ID:
+                <span class="rounded-lg bg-dark-800/70 px-2 py-1 font-mono text-dark-100">{{ roomId }}</span>
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <span class="rounded-xl border border-surface-glass-border bg-dark-800/80 px-3 py-1.5 text-dark-100">
+                {{ participantsCount }} Participant{{ participantsCount === 1 ? '' : 's' }}
+              </span>
+              <span :class="connectionBadgeClass" class="rounded-xl px-3 py-1.5 font-medium">
+                {{ connectionStatus }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+            <div class="rounded-2xl border border-surface-glass-border bg-dark-800/60 p-3">
+              <p class="text-2xs uppercase tracking-[0.18em] text-dark-400">Media</p>
+              <p class="mt-1 font-medium text-dark-100">{{ mediaStatusLabel }}</p>
+            </div>
+            <div class="rounded-2xl border border-surface-glass-border bg-dark-800/60 p-3">
+              <p class="text-2xs uppercase tracking-[0.18em] text-dark-400">Room State</p>
+              <p class="mt-1 font-medium text-dark-100">{{ roomStateLabel }}</p>
+            </div>
+            <div class="rounded-2xl border border-surface-glass-border bg-dark-800/60 p-3 sm:col-span-2 xl:col-span-1">
+              <p class="text-2xs uppercase tracking-[0.18em] text-dark-400">Tips</p>
+              <p class="mt-1 text-dark-200">Use headphones for best audio quality and avoid echo.</p>
+            </div>
+          </div>
+
+          <p v-if="statusMessage" class="mt-4 text-sm text-dark-300">
+            {{ statusMessage }}
+          </p>
+          <p v-if="errorMessage" class="mt-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            {{ errorMessage }}
+          </p>
+        </header>
+
+        <div
+          v-if="permissionDenied"
+          class="rounded-3xl border border-red-500/25 bg-red-500/10 p-5 text-sm text-red-200 backdrop-blur"
+        >
+          <p class="font-medium">Camera or microphone permission was denied.</p>
+          <p class="mt-1 text-red-200/90">
+            Please allow access in your browser settings, then rejoin the meeting.
+          </p>
+        </div>
+
+        <section class="rounded-3xl border border-surface-glass-border bg-dark-900/70 p-4 shadow-card backdrop-blur-xl md:p-5">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 class="text-lg font-semibold">Participants</h2>
             <p class="text-sm text-dark-300">
-              Room: <span class="font-mono text-dark-100">{{ roomId }}</span>
+              {{ remoteParticipants.length ? 'Live media streams are active.' : 'Share the room link and wait for others to join.' }}
             </p>
           </div>
 
-          <div class="flex items-center gap-3 text-sm text-dark-200">
-            <span class="rounded-lg bg-dark-800/80 px-3 py-1">
-              Participants: {{ participantsCount }}
-            </span>
-            <span class="rounded-lg bg-dark-800/80 px-3 py-1">{{ connectionStatus }}</span>
+          <div v-if="!permissionDenied" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <MeetingVideoTile
+              :stream="localStream"
+              :label="`You${isMuted ? ' (Muted)' : ''}${isCameraOff ? ' (Camera Off)' : ''}`"
+              muted
+            />
+
+            <MeetingVideoTile
+              v-for="remote in remoteParticipants"
+              :key="remote.socketId"
+              :stream="remote.stream"
+              :label="remote.label"
+            />
+
+            <div
+              v-if="remoteParticipants.length === 0"
+              class="flex min-h-56 flex-col items-center justify-center rounded-3xl border border-dashed border-surface-glass-border bg-dark-800/35 px-5 text-center"
+            >
+              <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/20 text-accent-light">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.8"
+                    d="M17 20h5V4H2v16h5m10 0v-5a3 3 0 00-3-3H10a3 3 0 00-3 3v5m10 0H7"
+                  />
+                </svg>
+              </div>
+              <p class="font-medium text-dark-100">Waiting for participants</p>
+              <p class="mt-1 text-sm text-dark-300">Invite classmates using the copy link button below.</p>
+            </div>
           </div>
+        </section>
+
+        <div class="sticky bottom-4 z-20">
+          <MeetingControls
+            :is-muted="isMuted"
+            :is-camera-off="isCameraOff"
+            :disabled="isLeaving"
+            @toggle-mic="toggleMute"
+            @toggle-camera="toggleCamera"
+            @copy-link="copyMeetingLink"
+            @leave="leaveCall"
+          />
         </div>
-
-        <p v-if="statusMessage" class="mt-3 text-sm text-dark-300">
-          {{ statusMessage }}
-        </p>
-        <p v-if="errorMessage" class="mt-3 text-sm text-red-400">
-          {{ errorMessage }}
-        </p>
-      </header>
-
-      <div
-        v-if="permissionDenied"
-        class="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-200"
-      >
-        <p class="font-medium">Camera or microphone permission was denied.</p>
-        <p class="mt-1 text-red-200/90">
-          Please allow access in your browser settings, then rejoin the meeting.
-        </p>
       </div>
-
-      <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <MeetingVideoTile
-          :stream="localStream"
-          :label="`You${isMuted ? ' (Muted)' : ''}${isCameraOff ? ' (Camera Off)' : ''}`"
-          muted
-        />
-
-        <MeetingVideoTile
-          v-for="remote in remoteParticipants"
-          :key="remote.socketId"
-          :stream="remote.stream"
-          :label="remote.label"
-        />
-      </div>
-
-      <MeetingControls
-        :is-muted="isMuted"
-        :is-camera-off="isCameraOff"
-        :disabled="isLeaving"
-        @toggle-mic="toggleMute"
-        @toggle-camera="toggleCamera"
-        @copy-link="copyMeetingLink"
-        @leave="leaveCall"
-      />
     </div>
   </div>
 </template>
@@ -180,6 +237,35 @@ const participantsCount = computed(() => {
   return localParticipant + remoteParticipants.value.length
 })
 
+const connectionBadgeClass = computed(() => {
+  const status = connectionStatus.value.toLowerCase()
+
+  if (status.includes('failed') || status.includes('error')) {
+    return 'border border-red-500/30 bg-red-500/15 text-red-300'
+  }
+
+  if (status.includes('connecting') || status.includes('requesting') || status.includes('initializing')) {
+    return 'border border-secondary-500/30 bg-secondary-500/15 text-secondary-300'
+  }
+
+  if (status.includes('ended') || status.includes('disconnected')) {
+    return 'border border-dark-600 bg-dark-800/90 text-dark-300'
+  }
+
+  return 'border border-accent/30 bg-accent/15 text-accent-light'
+})
+
+const mediaStatusLabel = computed(() => {
+  if (permissionDenied.value) return 'No camera/microphone permission'
+  if (!localStream.value) return 'Preparing local stream'
+  if (isMuted.value && isCameraOff.value) return 'Mic muted · Camera off'
+  if (isMuted.value) return 'Mic muted · Camera on'
+  if (isCameraOff.value) return 'Mic on · Camera off'
+  return 'Mic on · Camera on'
+})
+
+const roomStateLabel = computed(() => (roomActive.value ? 'Session in progress' : 'Session ended'))
+
 const asRecord = (payload: unknown): Record<string, unknown> =>
   payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {}
 
@@ -210,6 +296,30 @@ const normalizeSocketId = (payload: unknown): string => {
   }
 
   return ''
+}
+
+const normalizeSenderSocketId = (payload: unknown): string => {
+  if (!payload || typeof payload !== 'object') return ''
+
+  const source = payload as Record<string, unknown>
+  const nested = asRecord(source.data)
+  const sender =
+    source.fromSocketId ||
+    source.from ||
+    source.senderSocketId ||
+    source.sourceSocketId ||
+    source.userSocketId ||
+    nested.fromSocketId ||
+    nested.from ||
+    nested.senderSocketId ||
+    nested.sourceSocketId ||
+    nested.userSocketId
+
+  if (typeof sender === 'string' || typeof sender === 'number') {
+    return String(sender)
+  }
+
+  return normalizeSocketId(payload)
 }
 
 const normalizeSocketIdList = (payload: unknown): string[] => {
@@ -446,9 +556,7 @@ const handleUserJoined = async (payload: unknown, selfSocketId?: string) => {
 }
 
 const handleOffer = async (payload: unknown) => {
-  const source = (payload || {}) as SignalingOfferPayload
-  const fromSocketId =
-    source.fromSocketId || source.from || source.socketId || source.senderSocketId || source.sourceSocketId || source.userSocketId || ''
+  const fromSocketId = normalizeSenderSocketId(payload)
   const offer = normalizeSessionDescription(payload, 'offer')
   if (!fromSocketId || !offer) return
 
@@ -471,9 +579,7 @@ const handleOffer = async (payload: unknown) => {
 }
 
 const handleAnswer = async (payload: unknown) => {
-  const source = (payload || {}) as SignalingAnswerPayload
-  const fromSocketId =
-    source.fromSocketId || source.from || source.socketId || source.senderSocketId || source.sourceSocketId || source.userSocketId || ''
+  const fromSocketId = normalizeSenderSocketId(payload)
   const answer = normalizeSessionDescription(payload, 'answer')
 
   if (!fromSocketId || !answer) return
@@ -485,9 +591,7 @@ const handleAnswer = async (payload: unknown) => {
 }
 
 const handleIceCandidate = async (payload: unknown) => {
-  const source = (payload || {}) as SignalingIcePayload
-  const fromSocketId =
-    source.fromSocketId || source.from || source.socketId || source.senderSocketId || source.sourceSocketId || source.userSocketId || ''
+  const fromSocketId = normalizeSenderSocketId(payload)
   const candidate = normalizeIceCandidatePayload(payload)
   if (!fromSocketId || !candidate) return
 
@@ -635,30 +739,29 @@ const initMeeting = async () => {
     return
   }
 
-  connectionStatus.value = 'Connecting...'
+  connectionStatus.value = 'Requesting media access...'
   statusMessage.value = ''
   errorMessage.value = ''
-
-  registerSocketListeners()
-
-  connectionStatus.value = 'Requesting media access...'
+  permissionDenied.value = false
 
   try {
     await initLocalMedia()
   } catch (error) {
     permissionDenied.value = true
-    connectionStatus.value = 'Connected (no media)'
+    connectionStatus.value = 'Media blocked'
     errorMessage.value =
       error instanceof Error
         ? error.message
         : 'Camera/microphone access was denied. You are in the room, but audio/video is disabled.'
-    statusMessage.value = 'You joined the room without camera/mic access.'
-    return
+    statusMessage.value = 'Joining room without camera/mic access.'
   }
 
-  permissionDenied.value = false
-  connectionStatus.value = 'Connected'
-  statusMessage.value = `Signed in as ${userStore.user?.name || 'User'}`
+  connectionStatus.value = 'Connecting...'
+  registerSocketListeners()
+
+  if (!permissionDenied.value) {
+    statusMessage.value = `Signed in as ${userStore.user?.name || 'User'}`
+  }
 }
 
 const toggleMute = () => {

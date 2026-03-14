@@ -1,4 +1,6 @@
-import { io, type Socket } from 'socket.io-client'
+import { io } from 'socket.io-client'
+
+type ClientSocket = ReturnType<typeof io>
 
 interface JoinRoomPayload {
   roomId: string
@@ -49,9 +51,9 @@ const resolveSocketUrl = (): string => {
 }
 
 export const useMeetingSocket = () => {
-  const socket = ref<Socket | null>(null)
+  const socket = shallowRef<ClientSocket | null>(null)
 
-  const connect = (): Socket | null => {
+  const connect = (): ClientSocket | null => {
     if (!process.client) {
       return null
     }
@@ -96,36 +98,48 @@ export const useMeetingSocket = () => {
   }
 
   const emitOffer = (payload: OfferPayload) => {
+    const senderSocketId = socket.value?.id
+
     socket.value?.emit('offer', {
       roomId: payload.roomId,
       toSocketId: payload.toSocketId,
       targetSocketId: payload.toSocketId,
       to: payload.toSocketId,
       socketId: payload.toSocketId,
+      fromSocketId: senderSocketId,
+      senderSocketId,
       offer: payload.offer,
       sdp: payload.offer,
     })
   }
 
   const emitAnswer = (payload: AnswerPayload) => {
+    const senderSocketId = socket.value?.id
+
     socket.value?.emit('answer', {
       roomId: payload.roomId,
       toSocketId: payload.toSocketId,
       targetSocketId: payload.toSocketId,
       to: payload.toSocketId,
       socketId: payload.toSocketId,
+      fromSocketId: senderSocketId,
+      senderSocketId,
       answer: payload.answer,
       sdp: payload.answer,
     })
   }
 
   const emitIceCandidate = (payload: IceCandidatePayload) => {
+    const senderSocketId = socket.value?.id
+
     socket.value?.emit('ice-candidate', {
       roomId: payload.roomId,
       toSocketId: payload.toSocketId,
       targetSocketId: payload.toSocketId,
       to: payload.toSocketId,
       socketId: payload.toSocketId,
+      fromSocketId: senderSocketId,
+      senderSocketId,
       candidate: payload.candidate,
       iceCandidate: payload.candidate,
     })
