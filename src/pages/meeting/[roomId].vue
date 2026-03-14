@@ -51,6 +51,12 @@
           <p v-if="errorMessage" class="mt-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
             {{ errorMessage }}
           </p>
+          <p
+            v-if="remoteMediaDiagnostic"
+            class="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
+          >
+            {{ remoteMediaDiagnostic }}
+          </p>
         </header>
 
         <div
@@ -189,16 +195,40 @@ const roomActive = ref(true)
 const localStream = ref<MediaStream | null>(null)
 const remoteStreamsBySocketId = ref<Record<string, MediaStream>>({})
 const peerConnectionsBySocketId = new Map<string, RTCPeerConnection>()
+const pendingIceCandidatesBySocketId = new Map<string, RTCIceCandidateInit[]>()
+const makingOfferBySocketId = new Map<string, boolean>()
+const socketListenersRegistered = ref(false)
+const localSocketId = ref('')
+const lastRemoteTrackAt = ref<number | null>(null)
+const peerDiagnosticsBySocketId = ref<
+  Record<
+    string,
+    {
+      connectionState: RTCPeerConnectionState
+      iceConnectionState: RTCIceConnectionState
+      signalingState: RTCSignalingState
+    }
+  >
+>({})
+
+const defaultIceServers: RTCIceServer[] = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+]
+
+const logRtc = (event: string, details?: Record<string, unknown>) => {
+  console.info('[MeetingRTC]', event, details || {})
+}
 
 const parseIceServers = (value: unknown): RTCIceServer[] => {
   if (typeof value !== 'string' || !value.trim()) {
-    return [{ urls: 'stun:stun.l.google.com:19302' }]
+    return defaultIceServers
   }
 
   try {
     const parsed = JSON.parse(value)
     if (!Array.isArray(parsed)) {
-      return [{ urls: 'stun:stun.l.google.com:19302' }]
+      return defaultIceServers
     }
 
     const normalized = parsed.filter((item): item is RTCIceServer => {
@@ -212,9 +242,9 @@ const parseIceServers = (value: unknown): RTCIceServer[] => {
       return false
     })
 
-    return normalized.length ? normalized : [{ urls: 'stun:stun.l.google.com:19302' }]
+    return normalized.length ? normalized : defaultIceServers
   } catch {
-    return [{ urls: 'stun:stun.l.google.com:19302' }]
+    return defaultIceServers
   }
 }
 
@@ -265,6 +295,31 @@ const mediaStatusLabel = computed(() => {
 })
 
 const roomStateLabel = computed(() => (roomActive.value ? 'Session in progress' : 'Session ended'))
+
+const remoteMediaDiagnostic = computed(() => {
+  if (permissionDenied.value || remoteParticipants.value.length > 0) return ''
+
+  const peerEntries = Object.entries(peerDiagnosticsBySocketId.value)
+  if (!peerEntries.length) return ''
+
+  const maybeConnected = peerEntries.some(([, state]) => {
+    return (
+      ['connected', 'connecting'].includes(state.connectionState) ||
+      ['connected', 'checking', 'completed'].includes(state.iceConnectionState)
+    )
+  })
+
+  if (!maybeConnected) return ''
+
+  const states = peerEntries
+    .map(([socketId, state]) => {
+      return `${socketId.slice(0, 6)}: pc=${state.connectionState}, ice=${state.iceConnectionState}, sig=${state.signalingState}`
+    })
+    .join(' · ')
+
+  const onTrackTime = lastRemoteTrackAt.value ? new Date(lastRemoteTrackAt.value).toLocaleTimeString() : 'never'
+  return `No remote media received yet. Last ontrack: ${onTrackTime}. Peer diagnostics: ${states}`
+})
 
 const asRecord = (payload: unknown): Record<string, unknown> =>
   payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {}
@@ -426,6 +481,24 @@ const setRemoteStream = (socketId: string, stream: MediaStream) => {
   }
 }
 
+const setPeerDiagnostic = (socketId: string, pc: RTCPeerConnection) => {
+  peerDiagnosticsBySocketId.value = {
+    ...peerDiagnosticsBySocketId.value,
+    [socketId]: {
+      connectionState: pc.connectionState,
+      iceConnectionState: pc.iceConnectionState,
+      signalingState: pc.signalingState,
+    },
+  }
+}
+
+const clearPeerDiagnostic = (socketId: string) => {
+  if (!peerDiagnosticsBySocketId.value[socketId]) return
+  const next = { ...peerDiagnosticsBySocketId.value }
+  delete next[socketId]
+  peerDiagnosticsBySocketId.value = next
+}
+
 const closePeerConnection = (socketId: string) => {
   const pc = peerConnectionsBySocketId.get(socketId)
   if (!pc) return
@@ -433,9 +506,14 @@ const closePeerConnection = (socketId: string) => {
   pc.ontrack = null
   pc.onicecandidate = null
   pc.onconnectionstatechange = null
+  pc.oniceconnectionstatechange = null
+  pc.onsignalingstatechange = null
   pc.close()
 
   peerConnectionsBySocketId.delete(socketId)
+  pendingIceCandidatesBySocketId.delete(socketId)
+  makingOfferBySocketId.delete(socketId)
+  clearPeerDiagnostic(socketId)
   removeRemoteStream(socketId)
 }
 
@@ -444,14 +522,38 @@ const stopLocalMedia = () => {
   localStream.value = null
 }
 
+const syncLocalTrackState = () => {
+  const stream = localStream.value
+  if (!stream) {
+    isMuted.value = true
+    isCameraOff.value = true
+    return
+  }
+
+  const audioTracks = stream.getAudioTracks()
+  const videoTracks = stream.getVideoTracks()
+
+  isMuted.value = audioTracks.length === 0 || audioTracks.every((track) => !track.enabled)
+  isCameraOff.value = videoTracks.length === 0 || videoTracks.every((track) => !track.enabled)
+}
+
 const attachLocalTracks = (pc: RTCPeerConnection) => {
   const stream = localStream.value
   if (!stream) return
+
+  const localTracks = stream.getTracks()
+  logRtc('local tracks available for publishing', {
+    tracks: localTracks.map((track) => ({ id: track.id, kind: track.kind, enabled: track.enabled, readyState: track.readyState })),
+  })
 
   stream.getTracks().forEach((track) => {
     const alreadyAdded = pc.getSenders().some((sender) => sender.track?.id === track.id)
     if (!alreadyAdded) {
       pc.addTrack(track, stream)
+      logRtc('local track added to peer connection', {
+        trackId: track.id,
+        kind: track.kind,
+      })
     }
   })
 }
@@ -459,14 +561,28 @@ const attachLocalTracks = (pc: RTCPeerConnection) => {
 const renegotiatePeer = async (socketId: string, pc: RTCPeerConnection) => {
   if (pc.signalingState !== 'stable') return
 
-  const offer = await pc.createOffer()
-  await pc.setLocalDescription(offer)
+  makingOfferBySocketId.set(socketId, true)
+  try {
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
 
-  emitOffer({
-    roomId: roomId.value,
-    toSocketId: socketId,
-    offer,
-  })
+    logRtc('offer created and setLocalDescription (renegotiate)', {
+      toSocketId: socketId,
+      type: offer.type,
+    })
+
+    emitOffer({
+      roomId: roomId.value,
+      toSocketId: socketId,
+      offer,
+    })
+
+    logRtc('offer sent (renegotiate)', {
+      toSocketId: socketId,
+    })
+  } finally {
+    makingOfferBySocketId.set(socketId, false)
+  }
 }
 
 const attachTracksToAllPeers = async () => {
@@ -488,11 +604,24 @@ const createPeerConnection = (socketId: string): RTCPeerConnection | null => {
 
   const pc = new RTCPeerConnection(rtcConfig)
   peerConnectionsBySocketId.set(socketId, pc)
+  setPeerDiagnostic(socketId, pc)
+  logRtc('peer connection created', {
+    socketId,
+    iceServers: rtcConfig.iceServers,
+  })
 
   attachLocalTracks(pc)
 
   pc.onicecandidate = (event) => {
     if (!event.candidate) return
+
+    logRtc('ice candidate generated and sending', {
+      toSocketId: socketId,
+      candidate: event.candidate.candidate,
+      sdpMid: event.candidate.sdpMid,
+      sdpMLineIndex: event.candidate.sdpMLineIndex,
+    })
+
     emitIceCandidate({
       roomId: roomId.value,
       toSocketId: socketId,
@@ -501,6 +630,14 @@ const createPeerConnection = (socketId: string): RTCPeerConnection | null => {
   }
 
   pc.ontrack = (event) => {
+    lastRemoteTrackAt.value = Date.now()
+    logRtc('ontrack fired', {
+      fromSocketId: socketId,
+      trackId: event.track.id,
+      kind: event.track.kind,
+      streamCount: event.streams.length,
+    })
+
     const firstStream = event.streams[0]
     if (firstStream) {
       setRemoteStream(socketId, firstStream)
@@ -513,29 +650,95 @@ const createPeerConnection = (socketId: string): RTCPeerConnection | null => {
   }
 
   pc.onconnectionstatechange = () => {
-    if (['failed', 'disconnected', 'closed'].includes(pc.connectionState)) {
+    setPeerDiagnostic(socketId, pc)
+    logRtc('peer connection state changed', {
+      socketId,
+      connectionState: pc.connectionState,
+    })
+
+    if (pc.connectionState === 'failed' || pc.connectionState === 'closed') {
       closePeerConnection(socketId)
     }
   }
 
+  pc.oniceconnectionstatechange = () => {
+    setPeerDiagnostic(socketId, pc)
+    logRtc('ice connection state changed', {
+      socketId,
+      iceConnectionState: pc.iceConnectionState,
+    })
+  }
+
+  pc.onsignalingstatechange = () => {
+    setPeerDiagnostic(socketId, pc)
+    logRtc('signaling state changed', {
+      socketId,
+      signalingState: pc.signalingState,
+    })
+  }
+
   return pc
+}
+
+const flushPendingIceCandidates = async (socketId: string, pc: RTCPeerConnection) => {
+  const queued = pendingIceCandidatesBySocketId.get(socketId)
+  if (!queued?.length) return
+
+  logRtc('flushing queued ICE candidates', {
+    socketId,
+    queuedCount: queued.length,
+  })
+
+  pendingIceCandidatesBySocketId.delete(socketId)
+  for (const candidate of queued) {
+    try {
+      await pc.addIceCandidate(new RTCIceCandidate(candidate))
+      logRtc('queued ICE candidate applied', { socketId })
+    } catch (error) {
+      console.warn('Failed to apply queued ICE candidate:', error)
+    }
+  }
+}
+
+const isPolitePeer = (remoteSocketId: string): boolean => {
+  if (!localSocketId.value) return true
+  return localSocketId.value.localeCompare(remoteSocketId) < 0
 }
 
 const createAndSendOffer = async (socketId: string) => {
   const pc = createPeerConnection(socketId)
   if (!pc) return
 
+  attachLocalTracks(pc)
+
   if (pc.signalingState !== 'stable') {
+    logRtc('offer creation skipped: signaling not stable', {
+      toSocketId: socketId,
+      signalingState: pc.signalingState,
+    })
     return
   }
 
-  const offer = await pc.createOffer()
-  await pc.setLocalDescription(offer)
-  emitOffer({
-    roomId: roomId.value,
-    toSocketId: socketId,
-    offer,
-  })
+  makingOfferBySocketId.set(socketId, true)
+  try {
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
+    logRtc('offer created and setLocalDescription', {
+      toSocketId: socketId,
+      type: offer.type,
+    })
+
+    emitOffer({
+      roomId: roomId.value,
+      toSocketId: socketId,
+      offer,
+    })
+    logRtc('offer sent', {
+      toSocketId: socketId,
+    })
+  } finally {
+    makingOfferBySocketId.set(socketId, false)
+  }
 }
 
 const handleRoomUsers = async (payload: unknown, selfSocketId?: string) => {
@@ -560,21 +763,67 @@ const handleOffer = async (payload: unknown) => {
   const offer = normalizeSessionDescription(payload, 'offer')
   if (!fromSocketId || !offer) return
 
+  logRtc('offer received', {
+    fromSocketId,
+    type: offer.type,
+  })
+
   const pc = createPeerConnection(fromSocketId)
   if (!pc) return
 
-  if (pc.signalingState !== 'stable') {
-    await pc.setLocalDescription({ type: 'rollback' })
+  const offerCollision = makingOfferBySocketId.get(fromSocketId) || pc.signalingState !== 'stable'
+  const polite = isPolitePeer(fromSocketId)
+
+  if (offerCollision && !polite) {
+    logRtc('offer ignored due to glare and impolite role', {
+      fromSocketId,
+      signalingState: pc.signalingState,
+    })
+    return
   }
 
+  if (offerCollision) {
+    if (pc.signalingState === 'have-local-offer') {
+      logRtc('offer collision detected, rolling back local description', {
+        fromSocketId,
+        signalingState: pc.signalingState,
+      })
+      await pc.setLocalDescription({ type: 'rollback' })
+    } else if (pc.signalingState !== 'stable') {
+      logRtc('offer ignored due to non-roll-backable signaling state', {
+        fromSocketId,
+        signalingState: pc.signalingState,
+      })
+      return
+    } else {
+      logRtc('offer collision detected without rollback requirement', {
+        fromSocketId,
+        signalingState: pc.signalingState,
+      })
+    }
+  }
+
+  attachLocalTracks(pc)
   await pc.setRemoteDescription(new RTCSessionDescription(offer))
+  logRtc('remote offer applied', {
+    fromSocketId,
+  })
+
+  await flushPendingIceCandidates(fromSocketId, pc)
+
   const answer = await pc.createAnswer()
   await pc.setLocalDescription(answer)
+  logRtc('answer created and setLocalDescription', {
+    toSocketId: fromSocketId,
+  })
 
   emitAnswer({
     roomId: roomId.value,
     toSocketId: fromSocketId,
     answer,
+  })
+  logRtc('answer sent', {
+    toSocketId: fromSocketId,
   })
 }
 
@@ -584,10 +833,20 @@ const handleAnswer = async (payload: unknown) => {
 
   if (!fromSocketId || !answer) return
 
+  logRtc('answer received', {
+    fromSocketId,
+    type: answer.type,
+  })
+
   const pc = peerConnectionsBySocketId.get(fromSocketId)
   if (!pc) return
 
   await pc.setRemoteDescription(new RTCSessionDescription(answer))
+  logRtc('remote answer applied', {
+    fromSocketId,
+  })
+
+  await flushPendingIceCandidates(fromSocketId, pc)
 }
 
 const handleIceCandidate = async (payload: unknown) => {
@@ -595,11 +854,31 @@ const handleIceCandidate = async (payload: unknown) => {
   const candidate = normalizeIceCandidatePayload(payload)
   if (!fromSocketId || !candidate) return
 
+  logRtc('ICE candidate received', {
+    fromSocketId,
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex,
+  })
+
   const pc = createPeerConnection(fromSocketId)
   if (!pc) return
 
+  if (!pc.remoteDescription) {
+    const queued = pendingIceCandidatesBySocketId.get(fromSocketId) || []
+    pendingIceCandidatesBySocketId.set(fromSocketId, [...queued, candidate])
+    logRtc('ICE candidate queued until remote description is set', {
+      fromSocketId,
+      queuedCount: queued.length + 1,
+    })
+    return
+  }
+
   try {
     await pc.addIceCandidate(new RTCIceCandidate(candidate))
+    logRtc('ICE candidate applied', {
+      fromSocketId,
+    })
   } catch (error) {
     console.warn('Failed to add ICE candidate:', error)
   }
@@ -608,6 +887,7 @@ const handleIceCandidate = async (payload: unknown) => {
 const handleUserLeft = (payload: unknown) => {
   const socketId = normalizeSocketId(payload)
   if (!socketId) return
+  logRtc('participant left', { socketId })
   closePeerConnection(socketId)
 }
 
@@ -627,15 +907,28 @@ const cleanupMeeting = () => {
   })
 
   remoteStreamsBySocketId.value = {}
+  peerDiagnosticsBySocketId.value = {}
+  localSocketId.value = ''
+  socketListenersRegistered.value = false
+  pendingIceCandidatesBySocketId.clear()
+  makingOfferBySocketId.clear()
   stopLocalMedia()
   disconnect()
 }
 
 const registerSocketListeners = () => {
   const socket = connect()
-  if (!socket) return
+  if (!socket || socketListenersRegistered.value) return
+
+  socketListenersRegistered.value = true
 
   socket.on('connect', () => {
+    localSocketId.value = socket.id || ''
+    logRtc('socket connected', {
+      socketId: socket.id,
+      roomId: roomId.value,
+    })
+
     connectionStatus.value = 'Connected'
     statusMessage.value = 'Connected to signaling server. Joining room...'
 
@@ -647,11 +940,24 @@ const registerSocketListeners = () => {
   })
 
   socket.on('connect_error', (error: Error) => {
+    logRtc('socket connect_error', {
+      message: error.message,
+    })
     connectionStatus.value = 'Connection failed'
     errorMessage.value = error.message || 'Failed to connect to meeting server'
   })
 
+  socket.on('disconnect', (reason: string) => {
+    logRtc('socket disconnected', {
+      reason,
+    })
+    connectionStatus.value = 'Disconnected'
+  })
+
   socket.on('room-users', (payload: unknown) => {
+    logRtc('room-users received', {
+      users: normalizeSocketIdList(payload),
+    })
     statusMessage.value = 'Joined room. Connecting participants...'
     handleRoomUsers(payload, socket.id).catch((error) => {
       console.error('Failed to process room users:', error)
@@ -659,18 +965,27 @@ const registerSocketListeners = () => {
   })
 
   socket.on('user-joined', (payload: unknown) => {
+    logRtc('user-joined received', {
+      socketId: normalizeSocketId(payload),
+    })
     handleUserJoined(payload, socket.id).catch((error) => {
       console.error('Failed to handle user joined:', error)
     })
   })
 
   socket.on('participant-joined', (payload: unknown) => {
+    logRtc('participant-joined received', {
+      socketId: normalizeSocketId(payload),
+    })
     handleUserJoined(payload, socket.id).catch((error) => {
       console.error('Failed to handle participant joined:', error)
     })
   })
 
   socket.on('new-user', (payload: unknown) => {
+    logRtc('new-user received', {
+      socketId: normalizeSocketId(payload),
+    })
     handleUserJoined(payload, socket.id).catch((error) => {
       console.error('Failed to handle new user:', error)
     })
@@ -715,18 +1030,70 @@ const registerSocketListeners = () => {
       (typeof nested.message === 'string' && nested.message) ||
       (typeof nested.error === 'string' && nested.error) ||
       'Meeting signaling error'
+    logRtc('socket-error received', {
+      message,
+      payload: source,
+    })
     errorMessage.value = message
   })
 }
 
+const getReadableMediaError = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return 'Camera/microphone access failed due to an unknown error.'
+  }
+
+  const mediaError = error as Error & { name?: string }
+
+  if (mediaError.name === 'NotAllowedError' || mediaError.name === 'PermissionDeniedError') {
+    return 'Camera/microphone permission was denied. Allow access in browser settings and rejoin the class.'
+  }
+
+  if (mediaError.name === 'NotFoundError' || mediaError.name === 'DevicesNotFoundError') {
+    return 'No microphone/camera device was found. Connect a device and try again.'
+  }
+
+  if (mediaError.name === 'NotReadableError' || mediaError.name === 'TrackStartError') {
+    return 'Camera/microphone is already in use by another app. Close other apps and retry.'
+  }
+
+  return mediaError.message || 'Camera/microphone access failed.'
+}
+
 const initLocalMedia = async () => {
-  localStream.value = await navigator.mediaDevices.getUserMedia({
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error('This browser does not support camera/microphone capture (getUserMedia).')
+  }
+
+  const stream = await navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true,
   })
 
-  isMuted.value = false
-  isCameraOff.value = false
+  localStream.value = stream
+
+  logRtc('local stream obtained', {
+    streamId: stream.id,
+    tracks: stream.getTracks().map((track) => ({
+      id: track.id,
+      kind: track.kind,
+      enabled: track.enabled,
+      readyState: track.readyState,
+      label: track.label,
+    })),
+  })
+
+  stream.getTracks().forEach((track) => {
+    track.onended = () => {
+      logRtc('local track ended', {
+        trackId: track.id,
+        kind: track.kind,
+      })
+      syncLocalTrackState()
+    }
+  })
+
+  syncLocalTrackState()
 
   await attachTracksToAllPeers()
 }
@@ -749,11 +1116,11 @@ const initMeeting = async () => {
   } catch (error) {
     permissionDenied.value = true
     connectionStatus.value = 'Media blocked'
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : 'Camera/microphone access was denied. You are in the room, but audio/video is disabled.'
+    errorMessage.value = getReadableMediaError(error)
     statusMessage.value = 'Joining room without camera/mic access.'
+    logRtc('local media request failed', {
+      error: error instanceof Error ? { name: error.name, message: error.message } : { message: String(error) },
+    })
   }
 
   connectionStatus.value = 'Connecting...'
@@ -766,24 +1133,38 @@ const initMeeting = async () => {
 
 const toggleMute = () => {
   const stream = localStream.value
-  if (!stream) return
+  if (!stream) {
+    statusMessage.value = 'No local microphone stream available.'
+    return
+  }
 
   const nextMuted = !isMuted.value
   stream.getAudioTracks().forEach((track) => {
     track.enabled = !nextMuted
   })
-  isMuted.value = nextMuted
+  syncLocalTrackState()
+  logRtc('microphone toggled', {
+    muted: isMuted.value,
+    tracks: stream.getAudioTracks().map((track) => ({ id: track.id, enabled: track.enabled })),
+  })
 }
 
 const toggleCamera = () => {
   const stream = localStream.value
-  if (!stream) return
+  if (!stream) {
+    statusMessage.value = 'No local camera stream available.'
+    return
+  }
 
   const nextCameraOff = !isCameraOff.value
   stream.getVideoTracks().forEach((track) => {
     track.enabled = !nextCameraOff
   })
-  isCameraOff.value = nextCameraOff
+  syncLocalTrackState()
+  logRtc('camera toggled', {
+    cameraOff: isCameraOff.value,
+    tracks: stream.getVideoTracks().map((track) => ({ id: track.id, enabled: track.enabled })),
+  })
 }
 
 const copyMeetingLink = async () => {
