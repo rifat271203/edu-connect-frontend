@@ -46,11 +46,11 @@ export default defineNuxtConfig({
     public: {
       backendUrl:
         process.env.NUXT_PUBLIC_BACKEND_URL ||
-        'https://edu-connect-backend-production.up.railway.app',
+        'https://sincere-spontaneity-production-ab4e.up.railway.app',
       socketUrl:
         process.env.NUXT_PUBLIC_SOCKET_URL ||
         process.env.NUXT_PUBLIC_BACKEND_URL ||
-        'https://edu-connect-backend-production.up.railway.app',
+        'https://sincere-spontaneity-production-ab4e.up.railway.app',
       iceServers:
         process.env.NUXT_PUBLIC_ICE_SERVERS ||
         '[{"urls":"stun:stun.l.google.com:19302"}]',

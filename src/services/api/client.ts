@@ -1,7 +1,7 @@
 // API Client Configuration
 // Centralized, resilient HTTP layer for all backend communication
 
-const DEFAULT_API_BASE_URL = 'https://edu-connect-backend-production.up.railway.app'
+const DEFAULT_API_BASE_URL = 'https://sincere-spontaneity-production-ab4e.up.railway.app'
 
 const normalizeBaseUrl = (value: string): string => value.replace(/\/+$/, '')
 
