@@ -137,9 +137,7 @@ const logMathStepReveal = (event: string, payload?: Record<string, unknown>) => 
   console.info('[math-step-reveal]', event, payload || {})
 }
 
-const userAvatar = computed(() =>
-  userStore.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.user?.name || 'user'}`
-)
+const userAvatar = computed(() => userStore.user?.avatar)
 
 const userName = computed(() => userStore.user?.name || 'User')
 

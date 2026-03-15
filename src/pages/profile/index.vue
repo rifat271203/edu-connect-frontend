@@ -17,7 +17,7 @@
         <div class="relative">
           <div class="w-32 h-32 rounded-2xl overflow-hidden border-4 border-dark-950">
             <img 
-              :src="userStore.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.user?.name || 'user'}`" 
+              :src="userStore.user?.avatar" 
               alt="Profile" 
               class="w-full h-full object-cover"
             />

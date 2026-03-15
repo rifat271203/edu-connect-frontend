@@ -25,56 +25,58 @@
         </div>
 
         <div class="grid max-w-[620px] gap-4">
-          <article :class="ui.featureCard">
-            <div :class="ui.featureIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
-                <path
-                  d="M4 6.75A2.75 2.75 0 016.75 4h10.5A2.75 2.75 0 0120 6.75v10.5A2.75 2.75 0 0117.25 20H6.75A2.75 2.75 0 014 17.25V6.75z"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                />
-                <path
-                  d="M8 9.5h8M8 12h8M8 14.5h5"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </div>
-            <h3 class="text-base font-semibold tracking-[-0.01em]">Course Management</h3>
-            <p class="mt-2 text-sm leading-6 text-[rgba(234,242,255,0.68)]">
-              Organize modules, assignments, and assessments in a polished learning flow.
-            </p>
-          </article>
+          <NuxtLink
+            v-for="card in quickAccessCards"
+            :key="card.id"
+            :to="card.to"
+            :class="[
+              ui.featureCard,
+              'group block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(87,198,166,0.35)]'
+            ]"
+          >
+            <div class="flex items-start gap-4">
+              <div :class="[ui.featureIcon, 'transition-transform duration-200 group-hover:scale-105']" aria-hidden="true">
+                <svg v-if="card.id === 'ai-tutor'" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                  <path
+                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
 
-          <article :class="ui.featureCard">
-            <div :class="ui.featureIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
-                <path
-                  d="M8 11a3 3 0 100-6 3 3 0 000 6zM16 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM3.5 18.5c0-2.5 2.1-4.5 4.7-4.5h.6c2.6 0 4.7 2 4.7 4.5M13 18.5c.2-1.8 1.7-3.3 3.6-3.3h.3c2 0 3.6 1.5 3.6 3.3"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </div>
-            <h3 class="text-base font-semibold tracking-[-0.01em]">Community Learning</h3>
-            <p class="mt-2 text-sm leading-6 text-[rgba(234,242,255,0.68)]">
-              Join discussions, collaborate with peers, and keep communication active across classes.
-            </p>
-          </article>
+                <svg v-else-if="card.id === 'feed'" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                  <path
+                    d="M8 11a3 3 0 100-6 3 3 0 000 6zM16 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM3.5 18.5c0-2.5 2.1-4.5 4.7-4.5h.6c2.6 0 4.7 2 4.7 4.5M13 18.5c.2-1.8 1.7-3.3 3.6-3.3h.3c2 0 3.6 1.5 3.6 3.3"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
 
-          <article :class="ui.featureCard">
-            <div :class="ui.featureIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
-                <path d="M4 19h16M7 16V9m5 7V5m5 11v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                  <path
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--ec-accent-hover)]">
+                  {{ card.badge }}
+                </p>
+                <h3 class="mt-1 text-base font-semibold tracking-[-0.01em]">{{ card.title }}</h3>
+                <p class="mt-2 text-sm leading-6 text-[rgba(234,242,255,0.68)]">
+                  {{ card.description }}
+                </p>
+              </div>
             </div>
-            <h3 class="text-base font-semibold tracking-[-0.01em]">Analytics Insights</h3>
-            <p class="mt-2 text-sm leading-6 text-[rgba(234,242,255,0.68)]">
-              Monitor attendance, performance, and engagement metrics with actionable dashboards.
-            </p>
-          </article>
+          </NuxtLink>
         </div>
       </section>
 
@@ -435,6 +437,41 @@ const ui = {
   primaryButton: 'h-12 rounded-[14px] bg-[var(--ec-accent)] px-4 text-sm font-semibold text-[var(--ec-accent-foreground)] transition duration-200 hover:bg-[var(--ec-accent-hover)] hover:shadow-[var(--ec-accent-hover-shadow)] disabled:cursor-not-allowed disabled:opacity-65',
 }
 
+type QuickAccessCard = {
+  id: 'ai-tutor' | 'feed' | 'classroom'
+  to: string
+  badge: string
+  title: string
+  description: string
+}
+
+const quickAccessCards: QuickAccessCard[] = [
+  {
+    id: 'ai-tutor',
+    to: '/ai-tutor',
+    badge: ' AI Tutor',
+    title: 'AI Tutor Assistance',
+    description:
+      'Get instant help with concepts, problem solving, and step-by-step explanations. Your personal AI tutor is available 24/7 to guide you through lessons and assignments.'
+  },
+  {
+    id: 'feed',
+    to: '/home',
+    badge: ' Social Educational Feed',
+    title: 'Educational Social Feed',
+    description:
+      'Discover learning posts, course updates, and trending academic discussions from teachers and students. Stay connected with a smart, education-focused community.'
+  },
+  {
+    id: 'classroom',
+    to: '/classroom',
+    badge: ' Teacher’s Classroom',
+    title: 'Interactive Classrooms',
+    description:
+      'Join private classrooms managed by teachers. Access notes, discussions, exams, and live classes in a structured digital learning environment.'
+  }
+]
+
 const loginBackdropGradient = 'var(--ec-gradient-overlay)'
 
 const errors = ref({
@@ -551,7 +588,8 @@ const handleLogin = async () => {
       name: apiUser?.name || email.value.split('@')[0] || 'User',
       displayName: apiUser?.name || email.value.split('@')[0] || 'User',
       username: apiUser?.username || (apiUser?.name || email.value).toLowerCase().replace(/\s+/g, ''),
-      avatar: apiUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${apiUser?.name || email.value}`,
+      avatar: apiUser?.profilePicUrl || apiUser?.avatar,
+      profilePicUrl: apiUser?.profilePicUrl,
       department: apiUser?.department,
       institution: apiUser?.institution
     }

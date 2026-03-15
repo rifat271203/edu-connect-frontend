@@ -291,7 +291,7 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     (typeof root.avatar === 'string' && root.avatar) ||
     (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
     (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
-    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || fallbackSeed)}`
+    ''
 
   const id = toId(
     nested.id ||

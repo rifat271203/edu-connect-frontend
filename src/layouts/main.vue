@@ -1,10 +1,10 @@
 <template>
   <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] flex">
     <!-- Left Sidebar - Desktop -->
-    <LayoutSidebar class="hidden lg:flex" />
+    <LayoutSidebar v-if="!isGuest" class="hidden lg:flex" />
     
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col lg:ml-64">
+    <main :class="['flex-1 flex flex-col', !isGuest ? 'lg:ml-64' : '']">
       <!-- Mobile Header -->
       <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40 backdrop-blur-lg">
         <div class="flex items-center justify-between px-4 py-3">
@@ -23,7 +23,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </button>
-            <button @click="toggleMobileMenu" class="btn-ghost !h-10 !w-10 !p-0">
+            <button v-if="!isGuest" @click="toggleMobileMenu" class="btn-ghost !h-10 !w-10 !p-0">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
@@ -40,13 +40,13 @@
         </div>
         
         <!-- Right Sidebar - Desktop (hidden on ai-tutor/messages pages) -->
-        <LayoutRightSidebar v-if="route.path !== '/ai-tutor' && !route.path.startsWith('/messages')" class="hidden xl:block" />
+        <LayoutRightSidebar v-if="!isGuest && route.path !== '/ai-tutor' && !route.path.startsWith('/messages')" class="hidden xl:block" />
       </div>
     </main>
     
     <!-- Mobile Sidebar Overlay -->
       <div 
-        v-if="showMobileMenu"
+        v-if="!isGuest && showMobileMenu"
         class="fixed inset-0 z-50 lg:hidden"
         @click="toggleMobileMenu"
       >
@@ -58,7 +58,7 @@
     </div>
     
     <!-- Mobile Bottom Navigation -->
-    <LayoutMobileNav v-if="!isAiTutorRoute" class="lg:hidden" />
+    <LayoutMobileNav v-if="!isGuest && !isAiTutorRoute" class="lg:hidden" />
 
     <!-- First-login profile picture modal -->
     <div
@@ -76,7 +76,7 @@
         <div class="mt-5 flex items-center gap-4">
           <div class="h-24 w-24 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
             <img
-              :src="profilePicPreviewUrl || userStore.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.user?.name || 'user'}`"
+              :src="profilePicPreviewUrl || userStore.user?.avatar"
               alt="Profile preview"
               class="h-full w-full object-cover"
             />
@@ -208,6 +208,7 @@ const toggleMobileMenu = () => {
 // Close menu on route change
 const route = useRoute()
 const isAiTutorRoute = computed(() => route.path === '/ai-tutor')
+const isGuest = computed(() => !userStore.isAuthenticated)
 
 watch(() => route.path, () => {
   showMobileMenu.value = false

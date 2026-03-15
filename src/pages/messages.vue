@@ -463,7 +463,7 @@ const normalizeSocketMessage = (payload: unknown): DmMessage | null => {
           avatar:
             (typeof senderRecord.avatar === 'string' && senderRecord.avatar) ||
             (typeof senderRecord.profilePicUrl === 'string' && senderRecord.profilePicUrl) ||
-            `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(toId(senderRecord.id) || 'user')}`,
+            '',
         }
       : undefined,
     receiver: receiverRecord
@@ -480,7 +480,7 @@ const normalizeSocketMessage = (payload: unknown): DmMessage | null => {
           avatar:
             (typeof receiverRecord.avatar === 'string' && receiverRecord.avatar) ||
             (typeof receiverRecord.profilePicUrl === 'string' && receiverRecord.profilePicUrl) ||
-            `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(toId(receiverRecord.id) || 'user')}`,
+            '',
         }
       : undefined,
   }

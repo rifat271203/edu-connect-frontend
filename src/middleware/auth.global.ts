@@ -5,20 +5,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) {
     return
   }
-  
-  // Skip auth check for login page
-  if (to.path === '/login') {
-    return
-  }
-  
+
+  const guestAllowedPaths = new Set(['/login', '/home', '/ai-tutor'])
+
   // Initialize user store to load user data from localStorage
   const userStore = useUserStore()
   userStore.initAuth()
-  
+
   // Check if user is authenticated
   const token = localStorage.getItem('educonnect_token')
   const isAuth = localStorage.getItem('educonnect_auth')
-  
+
+  // Allow guest routes when unauthenticated
+  if ((!token || isAuth !== 'true') && guestAllowedPaths.has(to.path)) {
+    return
+  }
+
   // If not authenticated, redirect to login
   if (!token || isAuth !== 'true') {
     return navigateTo('/login')

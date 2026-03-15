@@ -154,7 +154,7 @@ const notifications = computed(() =>
   rawNotifications.value.map((item) => ({
     id: item.id,
     name: item.user?.displayName || 'System',
-    avatar: item.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=system',
+    avatar: item.user?.avatar || '',
     action: item.message,
     time: item.timestamp,
     read: item.read,
@@ -181,19 +181,19 @@ const suggestedUsers = ref([
   {
     id: '1',
     name: 'Emma Wilson',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emma',
+    avatar: '',
     followers: 234
   },
   {
     id: '2',
     name: 'James Chen',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=james',
+    avatar: '',
     followers: 567
   },
   {
     id: '3',
     name: 'Sophie Kim',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sophie',
+    avatar: '',
     followers: 891
   }
 ])

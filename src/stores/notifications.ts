@@ -73,7 +73,7 @@ const dummyFriendRequests: FriendRequest[] = [
       id: '11',
       username: 'jessicag',
       displayName: 'Jessica Garcia',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jessica'
+      avatar: ''
     },
     timestamp: '2 hours ago',
     status: 'pending'
@@ -84,7 +84,7 @@ const dummyFriendRequests: FriendRequest[] = [
       id: '12',
       username: 'ryanb',
       displayName: 'Ryan Brown',
-      avatar: 'https://api.dicebear.com/7.x//svg?seed=avataaarsryan'
+      avatar: ''
     },
     timestamp: '1 day ago',
     status: 'pending'

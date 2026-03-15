@@ -64,8 +64,15 @@
       <!-- Like -->
       <button 
         @click="$emit('like', post.id)"
+        :disabled="isGuest"
         class="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors"
-        :class="post.isLiked ? 'text-[var(--danger)]' : 'text-[var(--text-3)] hover:text-[var(--danger)] hover:bg-[var(--card-hover)]'"
+        :class="[
+          isGuest
+            ? 'text-[var(--text-3)] opacity-60 cursor-not-allowed'
+            : post.isLiked
+              ? 'text-[var(--danger)]'
+              : 'text-[var(--text-3)] hover:text-[var(--danger)] hover:bg-[var(--card-hover)]'
+        ]"
       >
         <svg 
           class="w-5 h-5 transition-transform"
@@ -82,7 +89,9 @@
       <!-- Comment -->
       <button
         @click="$emit('comment', post.id)"
-        class="flex items-center gap-2 px-3 py-1.5 text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] rounded-lg transition-colors"
+        :disabled="isGuest"
+        class="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors"
+        :class="isGuest ? 'text-[var(--text-3)] opacity-60 cursor-not-allowed' : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--card-hover)]'"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -126,9 +135,14 @@ interface Post {
 
 interface Props {
   post: Post
+  isGuest?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  isGuest: false,
+})
+
+const isGuest = computed(() => props.isGuest)
 
 const formatTimestamp = (value: string): string => {
   const date = new Date(value)

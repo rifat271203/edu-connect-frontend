@@ -16,7 +16,7 @@
       <UiCard v-if="publicProfile" class="mb-6 p-4">
         <div class="flex items-start gap-3">
           <UiAvatar
-            :src="publicProfile.profile.profilePicUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${publicProfile.profile.name}`"
+            :src="publicProfile.profile.profilePicUrl"
             :name="publicProfile.profile.name"
             size="lg"
           />

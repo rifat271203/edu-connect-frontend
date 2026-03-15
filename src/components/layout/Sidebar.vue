@@ -83,7 +83,7 @@
     <div class="p-4 border-t border-[var(--border)] bg-[var(--surface-2)]">
       <div class="flex items-center gap-3 px-2">
         <UiAvatar 
-          :src="userStore.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.user?.name || 'user'}`"
+          :src="userStore.user?.avatar"
           :name="userStore.user?.name || 'User'"
           size="md"
           show-online

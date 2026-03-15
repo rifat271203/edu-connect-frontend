@@ -50,11 +50,6 @@ const deriveUsername = (name: string, email: string): string => {
   return emailPrefix || 'user'
 }
 
-const deriveAvatar = (name: string, email: string): string => {
-  const seed = (name || email || 'user').trim()
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`
-}
-
 const normalizeAuthResponse = (
   payload: unknown,
   tokenFromResponse?: string,
@@ -109,7 +104,7 @@ const normalizeAuthResponse = (
       (typeof source.profile_pic_url === 'string' && source.profile_pic_url) ||
       (typeof source.avatar === 'string' && source.avatar) ||
       (typeof root.avatar === 'string' && root.avatar) ||
-      deriveAvatar(name, email),
+      undefined,
     profilePicUrl:
       (typeof source.profilePicUrl === 'string' && source.profilePicUrl) ||
       (typeof source.profile_pic_url === 'string' && source.profile_pic_url) ||
@@ -226,7 +221,7 @@ export const getCurrentUser = async (): Promise<ApiResponse<AuthUser>> => {
       (typeof userSource.profilePicUrl === 'string' && userSource.profilePicUrl) ||
       (typeof userSource.profile_pic_url === 'string' && userSource.profile_pic_url) ||
       (typeof userSource.avatar === 'string' && userSource.avatar) ||
-      deriveAvatar(name, email),
+      undefined,
     profilePicUrl:
       (typeof userSource.profilePicUrl === 'string' && userSource.profilePicUrl) ||
       (typeof userSource.profile_pic_url === 'string' && userSource.profile_pic_url) ||
