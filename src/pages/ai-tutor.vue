@@ -1,6 +1,6 @@
 <template>
-  <div class="h-[100dvh] lg:h-screen flex bg-dark-950 text-dark-100">
-    <div class="flex-1 min-w-0 flex flex-col">
+  <div class="h-[100dvh] lg:h-screen min-h-0 flex overflow-hidden bg-dark-950 text-dark-100">
+    <div class="flex-1 min-w-0 min-h-0 flex flex-col">
       <AiTutorHeader
         :message-count="messages.length"
         :saved-chat-count="chatHistory.length"
@@ -8,7 +8,7 @@
         @clear-chat="clearChat"
       />
 
-      <div class="px-4 lg:px-6 pt-4">
+      <div class="px-4 lg:px-6 pt-4 shrink-0">
         <transition name="fade-slide" mode="out-in">
           <div
             v-if="!selectedCategory"
@@ -836,6 +836,12 @@ const renderMathInMessages = () => {
   font-size: 0.875rem;
   word-break: break-word;
   overflow-wrap: anywhere;
+}
+.ai-message img,
+.ai-message svg,
+.ai-message iframe,
+.ai-message video {
+  max-width: 100%;
 }
 .ai-message h1,
 .ai-message h2,

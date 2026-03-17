@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] flex">
+  <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] flex overflow-x-hidden">
     <!-- Left Sidebar - Desktop -->
     <LayoutSidebar v-if="!isGuest" class="hidden lg:flex" />
     
     <!-- Main Content Area -->
-    <main :class="['flex-1 flex flex-col', !isGuest ? 'lg:ml-64' : '']">
+    <main :class="['w-full min-w-0 flex flex-col min-h-screen', !isGuest ? 'lg:pl-[260px]' : '']">
       <!-- Mobile Header -->
       <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40 backdrop-blur-lg">
         <div class="flex items-center justify-between px-4 py-3">
@@ -33,9 +33,9 @@
       </header>
       
       <!-- Page Content -->
-      <div class="flex-1 flex">
+      <div class="flex-1 flex min-h-0">
         <!-- Middle Content (Feed) -->
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0 min-h-0">
           <slot />
         </div>
         

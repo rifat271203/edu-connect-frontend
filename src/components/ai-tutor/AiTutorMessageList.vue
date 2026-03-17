@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 pb-6 scrollbar-hide">
+  <div ref="container" class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 sm:px-4 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 pb-6 scrollbar-hide">
     <div
       v-for="(message, index) in messages"
       :key="index"
@@ -19,7 +19,7 @@
             v-if="message.isStreaming"
             class="bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-3.5 sm:p-4 text-dark-100 shadow-sm"
           >
-            <p class="whitespace-pre-wrap text-sm leading-relaxed">{{ message.content }}</p>
+            <p class="whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-relaxed">{{ message.content }}</p>
           </div>
 
           <AiTutorChemistryMessage
@@ -64,7 +64,7 @@
         <div class="min-w-0 w-full">
           <p class="text-[11px] uppercase tracking-wide text-dark-400 mb-1 text-right">You</p>
           <div class="bg-dark-800/90 rounded-2xl rounded-tr-md p-3.5 sm:p-4 border border-dark-700/75 shadow-sm">
-            <p class="text-dark-100 whitespace-pre-wrap text-sm leading-relaxed">{{ message.content }}</p>
+            <p class="text-dark-100 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-relaxed">{{ message.content }}</p>
           </div>
         </div>
       </div>
