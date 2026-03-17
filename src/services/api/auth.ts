@@ -27,6 +27,7 @@ export interface AuthUser {
   username?: string
   avatar?: string
   profilePicUrl?: string
+  isProfilePublic?: boolean
   department?: string
   institution?: string
   [key: string]: unknown
@@ -35,6 +36,11 @@ export interface AuthUser {
 export interface AuthResponse {
   token: string
   user: AuthUser
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
 }
 
 const buildAuthEndpoint = (role: UserRole, action: 'login' | 'register') => `/api/auth/${role}s/${action}`
@@ -48,6 +54,13 @@ const deriveUsername = (name: string, email: string): string => {
 
   const emailPrefix = email.split('@')[0]?.trim().toLowerCase()
   return emailPrefix || 'user'
+}
+
+const toBoolean = (value: unknown, fallback = false): boolean => {
+  if (typeof value === 'boolean') return value
+  if (value === 1 || value === '1' || value === 'true') return true
+  if (value === 0 || value === '0' || value === 'false') return false
+  return fallback
 }
 
 const normalizeAuthResponse = (
@@ -111,6 +124,10 @@ const normalizeAuthResponse = (
       (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
       (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
       undefined,
+    isProfilePublic: toBoolean(
+      source.isProfilePublic ?? source.is_profile_public ?? root.isProfilePublic ?? root.is_profile_public,
+      false
+    ),
     department:
       (typeof source.department === 'string' && source.department) ||
       (typeof root.department === 'string' && root.department) ||
@@ -225,7 +242,13 @@ export const getCurrentUser = async (): Promise<ApiResponse<AuthUser>> => {
     profilePicUrl:
       (typeof userSource.profilePicUrl === 'string' && userSource.profilePicUrl) ||
       (typeof userSource.profile_pic_url === 'string' && userSource.profile_pic_url) ||
+      (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
+      (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
       undefined,
+    isProfilePublic: toBoolean(
+      userSource.isProfilePublic ?? userSource.is_profile_public ?? root.isProfilePublic ?? root.is_profile_public,
+      false
+    ),
   }
 
   return {
@@ -239,4 +262,10 @@ export const logout = async (): Promise<ApiResponse<void>> => {
     success: true,
     status: 200,
   }
+}
+
+export const changePassword = async (
+  payload: ChangePasswordRequest,
+): Promise<ApiResponse<{ message: string }>> => {
+  return await apiRequest<{ message: string }>('/api/auth/password', 'PATCH', payload)
 }

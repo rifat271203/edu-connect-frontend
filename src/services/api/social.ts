@@ -89,6 +89,7 @@ export interface MyProfileSummary {
     department?: string
     institution?: string
     profilePicUrl?: string
+    isProfilePublic?: boolean
     createdAt?: string
   }
   stats: {
@@ -111,6 +112,15 @@ export interface UploadProfilePicResponse {
   profilePicUrl: string
 }
 
+export interface ProfileVisibility {
+  userId: string
+  isPublic: boolean
+}
+
+export interface ProfileVisibilityUpdateResponse extends ProfileVisibility {
+  message: string
+}
+
 export interface PublicUserProfileSummary {
   profile: {
     id: string
@@ -120,6 +130,7 @@ export interface PublicUserProfileSummary {
     department?: string
     institution?: string
     profilePicUrl?: string
+    isProfilePublic?: boolean
     createdAt?: string
   }
   stats: {
@@ -230,6 +241,13 @@ const toNumber = (value: unknown, fallback = 0): number =>
       ? Number(value)
       : fallback
 
+const toBoolean = (value: unknown, fallback = false): boolean => {
+  if (typeof value === 'boolean') return value
+  if (value === 1 || value === '1' || value === 'true') return true
+  if (value === 0 || value === '0' || value === 'false') return false
+  return fallback
+}
+
 const toIsoTimestamp = (value: unknown): string => {
   if (typeof value === 'string' && value) return value
   return new Date().toISOString()
@@ -281,7 +299,7 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     name.toLowerCase().replace(/\s+/g, '') ||
     fallbackSeed
 
-  const avatar =
+  const profilePicUrl =
     (typeof nested.avatar === 'string' && nested.avatar) ||
     (typeof nested.profilePicUrl === 'string' && nested.profilePicUrl) ||
     (typeof nested.profile_pic_url === 'string' && nested.profile_pic_url) ||
@@ -292,6 +310,14 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
     (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
     ''
+
+  const isProfilePublic = toBoolean(
+    nested.isProfilePublic ??
+      nested.is_profile_public ??
+      root.isProfilePublic ??
+      root.is_profile_public,
+    false
+  )
 
   const id = toId(
     nested.id ||
@@ -311,7 +337,9 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     id,
     username,
     displayName: name,
-    avatar,
+    avatar: profilePicUrl,
+    profilePicUrl,
+    isProfilePublic,
   }
 }
 
@@ -486,7 +514,15 @@ const normalizeNotification = (value: unknown): FeedNotification => {
     name: source.user_name || source.userName || source.actor_name || source.actorName,
     displayName: source.user_name || source.userName || source.actor_name || source.actorName,
     username: source.user_username || source.userUsername || source.actor_username || source.actorUsername,
-    avatar: source.user_avatar || source.userAvatar || source.actor_avatar || source.actorAvatar,
+    avatar:
+      source.user_avatar ||
+      source.userAvatar ||
+      source.user_profile_pic_url ||
+      source.userProfilePicUrl ||
+      source.actor_avatar ||
+      source.actorAvatar ||
+      source.actor_profile_pic_url ||
+      source.actorProfilePicUrl,
   }
 
   const userSource = source.user || source.actor || source.sender || source.fromUser || source.from_user || fallbackActor
@@ -557,6 +593,7 @@ const normalizeMyProfile = (payload: unknown): MyProfileSummary => {
         (typeof profileSource.profile_pic_url === 'string' && profileSource.profile_pic_url) ||
         (typeof profileSource.avatar === 'string' && profileSource.avatar) ||
         undefined,
+      isProfilePublic: toBoolean(profileSource.isProfilePublic ?? profileSource.is_profile_public, false),
       createdAt:
         (typeof profileSource.createdAt === 'string' && profileSource.createdAt) ||
         (typeof profileSource.created_at === 'string' && profileSource.created_at) ||
@@ -614,6 +651,7 @@ const normalizePublicUserProfile = (payload: unknown): PublicUserProfileSummary 
         (typeof profileSource.profile_pic_url === 'string' && profileSource.profile_pic_url) ||
         (typeof profileSource.avatar === 'string' && profileSource.avatar) ||
         undefined,
+      isProfilePublic: toBoolean(profileSource.isProfilePublic ?? profileSource.is_profile_public, false),
       createdAt:
         (typeof profileSource.createdAt === 'string' && profileSource.createdAt) ||
         (typeof profileSource.created_at === 'string' && profileSource.created_at) ||
@@ -759,7 +797,7 @@ export const updatePost = async (postId: string, payload: UpdatePostRequest): Pr
 }
 
 export const deletePost = async (postId: string): Promise<ApiResponse<void>> => {
-  return await apiRequest<void>(`/api/social/posts/${postId}`, 'DELETE')
+  return await apiRequest<void>(`/api/social/posts/${encodeURIComponent(postId)}`, 'DELETE')
 }
 
 export const likePost = async (postId: string): Promise<ApiResponse<void>> => {
@@ -847,6 +885,42 @@ export const getMyActivity = async (limit = 20, offset = 0): Promise<ApiResponse
   }
 }
 
+export const getMyProfileVisibility = async (): Promise<ApiResponse<ProfileVisibility>> => {
+  const result = await apiRequest<unknown>('/api/social/me/profile-visibility', 'GET')
+  if (!result.success) return result as ApiResponse<ProfileVisibility>
+
+  const source = asRecord(result.data) || {}
+  const userId = toId(source.userId || source.user_id, '')
+
+  return {
+    ...result,
+    data: {
+      userId,
+      isPublic: toBoolean(source.isPublic ?? source.is_profile_public ?? source.is_profile_visible, true),
+    },
+  }
+}
+
+export const updateMyProfileVisibility = async (
+  isPublic: boolean,
+): Promise<ApiResponse<ProfileVisibilityUpdateResponse>> => {
+  const result = await apiRequest<unknown>('/api/social/me/profile-visibility', 'PATCH', { isPublic })
+  if (!result.success) return result as ApiResponse<ProfileVisibilityUpdateResponse>
+
+  const source = asRecord(result.data) || {}
+
+  return {
+    ...result,
+    data: {
+      message:
+        (typeof source.message === 'string' && source.message) ||
+        'Profile visibility updated',
+      userId: toId(source.userId || source.user_id, ''),
+      isPublic: toBoolean(source.isPublic ?? source.is_profile_public, isPublic),
+    },
+  }
+}
+
 export const getPublicUserProfile = async (
   userId: string | number,
   postLimit = 10,
@@ -856,7 +930,7 @@ export const getPublicUserProfile = async (
   query.set('postLimit', String(postLimit))
   query.set('postOffset', String(postOffset))
 
-  const result = await apiRequest<unknown>(`/api/social/users/${userId}/profile?${query.toString()}`, 'GET')
+  const result = await apiRequest<unknown>(`/api/social/users/${encodeURIComponent(String(userId))}/profile?${query.toString()}`, 'GET')
   if (!result.success) return result as ApiResponse<PublicUserProfileSummary>
 
   return {

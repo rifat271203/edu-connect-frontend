@@ -13,6 +13,7 @@ interface User {
   email: string
   avatar?: string
   profilePicUrl?: string
+  isProfilePublic?: boolean
   department?: string
   institution?: string
   coverImage?: string
@@ -107,6 +108,9 @@ export const useUserStore = defineStore('user', {
         displayName: result.data.name,
         avatar: result.data.profilePicUrl || result.data.avatar || this.user?.avatar,
         profilePicUrl: result.data.profilePicUrl || this.user?.profilePicUrl,
+        isProfilePublic:
+          result.data.isProfilePublic ??
+          this.user?.isProfilePublic,
       }
       this.isAuthenticated = true
       this.persistSession()
@@ -187,6 +191,7 @@ export const useUserStore = defineStore('user', {
           username: result.data.user.username,
           avatar: result.data.user.profilePicUrl || result.data.user.avatar,
           profilePicUrl: result.data.user.profilePicUrl,
+          isProfilePublic: result.data.user.isProfilePublic,
           department: result.data.user.department,
           institution: result.data.user.institution,
         }
@@ -233,6 +238,7 @@ export const useUserStore = defineStore('user', {
           username: result.data.user.username,
           avatar: result.data.user.profilePicUrl || result.data.user.avatar,
           profilePicUrl: result.data.user.profilePicUrl,
+          isProfilePublic: result.data.user.isProfilePublic,
           department: result.data.user.department,
           institution: result.data.user.institution,
         }

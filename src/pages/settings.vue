@@ -16,9 +16,9 @@
           <div class="flex items-center justify-between py-2">
             <div>
               <p class="font-medium text-[var(--text)]">Email</p>
-              <p class="text-sm text-[var(--text-3)]">john.doe@example.com</p>
+              <p class="text-sm text-[var(--text-3)]">{{ userStore.user?.email || 'Not available' }}</p>
             </div>
-            <UiButton variant="ghost" size="sm">Change</UiButton>
+            <UiButton variant="ghost" size="sm" disabled>Managed</UiButton>
           </div>
           
           <div class="flex items-center justify-between py-2">
@@ -26,7 +26,24 @@
               <p class="font-medium text-[var(--text)]">Password</p>
               <p class="text-sm text-[var(--text-3)]">••••••••••••</p>
             </div>
-            <UiButton variant="ghost" size="sm">Change</UiButton>
+            <UiButton variant="ghost" size="sm" @click="togglePasswordForm">
+              {{ showPasswordForm ? 'Cancel' : 'Change' }}
+            </UiButton>
+          </div>
+
+          <div v-if="showPasswordForm" class="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3 space-y-3">
+            <UiInput v-model="currentPassword" type="password" placeholder="Current password" />
+            <UiInput v-model="newPassword" type="password" placeholder="New password" />
+            <UiInput v-model="confirmNewPassword" type="password" placeholder="Confirm new password" />
+
+            <p v-if="passwordError" class="text-sm text-[var(--danger)]">{{ passwordError }}</p>
+            <p v-if="passwordSuccess" class="text-sm text-emerald-400">{{ passwordSuccess }}</p>
+
+            <div class="flex justify-end">
+              <UiButton :loading="passwordLoading" :disabled="passwordLoading" size="sm" @click="handleChangePassword">
+                {{ passwordLoading ? 'Updating...' : 'Update Password' }}
+              </UiButton>
+            </div>
           </div>
           
           <div class="flex items-center justify-between py-2">
@@ -171,11 +188,35 @@
               <p class="font-medium text-[var(--text)]">Profile Visibility</p>
               <p class="text-sm text-[var(--text-3)]">Who can see your profile</p>
             </div>
-            <select class="select-field !w-auto !px-3">
-              <option>Everyone</option>
-              <option>Friends Only</option>
-              <option>Private</option>
-            </select>
+            <div class="flex items-center gap-2">
+              <select
+                v-model="profileVisibilitySelection"
+                class="select-field !w-auto !px-3"
+                :disabled="profileVisibilityLoading || profileVisibilitySaving"
+              >
+                <option value="public">Everyone</option>
+                <option value="private">Private</option>
+              </select>
+              <UiButton
+                size="sm"
+                :loading="profileVisibilitySaving"
+                :disabled="profileVisibilityLoading || profileVisibilitySaving"
+                @click="saveProfileVisibility"
+              >
+                Save
+              </UiButton>
+            </div>
+          </div>
+
+          <p v-if="profileVisibilityError" class="text-sm text-[var(--danger)]">{{ profileVisibilityError }}</p>
+          <p v-if="profileVisibilitySuccess" class="text-sm text-emerald-400">{{ profileVisibilitySuccess }}</p>
+
+          <div class="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-3)]">
+            Current visibility:
+            <span class="font-semibold text-[var(--text)]">
+              {{ profileVisibilitySelection === 'public' ? 'Public' : 'Private' }}
+            </span>
+            <span v-if="profileVisibilityLoading" class="ml-2">(Loading...)</span>
           </div>
           
           <div class="flex items-center justify-between py-2">
@@ -207,11 +248,30 @@
 </template>
 
 <script setup lang="ts">
+import { changePassword } from '~/services/api/auth'
+import { getMyProfileVisibility, updateMyProfileVisibility } from '~/services/api/social'
+import { useUserStore } from '~/stores/user'
+
 definePageMeta({
   layout: 'main'
 })
 
 const { themePreference, accentPreference, resolvedTheme, setThemePreference, setAccentPreference, toggleTheme } = useTheme()
+const userStore = useUserStore()
+
+const showPasswordForm = ref(false)
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmNewPassword = ref('')
+const passwordLoading = ref(false)
+const passwordError = ref('')
+const passwordSuccess = ref('')
+
+const profileVisibilitySelection = ref<'public' | 'private'>('public')
+const profileVisibilityLoading = ref(false)
+const profileVisibilitySaving = ref(false)
+const profileVisibilityError = ref('')
+const profileVisibilitySuccess = ref('')
 
 const isDarkMode = computed(() => resolvedTheme.value === 'dark')
 
@@ -253,4 +313,113 @@ const accentOptions = [
     swatches: ['#3E7B63', '#2F6651', '#244F3F'],
   },
 ] as const
+
+const clearPasswordFeedback = () => {
+  passwordError.value = ''
+  passwordSuccess.value = ''
+}
+
+const togglePasswordForm = () => {
+  showPasswordForm.value = !showPasswordForm.value
+  clearPasswordFeedback()
+
+  if (!showPasswordForm.value) {
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmNewPassword.value = ''
+  }
+}
+
+const handleChangePassword = async () => {
+  clearPasswordFeedback()
+
+  if (!currentPassword.value || !newPassword.value || !confirmNewPassword.value) {
+    passwordError.value = 'All password fields are required.'
+    return
+  }
+
+  if (currentPassword.value === newPassword.value) {
+    passwordError.value = 'New password must be different from current password.'
+    return
+  }
+
+  if (newPassword.value !== confirmNewPassword.value) {
+    passwordError.value = 'New password and confirmation do not match.'
+    return
+  }
+
+  passwordLoading.value = true
+  const result = await changePassword({
+    currentPassword: currentPassword.value,
+    newPassword: newPassword.value,
+  })
+  passwordLoading.value = false
+
+  if (!result.success) {
+    passwordError.value = result.error || 'Failed to change password.'
+    return
+  }
+
+  currentPassword.value = ''
+  newPassword.value = ''
+  confirmNewPassword.value = ''
+  passwordSuccess.value = result.data?.message || 'Password changed successfully.'
+}
+
+const loadProfileVisibility = async () => {
+  profileVisibilityLoading.value = true
+  profileVisibilityError.value = ''
+  profileVisibilitySuccess.value = ''
+
+  const result = await getMyProfileVisibility()
+  profileVisibilityLoading.value = false
+
+  if (!result.success || !result.data) {
+    profileVisibilitySelection.value = userStore.user?.isProfilePublic === false ? 'private' : 'public'
+    profileVisibilityError.value = result.error || 'Failed to load profile visibility.'
+    return
+  }
+
+  const isPublic = result.data.isPublic
+  profileVisibilitySelection.value = isPublic ? 'public' : 'private'
+
+  if (userStore.user) {
+    userStore.user = {
+      ...userStore.user,
+      isProfilePublic: isPublic,
+    }
+    userStore.persistSession()
+  }
+}
+
+const saveProfileVisibility = async () => {
+  profileVisibilityError.value = ''
+  profileVisibilitySuccess.value = ''
+  profileVisibilitySaving.value = true
+
+  const isPublic = profileVisibilitySelection.value === 'public'
+  const result = await updateMyProfileVisibility(isPublic)
+
+  profileVisibilitySaving.value = false
+
+  if (!result.success || !result.data) {
+    profileVisibilityError.value = result.error || 'Failed to update profile visibility.'
+    return
+  }
+
+  if (userStore.user) {
+    userStore.user = {
+      ...userStore.user,
+      isProfilePublic: result.data.isPublic,
+    }
+    userStore.persistSession()
+  }
+
+  profileVisibilitySelection.value = result.data.isPublic ? 'public' : 'private'
+  profileVisibilitySuccess.value = result.data.message || 'Profile visibility updated.'
+}
+
+onMounted(async () => {
+  await loadProfileVisibility()
+})
 </script>

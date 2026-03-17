@@ -50,6 +50,20 @@
           <p class="text-xs text-dark-400 mt-1">
             {{ myProfile?.department || 'Department' }} · {{ myProfile?.institution || 'Institution' }}
           </p>
+          <label class="mt-2 inline-flex items-center gap-2 text-xs text-dark-300">
+            <input
+              type="checkbox"
+              class="h-4 w-4"
+              :checked="isProfilePublic"
+              :disabled="visibilityLoading || visibilitySaving"
+              @change="handleVisibilityToggle"
+            >
+            <span>
+              {{ isProfilePublic ? 'Public profile' : 'Private profile' }}
+              <span v-if="visibilitySaving">(updating...)</span>
+            </span>
+          </label>
+          <p v-if="visibilityError" class="mt-1 text-xs text-red-400">{{ visibilityError }}</p>
         </div>
         
         <UiButton variant="secondary" @click="openProfilePicPicker">
@@ -169,7 +183,7 @@ definePageMeta({
 })
 
 import { useUserStore } from '~/stores/user'
-import { getMyActivity, getMyProfile } from '~/services/api/social'
+import { getMyActivity, getMyProfile, getMyProfileVisibility, updateMyProfileVisibility } from '~/services/api/social'
 
 const userStore = useUserStore()
 
@@ -181,6 +195,10 @@ const updatingProfilePic = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 const profilePicInputRef = ref<HTMLInputElement | null>(null)
+
+const visibilityLoading = ref(false)
+const visibilitySaving = ref(false)
+const visibilityError = ref('')
 
 const myProfile = ref<Awaited<ReturnType<typeof getMyProfile>>['data'] extends infer T ? T extends { profile: infer P } ? P : null : null>(null)
 const myStats = ref({
@@ -198,6 +216,8 @@ const myActivitySummary = ref({
   shares: 0,
 })
 
+const isProfilePublic = ref(true)
+
 const loadProfileData = async () => {
   profileLoading.value = true
   errorMessage.value = ''
@@ -210,6 +230,7 @@ const loadProfileData = async () => {
   if (profileResult.success && profileResult.data) {
     myProfile.value = profileResult.data.profile
     myStats.value = profileResult.data.stats
+    isProfilePublic.value = profileResult.data.profile.isProfilePublic ?? true
 
     if (userStore.user) {
       userStore.user = {
@@ -221,6 +242,7 @@ const loadProfileData = async () => {
         institution: profileResult.data.profile.institution || userStore.user.institution,
         avatar: profileResult.data.profile.profilePicUrl || userStore.user.avatar,
         profilePicUrl: profileResult.data.profile.profilePicUrl || userStore.user.profilePicUrl,
+        isProfilePublic: profileResult.data.profile.isProfilePublic ?? userStore.user.isProfilePublic,
       }
 
       userStore.persistSession()
@@ -241,6 +263,59 @@ const loadProfileData = async () => {
   }
 
   profileLoading.value = false
+}
+
+const loadMyVisibility = async () => {
+  visibilityLoading.value = true
+  visibilityError.value = ''
+
+  const result = await getMyProfileVisibility()
+  visibilityLoading.value = false
+
+  if (!result.success || !result.data) {
+    visibilityError.value = result.error || 'Failed to load profile visibility'
+    return
+  }
+
+  isProfilePublic.value = result.data.isPublic
+
+  if (userStore.user) {
+    userStore.user = {
+      ...userStore.user,
+      isProfilePublic: result.data.isPublic,
+    }
+    userStore.persistSession()
+  }
+}
+
+const handleVisibilityToggle = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const nextValue = Boolean(target.checked)
+  const previous = isProfilePublic.value
+
+  isProfilePublic.value = nextValue
+  visibilityError.value = ''
+  visibilitySaving.value = true
+
+  const result = await updateMyProfileVisibility(nextValue)
+
+  visibilitySaving.value = false
+
+  if (!result.success || !result.data) {
+    isProfilePublic.value = previous
+    visibilityError.value = result.error || 'Failed to update profile visibility'
+    return
+  }
+
+  isProfilePublic.value = result.data.isPublic
+
+  if (userStore.user) {
+    userStore.user = {
+      ...userStore.user,
+      isProfilePublic: result.data.isPublic,
+    }
+    userStore.persistSession()
+  }
 }
 
 const openProfilePicPicker = () => {
@@ -273,7 +348,10 @@ const handleProfilePicSelected = async (event: Event) => {
 }
 
 onMounted(async () => {
-  await loadProfileData()
+  await Promise.all([
+    loadProfileData(),
+    loadMyVisibility(),
+  ])
 })
 
 const skills = ['JavaScript', 'Python', 'Vue.js', 'Machine Learning', 'Data Structures', 'React', 'Node.js']

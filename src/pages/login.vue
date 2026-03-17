@@ -588,8 +588,12 @@ const handleLogin = async () => {
       name: apiUser?.name || email.value.split('@')[0] || 'User',
       displayName: apiUser?.name || email.value.split('@')[0] || 'User',
       username: apiUser?.username || (apiUser?.name || email.value).toLowerCase().replace(/\s+/g, ''),
-      avatar: apiUser?.profilePicUrl || apiUser?.avatar,
-      profilePicUrl: apiUser?.profilePicUrl,
+      avatar: apiUser?.profilePicUrl || apiUser?.profile_pic_url || apiUser?.avatar,
+      profilePicUrl: apiUser?.profilePicUrl || apiUser?.profile_pic_url,
+      isProfilePublic:
+        typeof apiUser?.isProfilePublic === 'boolean'
+          ? apiUser.isProfilePublic
+          : apiUser?.is_profile_public === true || apiUser?.is_profile_public === 'true' || apiUser?.is_profile_public === 1,
       department: apiUser?.department,
       institution: apiUser?.institution
     }
@@ -627,7 +631,9 @@ const handleRegister = async () => {
     if (user) {
       localStorage.setItem('educonnect_user', JSON.stringify({
         ...user,
-        displayName: user.name
+        displayName: user.name,
+        avatar: user.profilePicUrl || user.avatar,
+        profilePicUrl: user.profilePicUrl || user.avatar,
       }))
     }
 

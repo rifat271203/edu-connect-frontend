@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { addComment, createPost, getFeedPosts, likePost, unlikePost, uploadPostMedia } from '~/services/api/social'
+import { addComment, createPost, deletePost, getFeedPosts, likePost, unlikePost, uploadPostMedia } from '~/services/api/social'
 import type { Post } from '~/types/post'
 
 interface PostsState {
@@ -148,6 +148,18 @@ export const usePostsStore = defineStore('posts', {
         this.error = result.error || 'Failed to add comment'
       }
 
+      return result
+    },
+
+    async deleteOwnedPost(postId: string) {
+      const result = await deletePost(postId)
+
+      if (!result.success) {
+        this.error = result.error || 'Failed to delete post'
+        return result
+      }
+
+      this.posts = this.posts.filter((post) => post.id !== postId)
       return result
     }
   }

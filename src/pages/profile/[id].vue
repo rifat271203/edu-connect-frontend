@@ -41,6 +41,10 @@
               {{ publicProfile.profile.institution || 'Institution' }}
             </p>
 
+            <p class="text-xs text-dark-400 mt-1">
+              Visibility: {{ publicProfile.profile.isProfilePublic ? 'Public' : 'Private' }}
+            </p>
+
             <div class="mt-3 grid grid-cols-3 gap-2 text-center">
               <div class="rounded-lg bg-dark-800/40 p-2">
                 <p class="text-lg font-semibold text-dark-50">{{ publicProfile.stats.postCount }}</p>

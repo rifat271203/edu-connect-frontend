@@ -185,8 +185,11 @@
         <FeedPostCard
           :post="post"
           :is-guest="isGuest"
+          :current-user-id="String(userStore.user?.id || '')"
+          :allow-delete="!isGuest"
           @like="handleLike"
           @comment="toggleCommentBox"
+          @delete="handleDeletePost"
         />
 
         <UiCard v-if="!isGuest && isCommentBoxOpen(post.id)" class="mt-2 p-3">
@@ -478,6 +481,20 @@ const handleLike = async (postId: string) => {
   }
 
   await postsStore.toggleLike(postId)
+}
+
+const handleDeletePost = async (postId: string) => {
+  if (isGuest.value) {
+    localError.value = 'Please log in to delete posts.'
+    return
+  }
+
+  localError.value = ''
+  const result = await postsStore.deleteOwnedPost(postId)
+
+  if (!result.success) {
+    localError.value = result.error || 'Failed to delete post'
+  }
 }
 
 const isCommentBoxOpen = (postId: string) => openCommentPostIds.value.includes(postId)

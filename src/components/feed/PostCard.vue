@@ -4,7 +4,7 @@
     <div class="flex items-center gap-3 mb-4">
       <NuxtLink :to="`/profile/${post.user.username}`" class="shrink-0">
         <UiAvatar 
-          :src="post.user.avatar" 
+          :src="post.user.profilePicUrl || post.user.avatar" 
           :name="post.user.displayName" 
           size="md"
         />
@@ -18,9 +18,14 @@
         </NuxtLink>
         <p class="text-sm text-[var(--text-3)]">@{{ post.user.username }} · {{ formattedTimestamp }}</p>
       </div>
-      <button class="btn-ghost !h-9 !w-9 !p-0">
+      <button
+        v-if="allowDelete && isOwnPost"
+        class="btn-ghost !h-9 !w-9 !p-0 text-[var(--danger)]"
+        title="Delete post"
+        @click="$emit('delete', post.id)"
+      >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16" />
         </svg>
       </button>
     </div>
@@ -116,6 +121,8 @@ interface User {
   username: string
   displayName: string
   avatar: string
+  profilePicUrl?: string
+  isProfilePublic?: boolean
 }
 
 interface Post {
@@ -136,13 +143,18 @@ interface Post {
 interface Props {
   post: Post
   isGuest?: boolean
+  currentUserId?: string
+  allowDelete?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isGuest: false,
+  currentUserId: '',
+  allowDelete: false,
 })
 
 const isGuest = computed(() => props.isGuest)
+const isOwnPost = computed(() => !!props.currentUserId && String(props.post.user.id) === String(props.currentUserId))
 
 const formatTimestamp = (value: string): string => {
   const date = new Date(value)
@@ -184,5 +196,6 @@ const resolvedMediaType = computed<'image' | 'video'>(() => {
 defineEmits<{
   like: [postId: string]
   comment: [postId: string]
+  delete: [postId: string]
 }>()
 </script>

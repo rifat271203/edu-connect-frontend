@@ -4,6 +4,8 @@ export interface User {
   displayName: string
   email: string
   avatar: string
+  profilePicUrl?: string
+  isProfilePublic?: boolean
   coverImage?: string
   bio?: string
   followers: number
@@ -17,4 +19,6 @@ export interface UserPreview {
   username: string
   displayName: string
   avatar: string
+  profilePicUrl?: string
+  isProfilePublic?: boolean
 }

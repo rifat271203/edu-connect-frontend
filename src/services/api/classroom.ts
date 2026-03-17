@@ -118,12 +118,23 @@ const normalizeUserPreview = (value: unknown, fallbackSeed = 'user'): UserPrevie
     displayName.toLowerCase().replace(/\s+/g, '') ||
     fallbackSeed
 
-  const avatar =
+  const profilePicUrl =
     (typeof source.avatar === 'string' && source.avatar) ||
     (typeof source.profilePicUrl === 'string' && source.profilePicUrl) ||
     (typeof source.profile_pic_url === 'string' && source.profile_pic_url) ||
     (typeof root.avatar === 'string' && root.avatar) ||
     ''
+
+  const isProfilePublicRaw =
+    source.isProfilePublic ??
+    source.is_profile_public ??
+    root.isProfilePublic ??
+    root.is_profile_public
+
+  const isProfilePublic =
+    typeof isProfilePublicRaw === 'boolean'
+      ? isProfilePublicRaw
+      : isProfilePublicRaw === 1 || isProfilePublicRaw === '1' || isProfilePublicRaw === 'true'
 
   const id = toId(
     source.id || source.userId || source.user_id || root.id || root.userId || root.user_id,
@@ -134,7 +145,9 @@ const normalizeUserPreview = (value: unknown, fallbackSeed = 'user'): UserPrevie
     id,
     username,
     displayName,
-    avatar,
+    avatar: profilePicUrl,
+    profilePicUrl,
+    isProfilePublic,
   }
 }
 
@@ -247,7 +260,10 @@ const normalizeCourse = (value: unknown): ClassroomCourse => {
 const normalizeEnrollmentRequest = (value: unknown): ClassroomEnrollmentRequest => {
   const source = asRecord(value) || {}
   const requestId = toId(source.id || source.requestId || source.request_id, String(Date.now()))
-  const courseId = toId(source.courseId || source.course_id || source.course?.id || source.classroomCourseId || source.classroom_course_id)
+  const nestedCourse = asRecord(source.course)
+  const courseId = toId(
+    source.courseId || source.course_id || nestedCourse?.id || source.classroomCourseId || source.classroom_course_id
+  )
 
   const studentSource =
     source.student ||

@@ -463,6 +463,7 @@ const normalizeSocketMessage = (payload: unknown): DmMessage | null => {
           avatar:
             (typeof senderRecord.avatar === 'string' && senderRecord.avatar) ||
             (typeof senderRecord.profilePicUrl === 'string' && senderRecord.profilePicUrl) ||
+            (typeof senderRecord.profile_pic_url === 'string' && senderRecord.profile_pic_url) ||
             '',
         }
       : undefined,
@@ -480,6 +481,7 @@ const normalizeSocketMessage = (payload: unknown): DmMessage | null => {
           avatar:
             (typeof receiverRecord.avatar === 'string' && receiverRecord.avatar) ||
             (typeof receiverRecord.profilePicUrl === 'string' && receiverRecord.profilePicUrl) ||
+            (typeof receiverRecord.profile_pic_url === 'string' && receiverRecord.profile_pic_url) ||
             '',
         }
       : undefined,
