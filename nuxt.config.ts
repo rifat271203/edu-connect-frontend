@@ -6,9 +6,6 @@ export default defineNuxtConfig({
   // Use custom src directory
   srcDir: 'src/',
   
-  // Explicitly set public directory (since srcDir is customized)
-  publicDir: 'public',
-  
   // Configure modules
   modules: [
     '@pinia/nuxt',
@@ -44,6 +41,12 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      apiUrl: process.env.NUXT_PUBLIC_API_URL,
+      signalUrl: process.env.NUXT_PUBLIC_SIGNAL_URL,
+      stunUrl: process.env.NUXT_PUBLIC_STUN_URL,
+      turnUrl: process.env.NUXT_PUBLIC_TURN_URL,
+      turnUser: process.env.NUXT_PUBLIC_TURN_USER,
+      turnPass: process.env.NUXT_PUBLIC_TURN_PASS,
       backendUrl:
         process.env.NUXT_PUBLIC_BACKEND_URL ||
         'https://sincere-spontaneity-production-ab4e.up.railway.app',
