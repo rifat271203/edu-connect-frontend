@@ -14,49 +14,43 @@
         </div>
         <div class="min-w-0 w-full">
           <p class="text-[11px] uppercase tracking-wide text-dark-400 mb-1">AI Tutor</p>
-          <!-- {{ message.mathSolution }} -->
-            <!-- {{ !message.isStreaming ? '...' : '' }} -->
-          <AiTutorMathMessage
-            v-if="message.mathSolution && !message.isStreaming"
-            :message="message"
-            :message-index="index"
-            :copy-feedback="copyFeedbackByMessage[index]"
-            :render-markdown="renderMarkdown"
-            @copy-answer="copyMathAnswer"
-            @copy-step="copyMathStep"
-            @copy-final="copyMathFinal"
-            @open-math-zoom="openMathZoom"
-            @open-chunk="openChunkDrawer"
-            @reveal-progress="onMathRevealProgress"
-          />
 
-          <div v-else>
-            <div
-              v-if="message.isStreaming"
-              class="bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-3.5 sm:p-4 text-dark-100 shadow-sm"
-            >
-              <p class="whitespace-pre-wrap text-sm leading-relaxed">{{ message.content }}</p>
-            </div>
-            <div
-              v-else
-              class="ai-message bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-3.5 sm:p-4 text-dark-100 whitespace-pre-wrap shadow-sm"
-              v-html="renderMarkdown(message.content)"
-            ></div>
+          <div
+            v-if="message.isStreaming"
+            class="bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-3.5 sm:p-4 text-dark-100 shadow-sm"
+          >
+            <p class="whitespace-pre-wrap text-sm leading-relaxed">{{ message.content }}</p>
           </div>
 
-          <ReactionDiagram
-            v-if="message.diagram && message.showDiagram"
-            class="mt-3"
-            :diagram="message.diagram"
-          />
-
-          <MechanismSteps
-            v-if="message.mechanismSteps?.length && message.showMechanismSteps"
-            :steps="message.mechanismSteps"
-            :theme="renderTheme"
+          <AiTutorChemistryMessage
+            v-else-if="isChemistryMessage(message)"
+            :message="message"
+            :message-index="index"
+            :render-theme="renderTheme"
             :svg-by-smiles="smilesSvgMap"
             :errors-by-smiles="renderErrors"
           />
+
+          <AiTutorPhysicsMessage
+            v-else-if="Boolean(message.physicsSolution)"
+            :message="message"
+            :message-index="index"
+            @open-math-zoom="openMathZoom"
+          />
+
+          <AiTutorMathMessage
+            v-else-if="Boolean(message.mathSolution)"
+            :message="message"
+            :message-index="index"
+            @open-math-zoom="openMathZoom"
+            @view-graph="openMathZoom"
+          />
+
+          <div
+            v-else
+            class="ai-message bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-3.5 sm:p-4 text-dark-100 whitespace-pre-wrap shadow-sm"
+            v-html="renderMarkdown(message.content)"
+          ></div>
         </div>
       </div>
 
@@ -94,12 +88,6 @@
       </div>
     </div>
 
-    <ChunkDrawer
-      :open="isChunkDrawerOpen"
-      :chunk-id="activeChunkId"
-      @close="closeChunkDrawer"
-    />
-
     <MathZoomModal
       :open="isMathZoomOpen"
       :content="activeMathZoomContent"
@@ -111,13 +99,11 @@
 <script setup lang="ts">
 import type { Message } from '~/types/aiTutor'
 import { renderSmilesToSvg } from '~/utils/smilesSvg'
-import { copyToClipboard } from '~/utils/copy'
 import { sanitizeMathText } from '~/utils/mathFormat'
-import ReactionDiagram from '~/components/reaction/ReactionDiagram.vue'
-import MechanismSteps from '~/components/reaction/MechanismSteps.vue'
-import MathZoomModal from '~/components/math/MathZoomModal.vue'
-import ChunkDrawer from '~/components/math/ChunkDrawer.vue'
 import AiTutorMathMessage from '~/components/ai-tutor/AiTutorMathMessage.vue'
+import AiTutorPhysicsMessage from '~/components/ai-tutor/AiTutorPhysicsMessage.vue'
+import AiTutorChemistryMessage from '~/components/ai-tutor/AiTutorChemistryMessage.vue'
+import MathZoomModal from '~/components/math/MathZoomModal.vue'
 
 const props = defineProps<{
   messages: Message[]
@@ -127,135 +113,45 @@ const props = defineProps<{
   renderMarkdown: (content: string) => string
 }>()
 
-const copyFeedbackByMessage = ref<Record<number, string>>({})
-const copyTimeoutByMessage = new Map<number, ReturnType<typeof setTimeout>>()
-const isChunkDrawerOpen = ref(false)
-const activeChunkId = ref<string | null>(null)
+const { resolvedTheme } = useTheme()
+const renderTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'))
+
+const container = ref<HTMLElement | null>(null)
 const isMathZoomOpen = ref(false)
 const activeMathZoomContent = ref('')
+const smilesSvgMap = ref<Map<string, string>>(new Map())
+const renderErrors = ref<Map<string, string>>(new Map())
 
-const logMathUiReveal = (event: string, payload?: Record<string, unknown>) => {
-  if (!import.meta.dev) return
-  console.info('[math-ui-reveal]', event, payload || {})
+type RawStructure = {
+  smiles?: string
+  smile?: string
 }
 
-const countStepLabels = (value: string): number => {
-  return value.match(/(?:^|\b)Step\s*\d+\s*:/gi)?.length || 0
+type RawMechanismStep = {
+  structures?: RawStructure[]
+  moleculeState?: RawStructure[]
+  molecule_state?: RawStructure[]
 }
 
-const getMathAnswerContent = (message: Message): string => {
-  const solution = message.mathSolution
-  if (!solution) return ''
-
-  return solution.answer?.trim() || solution.answerLatex?.trim() || message.content || ''
+const subjectHint = (message: Message): string => {
+  return `${message.subject || ''} ${message.category || ''}`.toLowerCase()
 }
 
-const getMathStepCount = (message: Message): number => {
-  const solution = message.mathSolution
-  if (!solution) return 0
-
-  return Math.max(solution.steps?.length || 0, solution.stepsLatex?.length || 0)
-}
-
-const getVisibleMathStepCount = (message: Message): number => {
-  const totalSteps = getMathStepCount(message)
-  if (!totalSteps) return 0
-  if (typeof message.revealedMathSteps !== 'number') return totalSteps
-
-  return Math.min(Math.max(message.revealedMathSteps, 0), totalSteps)
-}
-
-const getMathStepContent = (message: Message, stepIndex: number): string => {
-  const solution = message.mathSolution
-  if (!solution) return ''
-
-  return solution.steps?.[stepIndex]?.trim() || solution.stepsLatex?.[stepIndex]?.trim() || ''
-}
-
-const getMathFinalContent = (message: Message): string => {
-  const solution = message.mathSolution
-  if (!solution) return ''
-
-  return solution.final?.trim() || solution.finalLatex?.trim() || ''
-}
-
-const mathRevealSnapshot = computed(() => {
-  return props.messages
-    .map((message, index) => {
-      if (message.role !== 'assistant' || !message.mathSolution) return `${index}:no-math`
-      const answerContent = getMathAnswerContent(message)
-      return [
-        index,
-        message.isStreaming ? 'streaming' : 'done',
-        typeof message.revealedMathSteps === 'number' ? message.revealedMathSteps : 'na',
-        getVisibleMathStepCount(message),
-        getMathStepCount(message),
-        countStepLabels(answerContent),
-      ].join(':')
-    })
-    .join('|')
-})
-
-const setCopyFeedback = (messageIndex: number, message: string) => {
-  copyFeedbackByMessage.value[messageIndex] = message
-
-  const existingTimeout = copyTimeoutByMessage.get(messageIndex)
-  if (existingTimeout) clearTimeout(existingTimeout)
-
-  const timeout = setTimeout(() => {
-    copyFeedbackByMessage.value[messageIndex] = ''
-    copyTimeoutByMessage.delete(messageIndex)
-  }, 2200)
-
-  copyTimeoutByMessage.set(messageIndex, timeout)
-}
-
-const copyMathAnswer = async (messageIndex: number, message: Message) => {
-  const answerText = getMathAnswerContent(message)
-  if (!answerText) {
-    setCopyFeedback(messageIndex, 'No answer available to copy.')
-    return
-  }
-
-  await copyToClipboard(answerText, {
-    successMessage: 'Answer copied.',
-    errorMessage: 'Failed to copy answer.',
-    onFeedback: feedback => setCopyFeedback(messageIndex, feedback),
-  })
-}
-
-const copyMathFinal = async (messageIndex: number, message: Message) => {
-  const finalText = getMathFinalContent(message)
-  if (!finalText) {
-    setCopyFeedback(messageIndex, 'No final expression available to copy.')
-    return
-  }
-
-  await copyToClipboard(finalText, {
-    successMessage: 'Final expression copied.',
-    errorMessage: 'Failed to copy final expression.',
-    onFeedback: feedback => setCopyFeedback(messageIndex, feedback),
-  })
-}
-
-const copyMathStep = async (messageIndex: number, message: Message, stepIndex: number) => {
-  const stepText = getMathStepContent(message, stepIndex)
-  if (!stepText) {
-    setCopyFeedback(messageIndex, 'No step content available to copy.')
-    return
-  }
-
-  await copyToClipboard(stepText, {
-    successMessage: `Step ${stepIndex + 1} copied.`,
-    errorMessage: `Failed to copy step ${stepIndex + 1}.`,
-    onFeedback: feedback => setCopyFeedback(messageIndex, feedback),
-  })
+const isChemistryMessage = (message: Message): boolean => {
+  const hint = subjectHint(message)
+  return Boolean(
+    message.chemistrySolution ||
+    message.diagram ||
+    message.mechanismSteps?.length ||
+    hint.includes('chemistry') ||
+    hint.includes('chem') ||
+    hint.includes('organic')
+  )
 }
 
 const openMathZoom = (content: string) => {
   const normalized = sanitizeMathText(content)
   if (!normalized) return
-
   activeMathZoomContent.value = normalized
   isMathZoomOpen.value = true
 }
@@ -264,49 +160,15 @@ const closeMathZoom = () => {
   isMathZoomOpen.value = false
 }
 
-const openChunkDrawer = (chunkId: string) => {
-  activeChunkId.value = chunkId
-  isChunkDrawerOpen.value = true
-}
-
-const closeChunkDrawer = () => {
-  isChunkDrawerOpen.value = false
-}
-
-const onMathRevealProgress = async () => {
-  await nextTick()
-  scrollToBottom()
-}
-
-const { resolvedTheme } = useTheme()
-const renderTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'))
-
-const container = ref<HTMLElement | null>(null)
-const smilesSvgMap = ref<Map<string, string>>(new Map())
-const renderErrors = ref<Map<string, string>>(new Map())
-
-type RawMechanismStructure = {
-  smiles?: string
-  smile?: string
-}
-
-type RawMechanismStep = {
-  structures?: RawMechanismStructure[]
-  moleculeState?: RawMechanismStructure[]
-  molecule_state?: RawMechanismStructure[]
-}
-
-const getStepStructures = (step: unknown): RawMechanismStructure[] => {
+const resolveStepStructures = (step: unknown): RawStructure[] => {
   const raw = (step ?? {}) as RawMechanismStep
-
   if (Array.isArray(raw.structures)) return raw.structures
   if (Array.isArray(raw.moleculeState)) return raw.moleculeState
   if (Array.isArray(raw.molecule_state)) return raw.molecule_state
-
   return []
 }
 
-const getStructureSmiles = (structure: RawMechanismStructure): string => {
+const getStructureSmiles = (structure: RawStructure): string => {
   return (structure.smiles ?? structure.smile ?? '').trim()
 }
 
@@ -318,10 +180,13 @@ const allStructureSmiles = computed(() => {
     message.diagram?.reagents.forEach(item => values.push(item.smiles))
     message.diagram?.products.forEach(item => values.push(item.smiles))
     message.mechanismSteps?.forEach(step => {
-      getStepStructures(step).forEach((structure) => {
+      resolveStepStructures(step).forEach((structure) => {
         const smiles = getStructureSmiles(structure)
         if (smiles) values.push(smiles)
       })
+    })
+    message.chemistrySolution?.resonance?.forms?.forEach(form => {
+      if (form.smiles?.trim()) values.push(form.smiles.trim())
     })
   })
 
@@ -356,49 +221,22 @@ const renderAllStructures = async () => {
 }
 
 const scrollToBottom = () => {
-  if (container.value) {
-    container.value.scrollTop = container.value.scrollHeight
-  }
+  if (!container.value) return
+  container.value.scrollTop = container.value.scrollHeight
 }
 
 watch(
-  () => [props.messages.length, props.isTyping, renderTheme.value],
+  () => [props.messages, props.isTyping, renderTheme.value],
   async () => {
     await renderAllStructures()
     await nextTick()
     scrollToBottom()
   },
-  { deep: true }
+  { deep: true, immediate: true }
 )
-
-watch(
-  mathRevealSnapshot,
-  () => {
-    props.messages.forEach((message, index) => {
-      if (message.role !== 'assistant' || !message.mathSolution) return
-
-      const answerContent = getMathAnswerContent(message)
-      logMathUiReveal('message-snapshot', {
-        index,
-        isStreaming: Boolean(message.isStreaming),
-        revealedMathSteps: typeof message.revealedMathSteps === 'number' ? message.revealedMathSteps : null,
-        visibleMathSteps: getVisibleMathStepCount(message),
-        totalMathSteps: getMathStepCount(message),
-        answerStepLabelCount: countStepLabels(answerContent),
-        answerPreview: answerContent.slice(0, 140),
-      })
-    })
-  },
-  { immediate: true }
-)
-
-onBeforeUnmount(() => {
-  copyTimeoutByMessage.forEach(timeout => clearTimeout(timeout))
-  copyTimeoutByMessage.clear()
-})
 
 defineExpose({
-  scrollToBottom
+  scrollToBottom,
 })
 </script>
 

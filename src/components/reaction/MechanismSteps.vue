@@ -1,20 +1,26 @@
 <template>
   <div class="mt-4 space-y-3">
-    <div
+    <details
       v-for="step in steps"
       :key="`mechanism-step-${step.step}-${step.title}`"
       class="rounded-xl border p-3"
       :class="panelClasses"
+      :open="step.step === 1"
     >
-      <div class="flex items-start gap-2">
-        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[11px] font-semibold" :class="stepBadgeClasses">
-          {{ step.step }}
-        </span>
-        <div class="min-w-0">
-          <p class="text-sm font-semibold" :class="titleClasses">{{ step.title }}</p>
-          <p class="mt-1 text-xs leading-relaxed" :class="descClasses">{{ step.desc }}</p>
+      <summary class="list-none cursor-pointer select-none">
+        <div class="flex items-start gap-2">
+          <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[11px] font-semibold" :class="stepBadgeClasses">
+            {{ step.step }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold" :class="titleClasses">{{ step.title }}</p>
+            <p class="mt-1 text-xs" :class="descClasses">Tap to expand step details</p>
+          </div>
+          <span class="text-xs" :class="descClasses">▼</span>
         </div>
-      </div>
+      </summary>
+
+      <p class="mt-3 text-xs leading-relaxed" :class="descClasses">{{ step.desc }}</p>
 
       <div v-if="resolveStepStructures(step).length" class="mt-3 flex flex-wrap gap-3">
         <MoleculeCard
@@ -22,11 +28,11 @@
           :key="`step-structure-${step.step}-${index}-${structure.smiles}`"
           :item="structure"
           :theme="theme"
-          :svg="svgBySmiles.get(structure.smiles)"
-          :error-message="errorsBySmiles.get(structure.smiles)"
+          :svg="svgBySmiles?.get(structure.smiles)"
+          :error-message="errorsBySmiles?.get(structure.smiles)"
         />
       </div>
-    </div>
+    </details>
   </div>
 </template>
 
@@ -52,8 +58,8 @@ type RawMechanismStep = {
 const props = defineProps<{
   steps: MechanismStep[]
   theme: SmilesTheme
-  svgBySmiles: Map<string, string>
-  errorsBySmiles: Map<string, string>
+  svgBySmiles?: Map<string, string>
+  errorsBySmiles?: Map<string, string>
 }>()
 
 const resolveStepStructures = (step: MechanismStep): ReactionItem[] => {
@@ -67,7 +73,7 @@ const resolveStepStructures = (step: MechanismStep): ReactionItem[] => {
         : []
 
   return structures
-    .map((item) => {
+    .map((item): ReactionItem | null => {
       const smiles = (item.smiles ?? item.smile ?? '').trim()
       if (!smiles) return null
       return {
@@ -76,7 +82,7 @@ const resolveStepStructures = (step: MechanismStep): ReactionItem[] => {
         type: item.type,
       }
     })
-    .filter((item): item is ReactionItem => Boolean(item))
+    .filter((item): item is ReactionItem => item !== null)
 }
 
 const panelClasses = computed(() =>

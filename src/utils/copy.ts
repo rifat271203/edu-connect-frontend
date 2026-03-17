@@ -50,39 +50,34 @@ export const copyToClipboard = async (text: string, options?: CopyOptions): Prom
 export const buildMathSolutionMarkdown = (solution: MathTutorSolution): string => {
   const lines: string[] = ['# Math Solution', '']
 
-  const answer = solution.answer || (solution.answerLatex ? `$$${solution.answerLatex}$$` : '')
+  const answer = solution.answer || ''
   const steps = solution.steps || []
-  const stepsLatex = solution.stepsLatex || []
-  const final = solution.final || (solution.finalLatex ? `$$${solution.finalLatex}$$` : '')
+  const final = solution.final_answer || ''
 
   if (answer) {
     lines.push('## Answer', '', answer, '')
   }
 
-  const totalSteps = Math.max(steps.length, stepsLatex.length)
-  if (totalSteps > 0) {
+  if (steps.length > 0) {
     lines.push('## Steps', '')
 
-    for (let index = 0; index < totalSteps; index += 1) {
-      const latexStep = stepsLatex[index]?.trim()
-      const plainStep = steps[index]?.trim()
-      const stepValue = latexStep ? `$$${latexStep}$$` : (plainStep || '—')
-      lines.push(`${index + 1}. ${stepValue}`)
+    for (let index = 0; index < steps.length; index += 1) {
+      const step = steps[index]
+      lines.push(`### Step ${index + 1}${step.title ? `: ${step.title}` : ''}`)
+      lines.push('', step.work || '—')
+      if (step.result) {
+        lines.push('', `Result: ${step.result}`)
+      }
+      lines.push('')
     }
-
-    lines.push('')
   }
 
   if (final) {
     lines.push('## Final', '', final, '')
   }
 
-  if (solution.notes) {
-    lines.push('## Notes', '', solution.notes, '')
-  }
-
-  if (solution.usedChunkIds?.length) {
-    lines.push('## Reference Chunks', '', solution.usedChunkIds.map(id => `- ${id}`).join('\n'), '')
+  if (solution.graph_hint) {
+    lines.push('## Graph Hint', '', solution.graph_hint, '')
   }
 
   return lines.join('\n').trim()

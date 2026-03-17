@@ -104,7 +104,15 @@ definePageMeta({ layout: 'main' })
 import { useUserStore } from '~/stores/user'
 import { sendChatMessage, type AIAskResponse } from '~/services/api/chat'
 import { AI_TUTOR_PROMPTS_BY_CATEGORY } from '~/constants/aiTutorPrompts'
-import type { ChatSession, MathTutorSolution, Message, TutorCategory } from '~/types/aiTutor'
+import type {
+  ChatSession,
+  ChemistryTutorSolution,
+  MathTutorSolution,
+  Message,
+  PhysicsTutorSolution,
+  TutorCategory,
+  TutorStep,
+} from '~/types/aiTutor'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 
@@ -311,20 +319,75 @@ const quickPrompts = computed(() => {
 
 const messages = ref<Message[]>([])
 
-const toStringArray = (value: unknown): string[] | undefined => {
-  if (!Array.isArray(value)) return undefined
-
-  const normalized = value
+const toStringArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return []
+  return value
     .filter((item): item is string => typeof item === 'string')
     .map(item => item.trim())
     .filter(Boolean)
-
-  return normalized.length ? normalized : undefined
 }
 
-const toConfidence = (value: unknown): MathTutorSolution['confidence'] => {
-  if (value === 'low' || value === 'medium' || value === 'high') return value
+const toTutorSteps = (value: unknown): TutorStep[] => {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item): TutorStep | null => {
+      if (typeof item === 'string') {
+        const work = item.trim()
+        if (!work) return null
+        return { title: 'Step', work }
+      }
+
+      if (!item || typeof item !== 'object') return null
+
+      const raw = item as Record<string, unknown>
+      const title = typeof raw.title === 'string' ? raw.title.trim() : ''
+      const work = typeof raw.work === 'string'
+        ? raw.work.trim()
+        : typeof raw.step === 'string'
+          ? raw.step.trim()
+          : ''
+      const result = typeof raw.result === 'string' ? raw.result.trim() : ''
+
+      if (!title && !work && !result) return null
+
+      return {
+        title: title || 'Step',
+        work: work || result || title,
+        result: result || undefined,
+      }
+    })
+    .filter((step): step is TutorStep => Boolean(step))
+}
+
+const toBooleanOrUndefined = (value: unknown): boolean | undefined => {
+  return typeof value === 'boolean' ? value : undefined
+}
+
+const toCategory = (value: unknown): TutorCategory | undefined => {
+  if (value === 'math' || value === 'physics' || value === 'chemistry') return value
   return undefined
+}
+
+const normalizeCategoryText = (value: unknown): string => {
+  if (typeof value !== 'string') return ''
+  return value.trim().toLowerCase()
+}
+
+const inferCategoryFromResponse = (responseData: AIAskResponse, fallback: TutorCategory): TutorCategory => {
+  const subject = toCategory(responseData.subject)
+  if (subject) return subject
+
+  const category = toCategory(responseData.category)
+  if (category) return category
+
+  const categoryHint = `${normalizeCategoryText(responseData.subject)} ${normalizeCategoryText(responseData.category)}`
+  if (categoryHint.includes('chem')) return 'chemistry'
+  if (categoryHint.includes('organic')) return 'chemistry'
+  if (categoryHint.includes('phys')) return 'physics'
+  if (categoryHint.includes('math')) return 'math'
+
+  return fallback
 }
 
 const countStepLabels = (value: string | undefined): number => {
@@ -348,42 +411,25 @@ const parseMathSolution = (responseData: AIAskResponse, activeCategory: TutorCat
 
   const solution: MathTutorSolution = {
     answer: typeof answerPayload === 'string' ? answerPayload : undefined,
-    answerLatex: typeof responseData.answerLatex === 'string' ? responseData.answerLatex : undefined,
-    steps: toStringArray(responseData.steps),
-    stepsLatex: toStringArray(responseData.stepsLatex),
-    final: typeof responseData.final === 'string' ? responseData.final : undefined,
-    finalLatex: typeof responseData.finalLatex === 'string' ? responseData.finalLatex : undefined,
-    integrandLatex: typeof responseData.integrandLatex === 'string' ? responseData.integrandLatex : undefined,
-    usedChunkIds: toStringArray(responseData.usedChunkIds),
-    confidence: toConfidence(responseData.confidence),
-    notes: typeof responseData.notes === 'string' ? responseData.notes : undefined,
-    contextUsed: typeof responseData.contextUsed === 'boolean' ? responseData.contextUsed : undefined
+    steps: toTutorSteps(responseData.steps),
+    final_answer: typeof responseData.final_answer === 'string' ? responseData.final_answer : undefined,
+    graph_hint: typeof responseData.graph_hint === 'string' ? responseData.graph_hint : null,
+    contextUsed: toBooleanOrUndefined(responseData.contextUsed),
   }
 
   if (nestedSolution) {
     if (typeof nestedSolution.answer === 'string') solution.answer = nestedSolution.answer
-    if (typeof nestedSolution.answerLatex === 'string') solution.answerLatex = nestedSolution.answerLatex
-    if (Array.isArray(nestedSolution.steps)) solution.steps = toStringArray(nestedSolution.steps)
-    if (Array.isArray(nestedSolution.stepsLatex)) solution.stepsLatex = toStringArray(nestedSolution.stepsLatex)
-    if (typeof nestedSolution.final === 'string') solution.final = nestedSolution.final
-    if (typeof nestedSolution.finalLatex === 'string') solution.finalLatex = nestedSolution.finalLatex
-    if (typeof nestedSolution.integrandLatex === 'string') solution.integrandLatex = nestedSolution.integrandLatex
-    if (Array.isArray(nestedSolution.usedChunkIds)) solution.usedChunkIds = toStringArray(nestedSolution.usedChunkIds)
-    solution.confidence = toConfidence(nestedSolution.confidence) || solution.confidence
-    if (typeof nestedSolution.notes === 'string') solution.notes = nestedSolution.notes
+    if (Array.isArray(nestedSolution.steps)) solution.steps = toTutorSteps(nestedSolution.steps)
+    if (typeof nestedSolution.final_answer === 'string') solution.final_answer = nestedSolution.final_answer
+    if (typeof nestedSolution.graph_hint === 'string') solution.graph_hint = nestedSolution.graph_hint
     if (typeof nestedSolution.contextUsed === 'boolean') solution.contextUsed = nestedSolution.contextUsed
   }
 
   const hasMathContent = Boolean(
     solution.answer ||
-    solution.answerLatex ||
-    solution.final ||
-    solution.finalLatex ||
     solution.steps?.length ||
-    solution.stepsLatex?.length ||
-    solution.notes ||
-    solution.usedChunkIds?.length ||
-    solution.confidence ||
+    solution.final_answer ||
+    solution.graph_hint ||
     solution.contextUsed !== undefined
   )
 
@@ -395,36 +441,168 @@ const parseMathSolution = (responseData: AIAskResponse, activeCategory: TutorCat
       ? (Array.isArray(nestedSolution.steps) ? 'array' : typeof nestedSolution.steps)
       : 'none',
     stepsCount: solution.steps?.length || 0,
-    stepsLatexCount: solution.stepsLatex?.length || 0,
-    firstStepPreview: (solution.steps?.[0] || solution.stepsLatex?.[0] || '').slice(0, 140),
+    firstStepPreview: (solution.steps?.[0]?.work || '').slice(0, 140),
     maxNumberedMentionsInSingleStep: Math.max(
-      ...((solution.steps || solution.stepsLatex || []).map(step => countNumberedMentions(step))),
+      ...(solution.steps || []).map(step => countNumberedMentions(step.work)),
       0
     ),
     answerStepLabelCount: countStepLabels(solution.answer),
-    finalStepLabelCount: countStepLabels(solution.final),
+    finalStepLabelCount: countStepLabels(solution.final_answer),
     nestedKeys: nestedSolution ? Object.keys(nestedSolution) : []
   })
 
   return hasMathContent ? solution : undefined
 }
 
+const parsePhysicsSolution = (responseData: AIAskResponse, activeCategory: TutorCategory): PhysicsTutorSolution | undefined => {
+  if (activeCategory !== 'physics') return undefined
+
+  const answerPayload = responseData.answer
+  const nestedSolution =
+    typeof answerPayload === 'object' && answerPayload !== null && !Array.isArray(answerPayload)
+      ? (answerPayload as Record<string, unknown>)
+      : null
+
+  const given = Array.isArray(responseData.given)
+    ? responseData.given
+      .map((item) => {
+        const symbol = typeof item?.symbol === 'string' ? item.symbol.trim() : ''
+        const value = typeof item?.value === 'string' ? item.value.trim() : ''
+        const unit = typeof item?.unit === 'string' ? item.unit.trim() : ''
+        const description = typeof item?.description === 'string' ? item.description.trim() : ''
+        if (!symbol && !value && !unit && !description) return null
+        return { symbol, value, unit, description }
+      })
+      .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    : []
+
+  const solution: PhysicsTutorSolution = {
+    answer: typeof answerPayload === 'string' ? answerPayload : undefined,
+    given: given.length ? given : undefined,
+    formula: typeof responseData.formula === 'string' ? responseData.formula : undefined,
+    law_or_principle: typeof responseData.law_or_principle === 'string' ? responseData.law_or_principle : undefined,
+    steps: toTutorSteps(responseData.steps),
+    final_answer: typeof responseData.final_answer === 'string' ? responseData.final_answer : undefined,
+    diagram_hint: typeof responseData.diagram_hint === 'string' ? responseData.diagram_hint : null,
+    contextUsed: toBooleanOrUndefined(responseData.contextUsed),
+  }
+
+  if (nestedSolution) {
+    if (typeof nestedSolution.answer === 'string') solution.answer = nestedSolution.answer
+    if (Array.isArray(nestedSolution.steps)) solution.steps = toTutorSteps(nestedSolution.steps)
+    if (typeof nestedSolution.formula === 'string') solution.formula = nestedSolution.formula
+    if (typeof nestedSolution.law_or_principle === 'string') solution.law_or_principle = nestedSolution.law_or_principle
+    if (typeof nestedSolution.final_answer === 'string') solution.final_answer = nestedSolution.final_answer
+    if (typeof nestedSolution.diagram_hint === 'string') solution.diagram_hint = nestedSolution.diagram_hint
+    if (typeof nestedSolution.contextUsed === 'boolean') solution.contextUsed = nestedSolution.contextUsed
+  }
+
+  const hasPhysicsContent = Boolean(
+    solution.answer ||
+    solution.given?.length ||
+    solution.formula ||
+    solution.law_or_principle ||
+    solution.steps?.length ||
+    solution.final_answer ||
+    solution.diagram_hint ||
+    solution.contextUsed !== undefined
+  )
+
+  return hasPhysicsContent ? solution : undefined
+}
+
+const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: TutorCategory): ChemistryTutorSolution | undefined => {
+  if (activeCategory !== 'chemistry') return undefined
+
+  const answerPayload = responseData.answer
+  const nestedSolution =
+    typeof answerPayload === 'object' && answerPayload !== null && !Array.isArray(answerPayload)
+      ? (answerPayload as Record<string, unknown>)
+      : null
+
+  const solution: ChemistryTutorSolution = {
+    answer: typeof answerPayload === 'string' ? answerPayload : undefined,
+    reaction_type: responseData.reaction_type,
+    substrate_class: responseData.substrate_class,
+    carbon_change: responseData.carbon_change,
+    detected_language: responseData.detected_language,
+    contextUsed: toBooleanOrUndefined(responseData.contextUsed),
+    diagram: responseData.diagram,
+    mechanism_steps: responseData.mechanism_steps,
+    key_points: toStringArray(responseData.key_points),
+    diagram_caption: typeof responseData.diagram_caption === 'string' ? responseData.diagram_caption : undefined,
+    resonance: responseData.resonance,
+  }
+
+  if (nestedSolution) {
+    if (typeof nestedSolution.answer === 'string') solution.answer = nestedSolution.answer
+    if (typeof nestedSolution.reaction_type === 'string') solution.reaction_type = nestedSolution.reaction_type as ChemistryTutorSolution['reaction_type']
+    if (typeof nestedSolution.substrate_class === 'string') solution.substrate_class = nestedSolution.substrate_class as ChemistryTutorSolution['substrate_class']
+    if (typeof nestedSolution.carbon_change === 'string') solution.carbon_change = nestedSolution.carbon_change as ChemistryTutorSolution['carbon_change']
+    if (typeof nestedSolution.detected_language === 'string') solution.detected_language = nestedSolution.detected_language as ChemistryTutorSolution['detected_language']
+    if (Array.isArray(nestedSolution.key_points)) solution.key_points = toStringArray(nestedSolution.key_points)
+    if (typeof nestedSolution.diagram_caption === 'string') solution.diagram_caption = nestedSolution.diagram_caption
+    if (typeof nestedSolution.contextUsed === 'boolean') solution.contextUsed = nestedSolution.contextUsed
+    if (nestedSolution.resonance && typeof nestedSolution.resonance === 'object') {
+      solution.resonance = nestedSolution.resonance as ChemistryTutorSolution['resonance']
+    }
+  }
+
+  const hasChemistryContent = Boolean(
+    solution.answer ||
+    solution.diagram ||
+    solution.mechanism_steps?.length ||
+    solution.reaction_type ||
+    solution.substrate_class ||
+    solution.carbon_change ||
+    solution.detected_language ||
+    solution.key_points?.length ||
+    solution.diagram_caption ||
+    solution.resonance ||
+    solution.contextUsed !== undefined
+  )
+
+  return hasChemistryContent ? solution : undefined
+}
+
 const resolveAssistantResponse = (
   responseData: AIAskResponse,
   activeCategory: TutorCategory
-): { aiResponse: string; mathSolution?: MathTutorSolution } => {
+): {
+  aiResponse: string
+  resolvedCategory: TutorCategory
+  mathSolution?: MathTutorSolution
+  physicsSolution?: PhysicsTutorSolution
+  chemistrySolution?: ChemistryTutorSolution
+} => {
+  const resolvedCategory = inferCategoryFromResponse(responseData, activeCategory)
+
+  const chemistrySolution = parseChemistrySolution(responseData, resolvedCategory)
+  const physicsSolution = parsePhysicsSolution(responseData, resolvedCategory)
   const mathSolution = parseMathSolution(responseData, activeCategory)
 
   let aiResponse = 'No response received'
-  if (mathSolution?.answer?.trim()) {
+  if (chemistrySolution?.answer?.trim()) {
+    aiResponse = chemistrySolution.answer.trim()
+  } else if (physicsSolution?.answer?.trim()) {
+    aiResponse = physicsSolution.answer.trim()
+  } else if (mathSolution?.answer?.trim()) {
     aiResponse = mathSolution.answer.trim()
-  } else if (mathSolution?.final?.trim()) {
-    aiResponse = mathSolution.final.trim()
+  } else if (mathSolution?.final_answer?.trim()) {
+    aiResponse = mathSolution.final_answer.trim()
+  } else if (physicsSolution?.final_answer?.trim()) {
+    aiResponse = physicsSolution.final_answer.trim()
   } else if (typeof responseData.answer === 'string' && responseData.answer.trim()) {
     aiResponse = responseData.answer.trim()
   }
 
-  return { aiResponse, mathSolution }
+  return {
+    aiResponse,
+    resolvedCategory,
+    chemistrySolution,
+    physicsSolution,
+    mathSolution,
+  }
 }
 
 const sendMessage = async (text: string) => {
@@ -445,37 +623,53 @@ const sendMessage = async (text: string) => {
   isTyping.value = false
 
   if (response.success && response.data) {
-    const { aiResponse, mathSolution } = resolveAssistantResponse(response.data, activeCategory)
-    const hasStructuredContent = Boolean(response.data.diagram || response.data.mechanism_steps?.length || mathSolution)
+    const {
+      aiResponse,
+      chemistrySolution,
+      mathSolution,
+      physicsSolution,
+      resolvedCategory,
+    } = resolveAssistantResponse(response.data, activeCategory)
+
+    const hasStructuredContent = Boolean(
+      chemistrySolution ||
+      physicsSolution ||
+      mathSolution ||
+      response.data.diagram ||
+      response.data.mechanism_steps?.length
+    )
 
     logMathStepReveal('before-render-assistant-message', {
       hasStructuredContent,
       hasMathSolution: Boolean(mathSolution),
+      hasPhysicsSolution: Boolean(physicsSolution),
+      hasChemistrySolution: Boolean(chemistrySolution),
       aiResponseLength: aiResponse.length,
       answerStepLabelCount: countStepLabels(mathSolution?.answer),
-      finalStepLabelCount: countStepLabels(mathSolution?.final),
+      finalStepLabelCount: countStepLabels(mathSolution?.final_answer),
       stepsCount: mathSolution?.steps?.length || 0,
-      stepsLatexCount: mathSolution?.stepsLatex?.length || 0
     })
 
     if (hasStructuredContent) {
-      const shouldBypassStreamingForMath = Boolean(mathSolution)
+      const shouldBypassStreaming = Boolean(mathSolution || chemistrySolution || physicsSolution)
 
       messages.value.push({
         role: 'assistant',
-        content: shouldBypassStreamingForMath ? aiResponse : '',
-        isStreaming: shouldBypassStreamingForMath ? false : true,
+        content: shouldBypassStreaming ? aiResponse : '',
+        isStreaming: shouldBypassStreaming ? false : true,
         revealedMathSteps: 0,
         mathSolution,
-        diagram: response.data.diagram,
-        mechanismSteps: response.data.mechanism_steps,
+        chemistrySolution,
+        physicsSolution,
+        diagram: chemistrySolution?.diagram || response.data.diagram,
+        mechanismSteps: chemistrySolution?.mechanism_steps || response.data.mechanism_steps,
         showDiagram: false,
         showMechanismSteps: false,
-        subject: response.data.subject || activeCategory,
-        category: response.data.category || activeCategory
+        subject: response.data.subject || resolvedCategory,
+        category: response.data.category || resolvedCategory
       })
 
-      if (!shouldBypassStreamingForMath) {
+      if (!shouldBypassStreaming) {
         await typeWriterEffect(aiResponse, () => {
           const lastMsg = messages.value[messages.value.length - 1]
           if (lastMsg && lastMsg.isStreaming) {
@@ -486,7 +680,6 @@ const sendMessage = async (text: string) => {
         })
       } else {
         await nextTick()
-        renderMathInMessages()
       }
 
       const lastMsg = messages.value[messages.value.length - 1]
@@ -506,7 +699,17 @@ const sendMessage = async (text: string) => {
         }
       }
     } else {
-      messages.value.push({ role: 'assistant', content: '', isStreaming: true, revealedMathSteps: 0, mathSolution })
+      messages.value.push({
+        role: 'assistant',
+        content: '',
+        isStreaming: true,
+        revealedMathSteps: 0,
+        mathSolution,
+        physicsSolution,
+        chemistrySolution,
+        subject: response.data.subject || resolvedCategory,
+        category: response.data.category || resolvedCategory,
+      })
       await typeWriterEffect(aiResponse, () => {
         const lastMsg = messages.value[messages.value.length - 1]
         if (lastMsg && lastMsg.isStreaming) {

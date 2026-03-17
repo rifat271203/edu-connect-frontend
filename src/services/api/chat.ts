@@ -2,7 +2,14 @@
 // This file contains AI chat-related API calls
 
 import { apiRequest, type ApiResponse } from './client'
-import type { MathTutorSolution, TutorCategory } from '~/types/aiTutor'
+import type {
+  ChemistryTutorSolution,
+  MathTutorSolution,
+  PhysicsTutorSolution,
+  ReactionType,
+  SubstrateClass,
+  TutorCategory,
+} from '~/types/aiTutor'
 import type { MechanismStep, ReactionDiagramData } from '~/types/reactionDiagram'
 
 // Types for chat API
@@ -18,17 +25,22 @@ export interface AIAskRequest {
 }
 
 export interface AIAskResponse {
-  answer?: string | MathTutorSolution
-  answerLatex?: string
-  steps?: string[]
-  stepsLatex?: string[]
-  final?: string
-  finalLatex?: string
-  integrandLatex?: string
-  usedChunkIds?: string[]
-  confidence?: 'low' | 'medium' | 'high'
-  notes?: string
-  contextUsed: boolean
+  answer?: string | MathTutorSolution | PhysicsTutorSolution | ChemistryTutorSolution
+  steps?: Array<string | { title?: string; work?: string; result?: string }>
+  final_answer?: string
+  graph_hint?: string | null
+  given?: Array<{ symbol?: string; value?: string; unit?: string; description?: string }>
+  formula?: string
+  law_or_principle?: string
+  diagram_hint?: string | null
+  reaction_type?: ReactionType
+  substrate_class?: SubstrateClass
+  carbon_change?: 'carbon_same' | 'carbon_increase' | 'carbon_decrease' | 'unknown'
+  detected_language?: 'bangla' | 'english' | 'mixed'
+  key_points?: string[]
+  diagram_caption?: string
+  resonance?: ChemistryTutorSolution['resonance']
+  contextUsed?: boolean
   diagram?: ReactionDiagramData
   mechanism_steps?: MechanismStep[]
   subject?: TutorCategory
