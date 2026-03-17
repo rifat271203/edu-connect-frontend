@@ -26,6 +26,8 @@ export interface AIAskRequest {
 
 export interface AIAskResponse {
   answer?: string | MathTutorSolution | PhysicsTutorSolution | ChemistryTutorSolution
+  is_conversion?: boolean
+  question_mode?: string
   steps?: Array<string | { title?: string; work?: string; result?: string }>
   final_answer?: string
   graph_hint?: string | null
@@ -38,6 +40,7 @@ export interface AIAskResponse {
   carbon_change?: 'carbon_same' | 'carbon_increase' | 'carbon_decrease' | 'unknown'
   detected_language?: 'bangla' | 'english' | 'mixed'
   key_points?: string[]
+  equations?: string[]
   diagram_caption?: string
   resonance?: ChemistryTutorSolution['resonance']
   contextUsed?: boolean

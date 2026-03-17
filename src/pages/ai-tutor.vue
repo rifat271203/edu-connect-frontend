@@ -522,6 +522,8 @@ const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: Tut
 
   const solution: ChemistryTutorSolution = {
     answer: typeof answerPayload === 'string' ? answerPayload : undefined,
+    is_conversion: toBooleanOrUndefined(responseData.is_conversion),
+    question_mode: typeof responseData.question_mode === 'string' ? responseData.question_mode : undefined,
     reaction_type: responseData.reaction_type,
     substrate_class: responseData.substrate_class,
     carbon_change: responseData.carbon_change,
@@ -530,17 +532,21 @@ const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: Tut
     diagram: responseData.diagram,
     mechanism_steps: responseData.mechanism_steps,
     key_points: toStringArray(responseData.key_points),
+    equations: toStringArray(responseData.equations),
     diagram_caption: typeof responseData.diagram_caption === 'string' ? responseData.diagram_caption : undefined,
     resonance: responseData.resonance,
   }
 
   if (nestedSolution) {
     if (typeof nestedSolution.answer === 'string') solution.answer = nestedSolution.answer
+    if (typeof nestedSolution.is_conversion === 'boolean') solution.is_conversion = nestedSolution.is_conversion
+    if (typeof nestedSolution.question_mode === 'string') solution.question_mode = nestedSolution.question_mode
     if (typeof nestedSolution.reaction_type === 'string') solution.reaction_type = nestedSolution.reaction_type as ChemistryTutorSolution['reaction_type']
     if (typeof nestedSolution.substrate_class === 'string') solution.substrate_class = nestedSolution.substrate_class as ChemistryTutorSolution['substrate_class']
     if (typeof nestedSolution.carbon_change === 'string') solution.carbon_change = nestedSolution.carbon_change as ChemistryTutorSolution['carbon_change']
     if (typeof nestedSolution.detected_language === 'string') solution.detected_language = nestedSolution.detected_language as ChemistryTutorSolution['detected_language']
     if (Array.isArray(nestedSolution.key_points)) solution.key_points = toStringArray(nestedSolution.key_points)
+    if (Array.isArray(nestedSolution.equations)) solution.equations = toStringArray(nestedSolution.equations)
     if (typeof nestedSolution.diagram_caption === 'string') solution.diagram_caption = nestedSolution.diagram_caption
     if (typeof nestedSolution.contextUsed === 'boolean') solution.contextUsed = nestedSolution.contextUsed
     if (nestedSolution.resonance && typeof nestedSolution.resonance === 'object') {
@@ -550,6 +556,8 @@ const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: Tut
 
   const hasChemistryContent = Boolean(
     solution.answer ||
+    solution.is_conversion !== undefined ||
+    solution.question_mode ||
     solution.diagram ||
     solution.mechanism_steps?.length ||
     solution.reaction_type ||
@@ -557,6 +565,7 @@ const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: Tut
     solution.carbon_change ||
     solution.detected_language ||
     solution.key_points?.length ||
+    solution.equations?.length ||
     solution.diagram_caption ||
     solution.resonance ||
     solution.contextUsed !== undefined

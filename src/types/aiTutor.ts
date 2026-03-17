@@ -26,6 +26,7 @@ export type SubstrateClass =
 
 export type CarbonChange = 'carbon_same' | 'carbon_increase' | 'carbon_decrease' | 'unknown'
 export type DetectedLanguage = 'bangla' | 'english' | 'mixed'
+export type ChemistryQuestionMode = 'description' | 'equation' | string
 
 export interface TutorStep {
   title: string
@@ -74,6 +75,8 @@ export interface ChemistryResonance {
 
 export interface ChemistryTutorSolution {
   answer?: string
+  is_conversion?: boolean
+  question_mode?: ChemistryQuestionMode
   reaction_type?: ReactionType
   substrate_class?: SubstrateClass
   carbon_change?: CarbonChange
@@ -82,6 +85,7 @@ export interface ChemistryTutorSolution {
   diagram?: ReactionDiagramData
   mechanism_steps?: MechanismStep[]
   key_points?: string[]
+  equations?: string[]
   diagram_caption?: string
   resonance?: ChemistryResonance | null
 }
