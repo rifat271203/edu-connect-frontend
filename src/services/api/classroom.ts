@@ -5,8 +5,8 @@ export interface ClassroomCoursesQuery {
   page?: number
   limit?: number
   q?: string
-  status?: string
-  sortBy?: string
+  status?: 'active' | 'archived'
+  sortBy?: 'created_at' | 'createdAt' | 'title' | 'code'
   sortOrder?: 'asc' | 'desc'
 }
 
@@ -322,7 +322,10 @@ const buildCoursesQueryString = (query: ClassroomCoursesQuery = {}): string => {
   if (query.limit !== undefined) params.set('limit', String(query.limit))
   if (query.q) params.set('q', query.q)
   if (query.status) params.set('status', query.status)
-  if (query.sortBy) params.set('sortBy', query.sortBy)
+  if (query.sortBy) {
+    const normalizedSortBy = query.sortBy === 'createdAt' ? 'created_at' : query.sortBy
+    params.set('sortBy', normalizedSortBy)
+  }
   if (query.sortOrder) params.set('sortOrder', query.sortOrder)
 
   const queryString = params.toString()

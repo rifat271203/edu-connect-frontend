@@ -74,31 +74,63 @@
         </div>
       </div>
       
-      <!-- Suggested Users -->
+      <!-- Popular Courses -->
       <div>
-        <h3 class="text-sm font-semibold text-[var(--text)] mb-3">Suggested for you</h3>
+        <div class="mb-3 flex items-center justify-between gap-2">
+          <h3 class="text-sm font-semibold text-[var(--text)]">Popular Courses</h3>
+          <button
+            class="text-xs text-[var(--primary)] hover:opacity-80"
+            :disabled="coursesLoading"
+            @click="loadPopularCourses"
+          >
+            Refresh
+          </button>
+        </div>
         
         <div class="widget-card p-2 space-y-1">
-          <div 
-            v-for="user in suggestedUsers" 
-            :key="user.id"
-            class="widget-row"
+          <div v-if="coursesLoading" class="space-y-2 p-2">
+            <UiSkeleton v-for="idx in 3" :key="`popular-course-skeleton-${idx}`" variant="text" class="h-5 w-full" />
+          </div>
+
+          <p v-else-if="coursesError" class="px-2 py-3 text-xs text-red-400">{{ coursesError }}</p>
+
+          <p v-else-if="popularCourses.length === 0" class="px-2 py-3 text-xs text-[var(--text-3)]">
+            No active courses available.
+          </p>
+
+          <NuxtLink
+            v-for="course in popularCourses"
+            v-else
+            :key="`popular-course-${course.id}`"
+            to="/classroom"
+            class="widget-row items-start"
           >
-            <UiAvatar 
-              :src="user.avatar" 
-              :name="user.name" 
+            <img
+              v-if="course.coursePicUrl"
+              :src="course.coursePicUrl"
+              :alt="`${course.title} cover`"
+              class="h-10 w-10 rounded-lg object-cover border border-[var(--border)]"
+              loading="lazy"
+            />
+            <UiAvatar
+              v-else
+              :src="course.instructor.avatar"
+              :name="course.title"
               size="sm"
             />
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-[var(--text)] truncate">{{ user.name }}</p>
-              <p class="text-xs text-[var(--text-3)]">{{ user.followers }} followers</p>
+
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-[var(--text)] truncate">{{ course.title }}</p>
+              <p class="text-xs text-[var(--text-3)] truncate">
+                {{ course.code || 'No code' }} · {{ course.instructor.displayName }}
+              </p>
+              <p class="text-xs text-[var(--text-3)]">{{ course.memberCount }} members</p>
             </div>
-            <UiButton size="sm" variant="ghost" class="!px-2">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-            </UiButton>
-          </div>
+
+            <UiBadge :variant="course.status === 'archived' ? 'warning' : 'accent'">
+              {{ course.status }}
+            </UiBadge>
+          </NuxtLink>
         </div>
       </div>
       
@@ -114,10 +146,14 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { getClassroomCourses, type ClassroomCourse } from '~/services/api/classroom'
 import { useNotificationsStore } from '~/stores/notifications'
 
 const notificationsStore = useNotificationsStore()
 const { notifications: rawNotifications, pendingFriendRequests } = storeToRefs(notificationsStore)
+const popularCourses = ref<ClassroomCourse[]>([])
+const coursesLoading = ref(false)
+const coursesError = ref('')
 
 const formatTimestamp = (value: string): string => {
   const date = new Date(value)
@@ -173,28 +209,40 @@ const handleNotificationClick = async (notificationId: string) => {
   await notificationsStore.markAsRead(notificationId)
 }
 
-onMounted(async () => {
-  await notificationsStore.fetchNotifications()
-})
+const loadPopularCourses = async () => {
+  coursesLoading.value = true
+  coursesError.value = ''
 
-const suggestedUsers = ref([
-  {
-    id: '1',
-    name: 'Emma Wilson',
-    avatar: '',
-    followers: 234
-  },
-  {
-    id: '2',
-    name: 'James Chen',
-    avatar: '',
-    followers: 567
-  },
-  {
-    id: '3',
-    name: 'Sophie Kim',
-    avatar: '',
-    followers: 891
+  const result = await getClassroomCourses({
+    page: 1,
+    limit: 20,
+    status: 'active',
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+  })
+
+  coursesLoading.value = false
+
+  if (!result.success || !result.data) {
+    popularCourses.value = []
+    coursesError.value = result.error || 'Failed to load popular courses'
+    return
   }
-])
+
+  popularCourses.value = [...result.data]
+    .sort((a, b) => {
+      if (b.memberCount !== a.memberCount) {
+        return b.memberCount - a.memberCount
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+    .slice(0, 5)
+}
+
+onMounted(async () => {
+  await Promise.all([
+    notificationsStore.fetchNotifications(),
+    loadPopularCourses(),
+  ])
+})
 </script>
