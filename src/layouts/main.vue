@@ -1,10 +1,10 @@
 <template>
   <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] flex overflow-x-hidden">
     <!-- Left Sidebar - Desktop -->
-    <LayoutSidebar v-if="!isGuest" class="hidden lg:flex" />
+    <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex" />
     
     <!-- Main Content Area -->
-    <main :class="['w-full min-w-0 flex flex-col min-h-screen', !isGuest ? 'lg:pl-[260px]' : '']">
+    <main :class="['w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[260px]' : '']">
       <!-- Mobile Header -->
       <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40 backdrop-blur-lg">
         <div class="flex items-center justify-between px-4 py-3">
@@ -40,7 +40,7 @@
         </div>
         
         <!-- Right Sidebar - Desktop (hidden on ai-tutor/messages pages) -->
-        <LayoutRightSidebar v-if="!isGuest && route.path !== '/ai-tutor' && !route.path.startsWith('/messages')" class="hidden xl:block" />
+        <LayoutRightSidebar v-if="showDesktopRightSidebar" class="hidden xl:block" />
       </div>
     </main>
     
@@ -209,6 +209,12 @@ const toggleMobileMenu = () => {
 const route = useRoute()
 const isAiTutorRoute = computed(() => route.path === '/ai-tutor')
 const isGuest = computed(() => !userStore.isAuthenticated)
+const guestAllowedPaths = new Set(['/login', '/home', '/ai-tutor'])
+const isProtectedRoute = computed(() => !guestAllowedPaths.has(route.path))
+const showDesktopSidebar = computed(() => !isGuest.value || isProtectedRoute.value)
+const showDesktopRightSidebar = computed(() =>
+  showDesktopSidebar.value && route.path !== '/ai-tutor' && !route.path.startsWith('/messages')
+)
 
 watch(() => route.path, () => {
   showMobileMenu.value = false
