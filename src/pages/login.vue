@@ -396,6 +396,13 @@ definePageMeta({
 
 const router = useRouter()
 
+const authCookieMaxAgeSeconds = 60 * 60 * 24 * 30
+
+const setAuthCookies = (token: string) => {
+  document.cookie = `educonnect_token=${encodeURIComponent(token)}; path=/; max-age=${authCookieMaxAgeSeconds}; samesite=lax`
+  document.cookie = `educonnect_auth=true; path=/; max-age=${authCookieMaxAgeSeconds}; samesite=lax`
+}
+
 const checkAuth = () => {
   const token = localStorage.getItem('educonnect_token')
   if (token) {
@@ -578,6 +585,7 @@ const handleLogin = async () => {
 
     if (token) {
       localStorage.setItem('educonnect_token', token)
+      setAuthCookies(token)
     }
 
     const apiUser = result.data?.user
@@ -625,6 +633,7 @@ const handleRegister = async () => {
 
     if (token) {
       localStorage.setItem('educonnect_token', token)
+      setAuthCookies(token)
     }
 
     const user = result.data?.user

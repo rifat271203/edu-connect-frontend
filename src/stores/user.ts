@@ -3,6 +3,29 @@ import { getCurrentUser, login, register, logout, type UserRole } from '~/servic
 import { uploadProfilePicture as uploadProfilePictureApi } from '~/services/api/social'
 
 const getProfilePicSkipStorageKey = (userId: string | number) => `educonnect_profile_pic_prompt_skipped_${String(userId)}`
+const authCookieMaxAgeSeconds = 60 * 60 * 24 * 30
+
+const setClientCookie = (name: string, value: string, maxAgeSeconds = authCookieMaxAgeSeconds) => {
+  if (!process.client) return
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`
+}
+
+const clearClientCookie = (name: string) => {
+  if (!process.client) return
+  document.cookie = `${name}=; path=/; max-age=0; samesite=lax`
+}
+
+const getClientCookie = (name: string): string | null => {
+  if (!process.client) return null
+
+  const cookie = document.cookie
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`))
+
+  if (!cookie) return null
+  return decodeURIComponent(cookie.slice(name.length + 1))
+}
 
 interface User {
   id: string | number
@@ -58,6 +81,14 @@ export const useUserStore = defineStore('user', {
       }
 
       localStorage.setItem('educonnect_auth', this.isAuthenticated ? 'true' : 'false')
+
+      if (this.token && this.isAuthenticated) {
+        setClientCookie('educonnect_token', this.token)
+        setClientCookie('educonnect_auth', 'true')
+      } else {
+        clearClientCookie('educonnect_token')
+        clearClientCookie('educonnect_auth')
+      }
     },
 
     clearSession() {
@@ -69,17 +100,32 @@ export const useUserStore = defineStore('user', {
       localStorage.removeItem('educonnect_token')
       localStorage.removeItem('educonnect_user')
       localStorage.removeItem('educonnect_auth')
+
+      clearClientCookie('educonnect_token')
+      clearClientCookie('educonnect_auth')
     },
 
     // Initialize auth state from localStorage
     initAuth() {
-      const token = localStorage.getItem('educonnect_token')
+      const token = localStorage.getItem('educonnect_token') || getClientCookie('educonnect_token')
       const userStr = localStorage.getItem('educonnect_user')
-      const isAuth = localStorage.getItem('educonnect_auth')
+      const isAuth = localStorage.getItem('educonnect_auth') || getClientCookie('educonnect_auth')
       
-      if (token && isAuth) {
+      if (token && isAuth === 'true') {
         this.token = token
         this.isAuthenticated = true
+
+        if (!localStorage.getItem('educonnect_token')) {
+          localStorage.setItem('educonnect_token', token)
+        }
+
+        if (!localStorage.getItem('educonnect_auth')) {
+          localStorage.setItem('educonnect_auth', 'true')
+        }
+
+        setClientCookie('educonnect_token', token)
+        setClientCookie('educonnect_auth', 'true')
+
         if (userStr) {
           try {
             this.user = JSON.parse(userStr)

@@ -123,6 +123,7 @@
 import { useUserStore } from '~/stores/user'
 
 const showMobileMenu = ref(false)
+const hasMounted = ref(false)
 const userStore = useUserStore()
 
 const profilePicInputRef = ref<HTMLInputElement | null>(null)
@@ -208,10 +209,23 @@ const toggleMobileMenu = () => {
 // Close menu on route change
 const route = useRoute()
 const isAiTutorRoute = computed(() => route.path === '/ai-tutor')
-const isGuest = computed(() => !userStore.isAuthenticated)
+const authCookie = useCookie<string | null>('educonnect_auth')
+const tokenCookie = useCookie<string | null>('educonnect_token')
+const hasCookieSession = computed(() => authCookie.value === 'true' && Boolean(tokenCookie.value))
+const isGuest = computed(() => !(userStore.isAuthenticated || hasCookieSession.value))
 const guestAllowedPaths = new Set(['/login', '/home', '/ai-tutor'])
 const isProtectedRoute = computed(() => !guestAllowedPaths.has(route.path))
-const showDesktopSidebar = computed(() => !isGuest.value || isProtectedRoute.value)
+const showDesktopSidebar = computed(() => {
+  if (isProtectedRoute.value) return true
+
+  // Keep SSR/CSR first render consistent for guest-allowed routes (like /home)
+  // unless we already have auth cookies available during SSR.
+  if (!hasMounted.value && !hasCookieSession.value) {
+    return false
+  }
+
+  return !isGuest.value
+})
 const showDesktopRightSidebar = computed(() =>
   showDesktopSidebar.value && route.path !== '/ai-tutor' && !route.path.startsWith('/messages')
 )
@@ -231,5 +245,9 @@ watch(
 
 onBeforeUnmount(() => {
   revokeProfilePicPreview()
+})
+
+onMounted(() => {
+  hasMounted.value = true
 })
 </script>
