@@ -35,6 +35,15 @@ export interface FriendRequestItem {
   timestamp: string
 }
 
+export interface SocialFriend extends UserPreview {
+  name: string
+  email?: string
+  role?: string
+  department?: string
+  institution?: string
+  friendsSince?: string
+}
+
 export interface SocialSearchResult {
   users: UserPreview[]
   posts: FeedPost[]
@@ -252,6 +261,9 @@ const toIsoTimestamp = (value: unknown): string => {
   if (typeof value === 'string' && value) return value
   return new Date().toISOString()
 }
+
+const toOptionalString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim() ? value : undefined
 
 const notificationTypes: NotificationType[] = [
   'friend_request',
@@ -989,6 +1001,49 @@ const normalizeFriendRequest = (value: unknown): FriendRequestItem => {
   }
 }
 
+const normalizeFriend = (value: unknown): SocialFriend => {
+  const source = asRecord(value) || {}
+  const base = normalizeUser(value, 'friend')
+
+  const name =
+    (typeof source.name === 'string' && source.name) ||
+    (typeof source.displayName === 'string' && source.displayName) ||
+    (typeof source.display_name === 'string' && source.display_name) ||
+    (typeof source.full_name === 'string' && source.full_name) ||
+    base.displayName ||
+    'User'
+
+  const username =
+    (typeof source.username === 'string' && source.username) ||
+    (typeof source.user_name === 'string' && source.user_name) ||
+    base.username ||
+    name.toLowerCase().replace(/\s+/g, '') ||
+    'user'
+
+  const profilePicUrl =
+    (typeof source.profilePicUrl === 'string' && source.profilePicUrl) ||
+    (typeof source.profile_pic_url === 'string' && source.profile_pic_url) ||
+    (typeof source.avatar === 'string' && source.avatar) ||
+    base.profilePicUrl ||
+    base.avatar ||
+    ''
+
+  return {
+    id: base.id,
+    username,
+    displayName: name,
+    name,
+    avatar: profilePicUrl,
+    profilePicUrl: profilePicUrl || undefined,
+    isProfilePublic: base.isProfilePublic,
+    email: toOptionalString(source.email),
+    role: toOptionalString(source.role),
+    department: toOptionalString(source.department),
+    institution: toOptionalString(source.institution),
+    friendsSince: toOptionalString(source.friendsSince || source.friends_since),
+  }
+}
+
 const normalizeDmMessage = (value: unknown): DmMessage => {
   const source = asRecord(value) || {}
   const id = toId(source.id, globalThis.crypto?.randomUUID?.() || String(Date.now()))
@@ -1173,11 +1228,17 @@ export const cancelFriendRequest = async (requestId: string): Promise<ApiRespons
   return await apiRequest<void>(`/api/social/friend-requests/${requestId}`, 'DELETE')
 }
 
-export const getFriends = async (): Promise<ApiResponse<UserPreview[]>> => {
+export const getFriends = async (): Promise<ApiResponse<SocialFriend[]>> => {
   const result = await apiRequest<unknown>('/api/social/friends', 'GET')
-  if (!result.success) return result as ApiResponse<UserPreview[]>
+  if (!result.success) return result as ApiResponse<SocialFriend[]>
 
-  return { ...result, data: mapResponseList(result.data, (item) => normalizeUser(item, 'friend')) }
+  const root = asRecord(result.data) || {}
+  const friendsRaw = root.friends || root.items || root.results || root.users || root.data || result.data
+
+  return {
+    ...result,
+    data: asArray(friendsRaw).map(normalizeFriend),
+  }
 }
 
 export const unfriend = async (friendId: string): Promise<ApiResponse<void>> => {

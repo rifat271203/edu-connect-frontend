@@ -147,6 +147,67 @@
       </UiCard>
     </div>
 
+    <!-- Friends -->
+    <div v-if="activeTab === 'Friends'" class="space-y-4">
+      <UiCard class="p-4">
+        <div class="mb-4 flex items-center justify-between gap-2">
+          <h3 class="font-semibold text-dark-50">Friends</h3>
+          <UiButton
+            v-if="myFriends.length > 8"
+            variant="ghost"
+            size="sm"
+            @click="showAllFriends = !showAllFriends"
+          >
+            {{ showAllFriends ? 'Show less' : 'See all friends' }}
+          </UiButton>
+        </div>
+
+        <p v-if="friendsError" class="text-sm text-red-400">{{ friendsError }}</p>
+
+        <div v-else-if="friendsLoading" class="space-y-3">
+          <div
+            v-for="index in 4"
+            :key="`friend-skeleton-${index}`"
+            class="rounded-xl border border-surface-glass-border p-3"
+          >
+            <UiSkeleton variant="text" class="w-40 mb-2" />
+            <UiSkeleton variant="text" class="w-24" />
+          </div>
+        </div>
+
+        <p v-else-if="myFriends.length === 0" class="text-sm text-dark-300">No friends yet.</p>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <NuxtLink
+            v-for="friend in visibleFriends"
+            :key="`friend-${friend.id}`"
+            :to="`/profile/${friend.id}`"
+            class="rounded-xl border border-surface-glass-border bg-dark-900/50 p-3 hover:bg-dark-800/60 transition-colors"
+          >
+            <div class="flex items-start gap-3">
+              <UiAvatar
+                :src="friend.profilePicUrl || friend.avatar"
+                :name="friend.name || friend.displayName"
+                size="md"
+              />
+
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-dark-50 truncate">{{ friend.name || friend.displayName }}</p>
+                <p class="text-xs text-dark-300 truncate">{{ friend.email || `@${friend.username}` }}</p>
+                <p class="mt-1 text-[11px] text-dark-400 truncate">
+                  {{ friend.role || 'member' }} · {{ friend.department || 'Department' }}
+                </p>
+                <p class="text-[11px] text-dark-400 truncate">{{ friend.institution || 'Institution' }}</p>
+                <p v-if="friend.friendsSince" class="mt-1 text-[11px] text-dark-500">
+                  Friends since {{ new Date(friend.friendsSince).toLocaleDateString() }}
+                </p>
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+      </UiCard>
+    </div>
+
     <!-- About -->
     <div v-if="activeTab === 'About'" class="space-y-4">
       <UiCard class="p-4">
@@ -175,12 +236,19 @@ definePageMeta({
 })
 
 import { useUserStore } from '~/stores/user'
-import { getMyActivity, getMyProfile, getMyProfileVisibility, updateMyProfileVisibility } from '~/services/api/social'
+import {
+  getFriends,
+  getMyActivity,
+  getMyProfile,
+  getMyProfileVisibility,
+  updateMyProfileVisibility,
+  type SocialFriend,
+} from '~/services/api/social'
 
 const userStore = useUserStore()
 
 const activeTab = ref('Posts')
-const tabs = ['Posts', 'Activity', 'About']
+const tabs = ['Posts', 'Activity', 'Friends', 'About']
 
 const profileLoading = ref(true)
 const updatingProfilePic = ref(false)
@@ -207,6 +275,15 @@ const myActivitySummary = ref({
   comments: 0,
   shares: 0,
 })
+
+const myFriends = ref<SocialFriend[]>([])
+const friendsLoading = ref(false)
+const friendsError = ref('')
+const showAllFriends = ref(false)
+
+const visibleFriends = computed(() =>
+  showAllFriends.value ? myFriends.value : myFriends.value.slice(0, 8)
+)
 
 const isProfilePublic = ref(true)
 
@@ -280,6 +357,26 @@ const loadMyVisibility = async () => {
   }
 }
 
+const loadMyFriends = async () => {
+  friendsLoading.value = true
+  friendsError.value = ''
+
+  const result = await getFriends()
+  friendsLoading.value = false
+
+  if (!result.success || !result.data) {
+    myFriends.value = []
+    friendsError.value = result.error || 'Failed to load friends'
+    return
+  }
+
+  myFriends.value = result.data
+  myStats.value = {
+    ...myStats.value,
+    friendCount: result.data.length,
+  }
+}
+
 const handleVisibilityToggle = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const nextValue = Boolean(target.checked)
@@ -342,6 +439,7 @@ const handleProfilePicSelected = async (event: Event) => {
 onMounted(async () => {
   await Promise.all([
     loadProfileData(),
+    loadMyFriends(),
     loadMyVisibility(),
   ])
 })
