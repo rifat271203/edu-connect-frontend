@@ -1,21 +1,11 @@
 <template>
   <div class="max-w-2xl mx-auto p-4 pb-24 lg:pb-4">
-    <!-- Cover Image -->
-    <div class="relative h-40 md:h-56 rounded-2xl overflow-hidden mb-16">
-      <img 
-        src="https://picsum.photos/seed/cover/1200/400" 
-        alt="Cover" 
-        class="w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-gradient-to-t from-dark-950/80 to-transparent" />
-    </div>
-    
-    <!-- Profile Info -->
-    <div class="relative px-4 -mt-20 mb-6">
+    <!-- Profile Header -->
+    <div class="mb-6 rounded-2xl border border-surface-glass-border bg-dark-900/70 p-4 md:p-6">
       <div class="flex flex-col md:flex-row md:items-end gap-4">
         <!-- Avatar -->
         <div class="relative">
-          <div class="w-32 h-32 rounded-2xl overflow-hidden border-4 border-dark-950">
+          <div class="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-dark-800 bg-dark-800/70">
             <img 
               :src="userStore.user?.avatar" 
               alt="Profile" 
@@ -66,39 +56,41 @@
           <p v-if="visibilityError" class="mt-1 text-xs text-red-400">{{ visibilityError }}</p>
         </div>
         
-        <UiButton variant="secondary" @click="openProfilePicPicker">
+        <UiButton variant="secondary" class="w-full md:w-auto" @click="openProfilePicPicker">
           {{ updatingProfilePic ? 'Updating...' : 'Update Photo' }}
         </UiButton>
       </div>
     </div>
 
-    <p v-if="errorMessage" class="mb-4 px-4 text-sm text-red-400">{{ errorMessage }}</p>
-    <p v-if="successMessage" class="mb-4 px-4 text-sm text-green-400">{{ successMessage }}</p>
+    <p v-if="errorMessage" class="mb-4 text-sm text-red-400">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="mb-4 text-sm text-green-400">{{ successMessage }}</p>
     
     <!-- Bio -->
-    <p class="text-dark-100 mb-6 px-4">
-      {{ userStore.user?.bio || 'Learning enthusiast | Building the future 🚀' }}
-    </p>
+    <UiCard class="mb-6 p-4">
+      <p class="text-dark-100 leading-relaxed">
+        {{ userStore.user?.bio || 'Learning enthusiast | Building the future 🚀' }}
+      </p>
+    </UiCard>
     
     <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 px-4 mb-8">
-      <div class="text-center">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
         <div class="text-xl font-bold text-dark-50">{{ myStats.postCount }}</div>
         <div class="text-sm text-dark-300">Posts</div>
       </div>
-      <div class="text-center">
+      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
         <div class="text-xl font-bold text-dark-50">{{ myStats.shareCount }}</div>
         <div class="text-sm text-dark-300">Shares</div>
       </div>
-      <div class="text-center">
+      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
         <div class="text-xl font-bold text-dark-50">{{ myStats.likeGivenCount }}</div>
         <div class="text-sm text-dark-300">Likes Given</div>
       </div>
-      <div class="text-center">
+      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
         <div class="text-xl font-bold text-dark-50">{{ myStats.commentCount }}</div>
         <div class="text-sm text-dark-300">Comments</div>
       </div>
-      <div class="text-center">
+      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
         <div class="text-xl font-bold text-dark-50">{{ myStats.friendCount }}</div>
         <div class="text-sm text-dark-300">Friends</div>
       </div>
