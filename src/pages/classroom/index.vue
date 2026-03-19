@@ -1,8 +1,8 @@
 <template>
-  <div class="mx-auto max-w-4xl p-4 pb-24 lg:pb-4">
-    <header class="mb-6">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Classroom</h1>
-      <p class="text-[var(--text-2)]">
+  <div class="mx-auto max-w-5xl p-4 pb-24 lg:pb-6">
+    <header class="mb-6 space-y-1">
+      <h1 class="font-display text-4xl text-[var(--t1)]">Classroom</h1>
+      <p class="text-[var(--t2)] text-sm">
         {{
           isTeacher
             ? 'Create and manage private courses for your students.'
@@ -11,11 +11,11 @@
       </p>
     </header>
 
-    <UiCard class="mb-6 p-4">
+    <UiCard class="mb-6 !p-5">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 class="text-lg font-semibold text-[var(--text)]">Live class meetings</h2>
-          <p class="text-sm text-[var(--text-2)]">
+          <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Live class meetings</h2>
+          <p class="text-sm text-[var(--t2)]">
             {{ isTeacher ? 'Start a room and share the ID with your class.' : 'Join a room using the ID shared by your teacher.' }}
           </p>
         </div>
@@ -37,11 +37,11 @@
         </div>
       </div>
 
-      <p v-if="meetingError" class="mt-3 text-sm text-[var(--danger)]">{{ meetingError }}</p>
+      <p v-if="meetingError" class="mt-3 text-sm text-[rgba(239,68,68,0.9)]">{{ meetingError }}</p>
     </UiCard>
 
     <p v-if="classroomInfo" class="mb-4 text-sm text-green-400">{{ classroomInfo }}</p>
-    <p v-if="classroomError" class="mb-4 text-sm text-[var(--danger)]">{{ classroomError }}</p>
+    <p v-if="classroomError" class="mb-4 text-sm text-[rgba(239,68,68,0.9)]">{{ classroomError }}</p>
 
     <div v-if="pageLoading" class="space-y-4">
       <UiCard v-for="i in 3" :key="`classroom-loading-${i}`" class="p-4">
@@ -54,32 +54,32 @@
     <template v-else>
       <section v-if="isTeacher" class="space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h2 class="text-lg font-semibold text-[var(--text)]">Your course feed</h2>
+          <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Your course feed</h2>
           <div class="flex items-center gap-2">
             <UiButton @click="openCreateCourseModal">Create Course</UiButton>
-            <UiButton variant="secondary" size="sm" :disabled="coursesLoading" @click="loadTeacherCourses">
+            <UiButton variant="ghost" size="sm" :disabled="coursesLoading" @click="loadTeacherCourses">
               Refresh
             </UiButton>
           </div>
         </div>
 
-        <div v-if="!teacherCourses.length" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--text-2)]">
+        <div v-if="!teacherCourses.length" class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm text-[var(--t2)]">
           No courses yet. Click <strong>Create Course</strong> to publish your first classroom post.
         </div>
 
         <div v-else class="space-y-4">
-          <UiCard v-for="course in teacherCourses" :key="`teacher-course-${course.id}`" class="p-4">
+          <UiCard v-for="course in teacherCourses" :key="`teacher-course-${course.id}`" class="!p-5">
             <div class="mb-3 flex items-center gap-3">
               <UiAvatar :src="course.instructor.avatar" :name="course.instructor.displayName" size="md" />
               <div class="min-w-0 flex-1">
-                <p class="font-medium text-[var(--text)] truncate">{{ course.instructor.displayName }}</p>
-                <p class="text-sm text-[var(--text-3)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
+                <p class="font-semibold text-[var(--t1)] truncate">{{ course.instructor.displayName }}</p>
+                <p class="mono-label text-[11px] text-[var(--t3)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
               </div>
               <UiBadge :variant="course.status === 'archived' ? 'warning' : 'success'">{{ course.status }}</UiBadge>
             </div>
 
-            <h3 class="text-lg font-semibold text-[var(--text)]">{{ course.title }}</h3>
-            <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)]">
+            <h3 class="font-display text-[30px] leading-8 text-[var(--t1)]">{{ course.title }}</h3>
+            <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface2)]">
               <img
                 :src="course.coursePicUrl"
                 :alt="`${course.title} cover`"
@@ -87,12 +87,12 @@
                 loading="lazy"
               />
             </div>
-            <p class="mt-1 whitespace-pre-wrap text-sm text-[var(--text-2)]">{{ course.description || 'No description added yet.' }}</p>
+            <p class="mt-1 whitespace-pre-wrap text-sm text-[var(--t2)]">{{ course.description || 'No description added yet.' }}</p>
 
-            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--text-3)]">
-              <span v-if="course.code" class="rounded-full bg-[var(--surface-2)] px-2 py-1">Code: {{ course.code }}</span>
-              <span v-if="course.department" class="rounded-full bg-[var(--surface-2)] px-2 py-1">Dept: {{ course.department }}</span>
-              <span class="rounded-full bg-[var(--surface-2)] px-2 py-1">Members: {{ course.memberCount }}</span>
+            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--t3)]">
+              <span v-if="course.code" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
+              <span v-if="course.department" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
+              <span class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
             </div>
 
             <div class="mt-4 flex flex-wrap gap-2">
@@ -131,23 +131,23 @@
               </UiButton>
             </div>
 
-            <div v-if="openRequestsByCourse[course.id]" class="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
-              <p v-if="requestsLoadingByCourse[course.id]" class="text-sm text-[var(--text-2)]">Loading enrollment requests...</p>
+            <div v-if="openRequestsByCourse[course.id]" class="mt-4 rounded-xl border border-[var(--line)] bg-[var(--surface2)] p-3">
+              <p v-if="requestsLoadingByCourse[course.id]" class="text-sm text-[var(--t2)]">Loading enrollment requests...</p>
 
               <template v-else>
-                <p v-if="!pendingRequestsForCourse(course.id).length" class="text-sm text-[var(--text-2)]">No pending enrollment requests.</p>
+                <p v-if="!pendingRequestsForCourse(course.id).length" class="text-sm text-[var(--t2)]">No pending enrollment requests.</p>
 
                 <div v-else class="space-y-2">
                   <div
                     v-for="request in pendingRequestsForCourse(course.id)"
                     :key="`enrollment-request-${request.id}`"
-                    class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[var(--surface)] p-3"
+                    class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-3"
                   >
                     <div class="flex items-center gap-3">
                       <UiAvatar :src="request.student.avatar" :name="request.student.displayName" size="sm" />
                       <div>
-                        <p class="text-sm font-medium text-[var(--text)]">{{ request.student.displayName }}</p>
-                        <p class="text-xs text-[var(--text-3)]">@{{ request.student.username }}</p>
+                        <p class="text-sm font-semibold text-[var(--t1)]">{{ request.student.displayName }}</p>
+                        <p class="mono-label text-[11px] text-[var(--t3)]">@{{ request.student.username }}</p>
                       </div>
                     </div>
 
@@ -179,13 +179,13 @@
       <section v-else class="space-y-6">
         <section>
           <div class="mb-3 flex items-center justify-between gap-3">
-            <h2 class="text-lg font-semibold text-[var(--text)]">My enrolled courses</h2>
-            <UiButton variant="secondary" size="sm" :disabled="enrollmentsLoading" @click="loadMyEnrollments">
+            <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">My enrolled courses</h2>
+            <UiButton variant="ghost" size="sm" :disabled="enrollmentsLoading" @click="loadMyEnrollments">
               Refresh
             </UiButton>
           </div>
 
-          <div v-if="!myEnrollments.length" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--text-2)]">
+          <div v-if="!myEnrollments.length" class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm text-[var(--t2)]">
             You are not enrolled in any courses yet.
           </div>
 
@@ -193,19 +193,30 @@
             <UiCard
               v-for="enrollment in myEnrollments"
               :key="`enrollment-${enrollment.id}`"
-              class="p-4"
+              class="!p-5"
               hover
               @click="navigateTo(`/classroom/${encodeURIComponent(enrollment.course.id)}`)"
             >
               <div class="flex items-start justify-between gap-2">
                 <div>
-                  <h3 class="font-semibold text-[var(--text)]">{{ enrollment.course.title }}</h3>
-                  <p class="mt-1 text-sm text-[var(--text-2)]">{{ enrollment.course.description || 'No description.' }}</p>
-                  <p class="mt-2 text-xs text-[var(--text-3)]">
+                  <h3 class="font-semibold text-[16px] text-[var(--t1)]">{{ enrollment.course.title }}</h3>
+                  <p class="mt-1 text-[13px] text-[var(--t2)]">{{ enrollment.course.description || 'No description.' }}</p>
+                  <p class="mt-2 mono-label text-[11px] text-[var(--t3)]">
                     Teacher: {{ enrollment.course.instructor.displayName }} · {{ formatTimestamp(enrollment.enrolledAt) }}
                   </p>
                 </div>
-                <UiBadge variant="success">{{ enrollment.status }}</UiBadge>
+                <span
+                  class="mono-label inline-flex items-center rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em]"
+                  :class="
+                    (enrollment.status || '').toLowerCase() === 'approved'
+                      ? 'bg-[rgba(52,211,153,0.1)] text-[#34d399]'
+                      : (enrollment.status || '').toLowerCase() === 'pending'
+                        ? 'bg-[var(--gold-dim)] text-[var(--gold)]'
+                        : 'bg-[var(--blue-dim)] text-[var(--blue)]'
+                  "
+                >
+                  {{ enrollment.status }}
+                </span>
               </div>
             </UiCard>
           </div>
@@ -213,30 +224,35 @@
 
         <section>
           <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 class="text-lg font-semibold text-[var(--text)]">Course feed</h2>
+            <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Course feed</h2>
             <div class="flex items-center gap-2">
-              <UiInput v-model="discoverQuery" placeholder="Search courses" class="min-w-56" />
-              <UiButton variant="secondary" size="sm" :disabled="coursesLoading" @click="loadDiscoverCourses">Refresh</UiButton>
+              <div class="relative min-w-56">
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--t3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.6-5.15a6.75 6.75 0 1 1-13.5 0 6.75 6.75 0 0 1 13.5 0Z" />
+                </svg>
+                <input v-model="discoverQuery" placeholder="Search courses" class="ui-input !h-10 !pl-10" />
+              </div>
+              <UiButton variant="ghost" size="sm" :disabled="coursesLoading" @click="loadDiscoverCourses">Refresh</UiButton>
             </div>
           </div>
 
-          <div v-if="!filteredDiscoverCourses.length" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--text-2)]">
+          <div v-if="!filteredDiscoverCourses.length" class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm text-[var(--t2)]">
             No courses found with the current filters.
           </div>
 
           <div v-else class="space-y-4">
-            <UiCard v-for="course in filteredDiscoverCourses" :key="`discover-course-${course.id}`" class="p-4">
+            <UiCard v-for="course in filteredDiscoverCourses" :key="`discover-course-${course.id}`" class="!p-5">
               <div class="mb-3 flex items-center gap-3">
                 <UiAvatar :src="course.instructor.avatar" :name="course.instructor.displayName" size="md" />
                 <div class="min-w-0 flex-1">
-                  <p class="font-medium text-[var(--text)] truncate">{{ course.instructor.displayName }}</p>
-                  <p class="text-sm text-[var(--text-3)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
+                  <p class="font-semibold text-[var(--t1)] truncate">{{ course.instructor.displayName }}</p>
+                  <p class="mono-label text-[11px] text-[var(--t3)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
                 </div>
                 <UiBadge :variant="course.status === 'archived' ? 'warning' : 'accent'">{{ course.status }}</UiBadge>
               </div>
 
-              <h3 class="text-lg font-semibold text-[var(--text)]">{{ course.title }}</h3>
-              <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)]">
+              <h3 class="font-display text-[30px] leading-8 text-[var(--t1)]">{{ course.title }}</h3>
+              <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface2)]">
                 <img
                   :src="course.coursePicUrl"
                   :alt="`${course.title} cover`"
@@ -244,12 +260,12 @@
                   loading="lazy"
                 />
               </div>
-              <p class="mt-1 whitespace-pre-wrap text-sm text-[var(--text-2)]">{{ course.description || 'No description added yet.' }}</p>
+              <p class="mt-1 whitespace-pre-wrap text-sm text-[var(--t2)]">{{ course.description || 'No description added yet.' }}</p>
 
-              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--text-3)]">
-                <span v-if="course.code" class="rounded-full bg-[var(--surface-2)] px-2 py-1">Code: {{ course.code }}</span>
-                <span v-if="course.department" class="rounded-full bg-[var(--surface-2)] px-2 py-1">Dept: {{ course.department }}</span>
-                <span class="rounded-full bg-[var(--surface-2)] px-2 py-1">Members: {{ course.memberCount }}</span>
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--t3)]">
+                <span v-if="course.code" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
+                <span v-if="course.department" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
+                <span class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
               </div>
 
               <div class="mt-4">
@@ -298,8 +314,8 @@
       <div class="relative w-full max-w-xl card-theme p-6">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h3 class="text-xl font-semibold text-[var(--text)]">Create Course</h3>
-            <p class="mt-1 text-sm text-[var(--text-2)]">Upload a course image and publish it as a course feed post.</p>
+            <h3 class="font-display text-3xl leading-8 text-[var(--t1)]">Create Course</h3>
+            <p class="mt-1 text-sm text-[var(--t2)]">Upload a course image and publish it as a course feed post.</p>
           </div>
           <button
             type="button"

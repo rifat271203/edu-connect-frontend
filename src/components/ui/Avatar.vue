@@ -1,7 +1,7 @@
 <template>
   <div 
     class="relative inline-flex shrink-0" 
-    :class="[sizeClasses, { 'ring-2 ring-accent/30': hasRing }]"
+    :class="[sizeClasses, { 'ring-2 ring-[var(--line-gold)]': hasRing }]"
   >
     <img
       v-if="src && !imageError"
@@ -13,8 +13,9 @@
     />
     <div
       v-else
-      class="rounded-full bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center text-white font-medium"
+      class="rounded-full flex items-center justify-center text-white font-bold uppercase tracking-[0.02em]"
       :class="sizeClasses"
+      :style="{ background: fallbackBackground }"
     >
       <span :class="textSizeClasses">{{ initials }}</span>
     </div>
@@ -70,14 +71,31 @@ const sizeClasses = computed(() => {
 
 const textSizeClasses = computed(() => {
   const sizes = {
-    xs: 'text-xs',
+    xs: 'text-[10px]',
     sm: 'text-xs',
-    md: 'text-sm',
+    md: 'text-[13px]',
     lg: 'text-base',
     xl: 'text-xl'
   }
   return sizes[props.size]
 })
+
+const fallbackPalette = ['#2d4a7a', '#3a6b4a', '#6b3a4a', '#4a3a6b', '#6b4a2d']
+
+const colorHash = computed(() => {
+  const seed = (props.name || props.alt || '').toLowerCase()
+  if (!seed) return 0
+
+  let hash = 0
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i)
+    hash |= 0
+  }
+
+  return Math.abs(hash)
+})
+
+const fallbackBackground = computed(() => fallbackPalette[colorHash.value % fallbackPalette.length])
 
 const initials = computed(() => {
   if (!props.name) return '?'

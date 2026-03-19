@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[100dvh] lg:h-screen min-h-0 flex overflow-hidden bg-dark-950 text-dark-100">
+  <div class="h-[100dvh] lg:h-screen min-h-0 flex overflow-hidden bg-[var(--ink)] text-[var(--t1)]">
     <div class="flex-1 min-w-0 min-h-0 flex flex-col">
       <AiTutorHeader
         :message-count="messages.length"
@@ -13,15 +13,15 @@
           <div
             v-if="!selectedCategory"
             key="category-picker"
-            class="max-w-4xl mx-auto rounded-2xl border border-dark-700/70 bg-dark-900/55 p-4 sm:p-5"
+            class="max-w-4xl mx-auto rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 sm:p-5"
           >
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <div>
-                <p class="text-sm font-semibold text-dark-100">Choose your tutor category first</p>
-                <p class="text-xs text-dark-400 mt-1">Select Physics, Chemistry, or Math before asking any question.</p>
+                <p class="text-sm font-semibold text-[var(--t1)]">Choose your tutor category first</p>
+                <p class="text-xs text-[var(--t2)] mt-1">Select Physics, Chemistry, or Math before asking any question.</p>
               </div>
-              <div class="text-xs text-dark-300">
-                Current: <span class="font-semibold text-accent-light">{{ selectedCategoryLabel }}</span>
+              <div class="text-xs mono-label text-[var(--t3)]">
+                Current: <span class="font-semibold text-[var(--gold)]">{{ selectedCategoryLabel }}</span>
               </div>
             </div>
 
@@ -30,22 +30,23 @@
                 v-for="option in categoryOptions"
                 :key="option.value"
                 @click="setCategory(option.value)"
-                class="rounded-xl border border-dark-700/80 bg-dark-900/45 px-3 py-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-dark-800/60"
+                class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] px-3 py-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--line-gold)] hover:bg-[var(--surface3)]"
+                :class="selectedCategory === option.value ? 'border-[var(--gold)] bg-[var(--gold-dim)] ring-1 ring-[var(--line-gold)]' : ''"
               >
-                <p class="text-sm font-semibold text-dark-100">{{ option.label }}</p>
-                <p class="text-xs text-dark-400 mt-1">{{ option.description }}</p>
+                <p class="text-sm font-bold text-[var(--t1)]">{{ option.label }}</p>
+                <p class="text-xs text-[var(--t2)] mt-1">{{ option.description }}</p>
               </button>
             </div>
           </div>
 
           <div v-else key="category-indicator" class="max-w-4xl mx-auto flex justify-end">
-            <div class="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-dark-900/80 px-3 py-2 shadow-[0_0_0_1px_rgba(233,120,96,0.08)]">
-              <span class="text-[11px] uppercase tracking-wide text-dark-400">Tutor Mode</span>
-              <span class="h-1 w-1 rounded-full bg-accent-light"></span>
-              <span class="text-xs font-semibold text-accent-light">{{ selectedCategoryLabel }}</span>
+            <div class="inline-flex items-center gap-2 rounded-full border border-[var(--line-gold)] bg-[var(--gold-dim)] px-3 py-2">
+              <span class="mono-label text-[11px] uppercase tracking-wide text-[var(--gold)]">Tutor Mode</span>
+              <span class="h-1 w-1 rounded-full bg-[var(--gold)]"></span>
+              <span class="text-xs font-semibold text-[var(--gold2)]">{{ selectedCategoryLabel }}</span>
               <button
                 @click="selectedCategory = null"
-                class="ml-1 rounded-full border border-dark-600 bg-dark-800/70 px-2 py-1 text-[11px] font-medium text-dark-200 transition-colors hover:border-dark-500 hover:text-dark-100"
+                class="ml-1 rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 text-[11px] font-medium text-[var(--t2)] transition-colors hover:border-[var(--line-gold)] hover:text-[var(--gold2)]"
               >
                 Change
               </button>
@@ -72,7 +73,7 @@
       />
 
       <div v-else class="flex-1 px-4 lg:px-6 py-8">
-        <div class="max-w-4xl mx-auto rounded-2xl border border-dark-700/70 bg-dark-900/45 p-6 text-sm text-dark-300">
+        <div class="max-w-4xl mx-auto rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6 text-sm text-[var(--t2)]">
           Select one category above to activate AI Tutor.
         </div>
       </div>
@@ -820,16 +821,16 @@ const renderMathInMessages = () => {
   transform: translateY(-6px);
 }
 
-.katex { color: #e97860 !important; font-size: 1.06em; }
+.katex { color: var(--gold) !important; font-size: 1.06em; }
 .katex-display {
   margin: 0.9em 0;
   padding: 0.5em;
-  background: rgba(163, 94, 71, 0.08);
-  border: 1px solid rgba(163, 94, 71, 0.15);
+  background: var(--gold-dim);
+  border: 1px solid var(--line-gold);
   border-radius: 0.55rem;
   overflow-x: auto;
 }
-.katex-display > .katex { color: #f0f0f5 !important; }
+.katex-display > .katex { color: var(--t1) !important; }
 
 .ai-message {
   line-height: 1.72;
@@ -847,7 +848,7 @@ const renderMathInMessages = () => {
 .ai-message h2,
 .ai-message h3,
 .ai-message h4 {
-  color: #f0f0f5;
+  color: var(--t1);
   font-weight: 700;
   margin-top: 0.72em;
   margin-bottom: 0.38em;
@@ -860,18 +861,18 @@ const renderMathInMessages = () => {
 .ai-message ul,
 .ai-message ol { margin-left: 1.2em; margin-bottom: 0.5em; }
 .ai-message li { margin-bottom: 0.2em; }
-.ai-message strong { color: #f0f0f5; font-weight: 600; }
-.ai-message em { color: #d0d0d8; }
+.ai-message strong { color: var(--t1); font-weight: 600; }
+.ai-message em { color: var(--t2); }
 .ai-message code {
-  background: rgba(163, 94, 71, 0.15);
-  border: 1px solid rgba(163, 94, 71, 0.22);
+  background: var(--gold-dim);
+  border: 1px solid var(--line-gold);
   padding: 0.15em 0.3em;
   border-radius: 0.3rem;
   font-size: 0.84em;
 }
 .ai-message pre {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--surface2);
+  border: 1px solid var(--line);
   padding: 0.75em;
   border-radius: 0.45rem;
   overflow-x: auto;
@@ -879,17 +880,17 @@ const renderMathInMessages = () => {
 }
 .ai-message pre code { background: transparent; padding: 0; font-size: 0.84em; }
 .ai-message blockquote {
-  border-left: 3px solid #e97860;
+  border-left: 3px solid var(--gold);
   padding-left: 0.75em;
   margin-left: 0;
-  color: #a0a0a8;
+  color: var(--t2);
 }
-.ai-message hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 0.75em 0; }
-.ai-message a { color: #e97860; text-decoration: underline; }
+.ai-message hr { border: none; border-top: 1px solid var(--line); margin: 0.75em 0; }
+.ai-message a { color: var(--gold); text-decoration: underline; }
 .ai-message table { border-collapse: collapse; width: 100%; margin: 0.75em 0; font-size: 0.84em; }
 .ai-message th,
-.ai-message td { border: 1px solid rgba(255,255,255,0.1); padding: 0.4em; text-align: left; }
-.ai-message th { background: rgba(0,0,0,0.2); }
+.ai-message td { border: 1px solid var(--line); padding: 0.4em; text-align: left; }
+.ai-message th { background: var(--surface3); }
 
 @media (max-width: 640px) {
   .ai-message { font-size: 0.8125rem; line-height: 1.66; }

@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'ui-card relative overflow-hidden transition-all duration-150',
+      'ui-card relative overflow-hidden transition-all duration-200',
       hover ? 'ui-card--hoverable cursor-pointer' : '',
       paddingClasses
     ]"

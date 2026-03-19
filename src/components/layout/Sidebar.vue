@@ -1,25 +1,26 @@
 <template>
-  <aside class="sidebar fixed left-0 top-0 bottom-0 w-[260px] z-30 flex flex-col">
+  <aside class="sidebar fixed left-0 top-0 bottom-0 w-[240px] z-30 flex flex-col">
     <!-- Logo -->
-    <div class="p-6">
+    <div class="px-5 py-6 border-b border-[var(--line)]">
       <NuxtLink to="/home" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center shadow-[var(--shadow-sm)] transition-all duration-150 group-hover:bg-[var(--primary-hover)]">
-          <svg class="w-6 h-6 text-[var(--on-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <div class="w-10 h-10 rounded-xl border border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] flex items-center justify-center transition-all duration-200 group-hover:-translate-y-0.5">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
           </svg>
         </div>
-        <span class="text-xl font-bold text-[var(--text)]">EduConnect</span>
+        <span class="font-display text-[29px] leading-none text-[var(--t1)]">EduConnect</span>
       </NuxtLink>
     </div>
 
     <!-- Search Users -->
-    <div class="px-3 pb-3">
-      <div class="card-theme p-3">
+    <div class="px-4 py-4 border-b border-[var(--line)]">
+      <div class="space-y-2">
+        <p class="section-label">Find users</p>
         <div class="space-y-2">
           <input
             v-model="searchQuery"
             type="text"
-            class="ui-input"
+            class="ui-input !h-10"
             placeholder="Search users"
             @keydown.enter.prevent="runUserSearch"
           />
@@ -27,33 +28,33 @@
           <div class="flex items-center gap-2">
             <select
               v-model="searchRole"
-              class="select-field flex-1"
+              class="select-field flex-1 !h-10"
             >
               <option value="">All roles</option>
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>
             </select>
 
-            <UiButton size="sm" :disabled="searchLoading || !searchQuery.trim()" @click="runUserSearch">
+            <UiButton size="sm" variant="ghost" :disabled="searchLoading || !searchQuery.trim()" @click="runUserSearch">
               {{ searchLoading ? '...' : 'Search' }}
             </UiButton>
           </div>
         </div>
 
-        <p v-if="searchError" class="mt-2 text-xs text-[var(--danger)]">{{ searchError }}</p>
+        <p v-if="searchError" class="mt-2 text-xs text-[rgba(239,68,68,0.9)]">{{ searchError }}</p>
 
         <div v-if="searchedUsers.length" class="mt-2 space-y-1 max-h-48 overflow-y-auto pr-1">
           <button
             v-for="user in searchedUsers"
             :key="user.id"
             type="button"
-            class="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-[var(--card-hover)] transition-colors text-left"
+            class="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl border border-transparent hover:border-[var(--line)] hover:bg-[var(--surface2)] transition-all text-left"
             @click="viewPublicProfile(user.id)"
           >
             <UiAvatar :src="user.avatar" :name="user.displayName" size="sm" />
             <div class="min-w-0 flex-1">
-              <p class="text-xs text-[var(--text)] truncate">{{ user.displayName }}</p>
-              <p class="text-[11px] text-[var(--text-3)] truncate">@{{ user.username }}</p>
+              <p class="text-xs text-[var(--t1)] truncate">{{ user.displayName }}</p>
+              <p class="mono-label text-[11px] text-[var(--t3)] truncate">@{{ user.username }}</p>
             </div>
           </button>
         </div>
@@ -73,15 +74,15 @@
             : ''
         ]"
         @click="$emit('navigate')"
-      >
+        >
         <span v-html="item.icon" class="w-5 h-5" />
-        <span class="font-medium text-[14px]">{{ item.label }}</span>
+        <span class="font-semibold text-[14px]">{{ item.label }}</span>
       </NuxtLink>
     </nav>
     
     <!-- User Section -->
-    <div class="p-4 border-t border-[var(--border)] bg-[var(--surface-2)]">
-      <div class="flex items-center gap-3 px-2">
+    <div class="p-4 border-t border-[var(--line)] bg-[var(--ink2)]">
+      <div class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-3 flex items-center gap-3">
         <UiAvatar 
           :src="userStore.user?.avatar"
           :name="userStore.user?.name || 'User'"
@@ -89,15 +90,15 @@
           show-online
         />
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-[var(--text)] truncate">
+          <p class="text-sm font-semibold text-[var(--t1)] truncate">
             {{ userStore.user?.name || 'User' }}
           </p>
-          <p class="text-xs text-[var(--text-3)] truncate">
+          <p class="mono-label text-[11px] text-[var(--t3)] truncate">
             @{{ userStore.user?.username || 'user' }}
           </p>
         </div>
         <button 
-          class="p-2 text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--sidebar-item-hover)] rounded-lg transition-all duration-150"
+          class="btn-ghost !h-9 !w-9 !p-0"
           @click="handleLogout"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

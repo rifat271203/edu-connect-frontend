@@ -1,11 +1,11 @@
 <template>
-  <aside class="w-80 xl:w-88 shrink-0 border-l border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl">
-    <div class="sticky top-0 h-screen overflow-y-auto scrollbar-hide p-4 space-y-6">
+  <aside class="w-[280px] shrink-0 border-l border-[var(--line)] bg-[var(--ink2)]">
+    <div class="sticky top-0 h-screen overflow-y-auto p-4 space-y-6">
       <!-- Friend Requests -->
       <div v-if="friendRequests.length > 0">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-[var(--text)]">Friend Requests</h3>
-          <button class="text-xs text-[var(--primary)] hover:opacity-80">See all</button>
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="section-label">Friend requests</h3>
+          <button class="text-[11px] mono-label text-[var(--gold)] hover:text-[var(--gold2)]">See all</button>
         </div>
         
         <div class="space-y-2">
@@ -41,16 +41,16 @@
       
       <!-- Notifications -->
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-[var(--text)]">Recent Activity</h3>
-          <button class="text-xs text-[var(--primary)] hover:opacity-80" @click="notificationsStore.markAllAsRead">Mark all read</button>
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="section-label">Recent activity</h3>
+          <button class="text-[11px] mono-label text-[var(--gold)] hover:text-[var(--gold2)]" @click="notificationsStore.markAllAsRead">Mark all read</button>
         </div>
         
-        <div class="widget-card p-2 space-y-1">
+        <div class="space-y-2">
           <div 
             v-for="notification in notifications" 
             :key="notification.id"
-            class="notification-item"
+            class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-3 transition-all duration-200 hover:border-[var(--line-gold)] hover:bg-[var(--surface2)]"
             :class="{ 'unread': !notification.read }"
             role="button"
             tabindex="0"
@@ -64,11 +64,11 @@
               size="sm"
             />
             <div class="flex-1 min-w-0">
-              <p class="text-sm text-[var(--text-2)]">
-                <span class="font-medium text-[var(--text)]">{{ notification.name }}</span>
+              <p class="text-sm text-[var(--t2)] leading-relaxed">
+                <span class="font-semibold text-[var(--t1)]">{{ notification.name }}</span>
                 {{ notification.action }}
               </p>
-              <p class="text-xs text-[var(--text-3)]">{{ formatTimestamp(notification.time) }}</p>
+              <p class="mono-label text-[10px] text-[var(--t3)] mt-1">{{ formatTimestamp(notification.time) }}</p>
             </div>
           </div>
         </div>
@@ -77,9 +77,9 @@
       <!-- Popular Courses -->
       <div>
         <div class="mb-3 flex items-center justify-between gap-2">
-          <h3 class="text-sm font-semibold text-[var(--text)]">Popular Courses</h3>
+          <h3 class="section-label">Popular courses</h3>
           <button
-            class="text-xs text-[var(--primary)] hover:opacity-80"
+            class="text-[11px] mono-label text-[var(--gold)] hover:text-[var(--gold2)]"
             :disabled="coursesLoading"
             @click="loadPopularCourses"
           >
@@ -87,7 +87,7 @@
           </button>
         </div>
         
-        <div class="widget-card p-2 space-y-1">
+        <div class="space-y-2">
           <div v-if="coursesLoading" class="space-y-2 p-2">
             <UiSkeleton v-for="idx in 3" :key="`popular-course-skeleton-${idx}`" variant="text" class="h-5 w-full" />
           </div>
@@ -103,7 +103,7 @@
             v-else
             :key="`popular-course-${course.id}`"
             to="/classroom"
-            class="widget-row items-start"
+            class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-3 flex items-start gap-3 transition-all duration-200 hover:border-[var(--line-gold)] hover:bg-[var(--surface2)]"
           >
             <img
               v-if="course.coursePicUrl"
@@ -120,11 +120,11 @@
             />
 
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-[var(--text)] truncate">{{ course.title }}</p>
-              <p class="text-xs text-[var(--text-3)] truncate">
+              <p class="text-sm font-semibold text-[var(--t1)] truncate">{{ course.title }}</p>
+              <p class="text-[11px] mono-label text-[var(--t3)] truncate mt-0.5">
                 {{ course.code || 'No code' }} · {{ course.instructor.displayName }}
               </p>
-              <p class="text-xs text-[var(--text-3)]">{{ course.memberCount }} members</p>
+              <p class="text-[11px] mono-label text-[var(--t3)] mt-1">{{ course.memberCount }} members</p>
             </div>
 
             <UiBadge :variant="course.status === 'archived' ? 'warning' : 'accent'">
@@ -135,8 +135,8 @@
       </div>
       
       <!-- Footer -->
-      <div class="pt-4 border-t border-[var(--border)]">
-        <p class="text-xs text-[var(--text-3)]">
+      <div class="pt-4 border-t border-[var(--line)]">
+        <p class="mono-label text-[10px] text-[var(--t3)]">
           © 2024 EduConnect · Privacy · Terms
         </p>
       </div>

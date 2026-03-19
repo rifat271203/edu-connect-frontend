@@ -1,11 +1,11 @@
 <template>
-  <div class="max-w-2xl mx-auto p-4 pb-24 lg:pb-4">
+  <div class="max-w-4xl mx-auto p-4 pb-24 lg:pb-6">
     <!-- Profile Header -->
-    <div class="mb-6 rounded-2xl border border-surface-glass-border bg-dark-900/70 p-4 md:p-6">
+    <div class="mb-6 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 md:p-6">
       <div class="flex flex-col md:flex-row md:items-end gap-4">
         <!-- Avatar -->
         <div class="relative">
-          <div class="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-dark-800 bg-dark-800/70">
+          <div class="w-20 h-20 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-[var(--gold)]/60 bg-[var(--surface2)]">
             <img 
               :src="userStore.user?.avatar" 
               alt="Profile" 
@@ -14,7 +14,7 @@
           </div>
           <button
             type="button"
-            class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-glow"
+            class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] flex items-center justify-center"
             :disabled="updatingProfilePic"
             @click="openProfilePicPicker"
           >
@@ -35,15 +35,15 @@
         
         <!-- Name & Edit -->
         <div class="flex-1">
-          <h1 class="text-2xl font-bold text-dark-50">{{ userStore.user?.name || 'User' }}</h1>
-          <p class="text-dark-200">@{{ userStore.user?.username || 'user' }}</p>
-          <p class="text-xs text-dark-400 mt-1">
+          <h1 class="font-display text-4xl leading-8 text-[var(--t1)]">{{ userStore.user?.name || 'User' }}</h1>
+          <p class="mono-label text-[12px] text-[var(--t3)] mt-1">@{{ userStore.user?.username || 'user' }}</p>
+          <p class="text-[13px] text-[var(--t2)] mt-1">
             {{ myProfile?.department || 'Department' }} · {{ myProfile?.institution || 'Institution' }}
           </p>
-          <label class="mt-2 inline-flex items-center gap-2 text-xs text-dark-300">
+          <label class="mt-3 inline-flex items-center gap-2 text-xs text-[var(--t2)] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-3 py-1.5">
             <input
               type="checkbox"
-              class="h-4 w-4"
+              class="h-4 w-4 accent-[var(--gold)]"
               :checked="isProfilePublic"
               :disabled="visibilityLoading || visibilitySaving"
               @change="handleVisibilityToggle"
@@ -53,57 +53,57 @@
               <span v-if="visibilitySaving">(updating...)</span>
             </span>
           </label>
-          <p v-if="visibilityError" class="mt-1 text-xs text-red-400">{{ visibilityError }}</p>
+          <p v-if="visibilityError" class="mt-1 text-xs text-[rgba(239,68,68,0.9)]">{{ visibilityError }}</p>
         </div>
         
-        <UiButton variant="secondary" class="w-full md:w-auto" @click="openProfilePicPicker">
+        <UiButton variant="ghost" class="w-full md:w-auto border-[var(--line-gold)] !text-[var(--gold)] hover:!bg-[var(--gold-dim)]" @click="openProfilePicPicker">
           {{ updatingProfilePic ? 'Updating...' : 'Update Photo' }}
         </UiButton>
       </div>
     </div>
 
-    <p v-if="errorMessage" class="mb-4 text-sm text-red-400">{{ errorMessage }}</p>
+    <p v-if="errorMessage" class="mb-4 text-sm text-[rgba(239,68,68,0.9)]">{{ errorMessage }}</p>
     <p v-if="successMessage" class="mb-4 text-sm text-green-400">{{ successMessage }}</p>
     
     <!-- Bio -->
-    <UiCard class="mb-6 p-4">
-      <p class="text-dark-100 leading-relaxed">
+    <UiCard class="mb-6 !p-4 rounded-[12px]">
+      <p class="font-display text-[26px] leading-7 text-[var(--t2)] italic">
         {{ userStore.user?.bio || 'Learning enthusiast | Building the future 🚀' }}
       </p>
     </UiCard>
     
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-        <div class="text-xl font-bold text-dark-50">{{ myStats.postCount }}</div>
-        <div class="text-sm text-dark-300">Posts</div>
+      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
+        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.postCount }}</div>
+        <div class="mono-label text-[11px] text-[var(--t3)]">Posts</div>
       </div>
-      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-        <div class="text-xl font-bold text-dark-50">{{ myStats.shareCount }}</div>
-        <div class="text-sm text-dark-300">Shares</div>
+      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
+        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.shareCount }}</div>
+        <div class="mono-label text-[11px] text-[var(--t3)]">Shares</div>
       </div>
-      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-        <div class="text-xl font-bold text-dark-50">{{ myStats.likeGivenCount }}</div>
-        <div class="text-sm text-dark-300">Likes Given</div>
+      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
+        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.likeGivenCount }}</div>
+        <div class="mono-label text-[11px] text-[var(--t3)]">Likes Given</div>
       </div>
-      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-        <div class="text-xl font-bold text-dark-50">{{ myStats.commentCount }}</div>
-        <div class="text-sm text-dark-300">Comments</div>
+      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
+        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.commentCount }}</div>
+        <div class="mono-label text-[11px] text-[var(--t3)]">Comments</div>
       </div>
-      <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-        <div class="text-xl font-bold text-dark-50">{{ myStats.friendCount }}</div>
-        <div class="text-sm text-dark-300">Friends</div>
+      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
+        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.friendCount }}</div>
+        <div class="mono-label text-[11px] text-[var(--t3)]">Friends</div>
       </div>
     </div>
     
     <!-- Tabs -->
-    <div class="flex gap-1 border-b border-surface-glass-border mb-6">
+    <div class="flex gap-4 border-b border-[var(--line)] mb-6">
       <button 
         v-for="tab in tabs" 
         :key="tab"
         @click="activeTab = tab"
-        class="tab-button"
-        :class="{ 'active': activeTab === tab }"
+        class="pb-2 text-sm font-semibold transition-colors"
+        :class="activeTab === tab ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--t3)] hover:text-[var(--t2)] border-b-2 border-transparent'"
       >
         {{ tab }}
       </button>
@@ -117,7 +117,7 @@
       </UiCard>
 
       <UiCard v-else-if="myPosts.length === 0" class="p-4">
-        <p class="text-sm text-dark-300">No posts yet.</p>
+        <p class="text-sm text-[var(--t2)]">No posts yet.</p>
       </UiCard>
 
       <FeedPostCard
@@ -130,20 +130,20 @@
     <!-- Activity -->
     <div v-if="activeTab === 'Activity'" class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <UiCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-dark-50">{{ myActivitySummary.likes }}</p>
-        <p class="text-sm text-dark-300">Liked Posts</p>
+        <p class="font-display text-3xl text-[var(--gold)]">{{ myActivitySummary.likes }}</p>
+        <p class="mono-label text-[11px] text-[var(--t3)]">Liked Posts</p>
       </UiCard>
       <UiCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-dark-50">{{ myActivitySummary.comments }}</p>
-        <p class="text-sm text-dark-300">Comments Made</p>
+        <p class="font-display text-3xl text-[var(--gold)]">{{ myActivitySummary.comments }}</p>
+        <p class="mono-label text-[11px] text-[var(--t3)]">Comments Made</p>
       </UiCard>
       <UiCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-dark-50">{{ myActivitySummary.shares }}</p>
-        <p class="text-sm text-dark-300">Shares</p>
+        <p class="font-display text-3xl text-[var(--gold)]">{{ myActivitySummary.shares }}</p>
+        <p class="mono-label text-[11px] text-[var(--t3)]">Shares</p>
       </UiCard>
       <UiCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-dark-50">{{ myPosts.length }}</p>
-        <p class="text-sm text-dark-300">Own Posts</p>
+        <p class="font-display text-3xl text-[var(--gold)]">{{ myPosts.length }}</p>
+        <p class="mono-label text-[11px] text-[var(--t3)]">Own Posts</p>
       </UiCard>
     </div>
 
@@ -162,7 +162,7 @@
           </UiButton>
         </div>
 
-        <p v-if="friendsError" class="text-sm text-red-400">{{ friendsError }}</p>
+        <p v-if="friendsError" class="text-sm text-[rgba(239,68,68,0.9)]">{{ friendsError }}</p>
 
         <div v-else-if="friendsLoading" class="space-y-3">
           <div
@@ -175,14 +175,14 @@
           </div>
         </div>
 
-        <p v-else-if="myFriends.length === 0" class="text-sm text-dark-300">No friends yet.</p>
+        <p v-else-if="myFriends.length === 0" class="text-sm text-[var(--t2)]">No friends yet.</p>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <NuxtLink
             v-for="friend in visibleFriends"
             :key="`friend-${friend.id}`"
             :to="`/profile/${friend.id}`"
-            class="rounded-xl border border-surface-glass-border bg-dark-900/50 p-3 hover:bg-dark-800/60 transition-colors"
+            class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] p-3 hover:border-[var(--line-gold)] hover:bg-[var(--surface3)] transition-colors"
           >
             <div class="flex items-start gap-3">
               <UiAvatar
@@ -193,12 +193,12 @@
 
               <div class="min-w-0">
                 <p class="text-sm font-medium text-dark-50 truncate">{{ friend.name || friend.displayName }}</p>
-                <p class="text-xs text-dark-300 truncate">{{ friend.email || `@${friend.username}` }}</p>
-                <p class="mt-1 text-[11px] text-dark-400 truncate">
+                <p class="text-xs text-[var(--t2)] truncate">{{ friend.email || `@${friend.username}` }}</p>
+                <p class="mt-1 text-[11px] mono-label text-[var(--t3)] truncate">
                   {{ friend.role || 'member' }} · {{ friend.department || 'Department' }}
                 </p>
-                <p class="text-[11px] text-dark-400 truncate">{{ friend.institution || 'Institution' }}</p>
-                <p v-if="friend.friendsSince" class="mt-1 text-[11px] text-dark-500">
+                <p class="text-[11px] mono-label text-[var(--t3)] truncate">{{ friend.institution || 'Institution' }}</p>
+                <p v-if="friend.friendsSince" class="mt-1 text-[11px] mono-label text-[var(--t3)]">
                   Friends since {{ new Date(friend.friendsSince).toLocaleDateString() }}
                 </p>
               </div>

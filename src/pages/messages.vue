@@ -1,23 +1,23 @@
 <template>
-  <div class="h-[calc(100vh-6.5rem)] lg:h-[calc(100vh-2rem)] p-2 lg:p-4 pb-24 lg:pb-4">
-    <p v-if="pageError" class="mb-2 text-sm text-red-400">{{ pageError }}</p>
+  <div class="h-[calc(100vh-6.2rem)] lg:h-[calc(100vh-1.5rem)] p-2 lg:p-4 pb-24 lg:pb-4">
+    <p v-if="pageError" class="mb-2 inline-flex rounded-full px-2.5 py-1 mono-label text-[11px] bg-[rgba(239,68,68,0.1)] text-[rgba(239,68,68,0.9)]">{{ pageError }}</p>
 
-    <div class="h-full rounded-2xl border border-slate-300/50 dark:border-dark-700/70 bg-white/80 dark:bg-dark-950 overflow-hidden grid lg:grid-cols-[minmax(0,1fr)_360px]">
+    <div class="h-full rounded-[14px] border border-[var(--line)] bg-[var(--ink2)] overflow-hidden grid lg:grid-cols-[minmax(0,1fr)_360px]">
       <aside
-        class="border-b lg:border-b-0 lg:border-l border-slate-300/60 dark:border-dark-700/70 flex flex-col bg-[var(--theme-control-bg-strong)] dark:bg-dark-900/60 lg:order-2"
+        class="border-b lg:border-b-0 lg:border-l border-[var(--line)] flex flex-col bg-[var(--ink2)] lg:order-2"
         :class="showMobileConversation ? 'hidden lg:flex' : 'flex'"
       >
-        <div class="px-4 pt-4 pb-3 border-b border-slate-200 dark:border-dark-700/70">
+        <div class="px-4 pt-4 pb-3 border-b border-[var(--line)]">
           <div class="flex items-center justify-between">
-            <p class="text-lg font-semibold text-slate-800 dark:text-dark-50">Messages</p>
-            <p class="text-xs text-slate-500 dark:text-dark-400">@{{ userStore.user?.username || 'user' }}</p>
+            <p class="font-display text-3xl leading-7 text-[var(--t1)]">Messages</p>
+            <p class="mono-label text-[11px] text-[var(--t3)]">@{{ userStore.user?.username || 'user' }}</p>
           </div>
 
           <div class="mt-3 flex gap-2">
             <input
               v-model="searchQuery"
               type="text"
-              class="flex-1 px-3 py-2 rounded-xl bg-white/70 dark:bg-dark-800/80 text-sm text-slate-700 dark:text-dark-100 placeholder:text-slate-400 dark:placeholder:text-dark-400 border border-transparent focus:border-emerald-500/50 dark:focus:border-accent/40 focus:outline-none"
+              class="flex-1 ui-input !h-10"
               placeholder="Search friends"
               @keydown.enter.prevent="runSearch"
             >
@@ -29,7 +29,7 @@
           <div class="mt-2 flex gap-2">
             <select
               v-model="searchRole"
-              class="w-full px-3 py-2 rounded-xl bg-white/70 dark:bg-dark-800/80 text-sm text-slate-700 dark:text-dark-100 border border-transparent focus:border-emerald-500/50 dark:focus:border-accent/40 focus:outline-none"
+              class="w-full select-field !h-10"
             >
               <option value="">All roles</option>
               <option value="student">Student</option>
@@ -37,36 +37,36 @@
             </select>
           </div>
 
-          <p v-if="searchError" class="mt-2 text-xs text-red-400">{{ searchError }}</p>
+          <p v-if="searchError" class="mt-2 text-xs text-[rgba(239,68,68,0.9)]">{{ searchError }}</p>
 
           <div v-if="searchedUsers.length" class="mt-2 max-h-40 overflow-y-auto space-y-1 pr-1">
             <button
               v-for="user in searchedUsers"
               :key="`search-${user.id}`"
               type="button"
-              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-emerald-500/10 dark:hover:bg-dark-800/60 transition-colors text-left"
+              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg border border-transparent hover:bg-[var(--surface2)] hover:border-[var(--line)] transition-colors text-left"
               @click="openConversation(user)"
             >
               <UiAvatar :src="user.avatar" :name="user.displayName" size="sm" />
               <div class="min-w-0 flex-1">
-                <p class="text-xs text-slate-800 dark:text-dark-50 truncate">{{ user.displayName }}</p>
-                <p class="text-[11px] text-slate-500 dark:text-dark-400 truncate">@{{ user.username }}</p>
+                <p class="text-xs text-[var(--t1)] truncate">{{ user.displayName }}</p>
+                <p class="mono-label text-[11px] text-[var(--t3)] truncate">@{{ user.username }}</p>
               </div>
             </button>
           </div>
         </div>
 
-        <div class="px-3 py-3 border-b border-slate-200 dark:border-dark-700/70">
+        <div class="px-3 py-3 border-b border-[var(--line)]">
           <div class="flex items-center justify-between px-1">
-            <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-dark-400">Friends</p>
-            <span class="text-[11px] text-slate-500 dark:text-dark-400">{{ visibleFriends.length }}</span>
+            <p class="section-label">Friends</p>
+            <span class="mono-label text-[11px] text-[var(--t3)]">{{ visibleFriends.length }}</span>
           </div>
 
           <div v-if="friendsLoading" class="mt-2 flex gap-2 overflow-hidden">
             <UiSkeleton v-for="idx in 5" :key="`friend-skeleton-${idx}`" variant="circular" class="w-12 h-12" />
           </div>
 
-          <p v-else-if="friendsError" class="mt-2 text-xs text-red-400 px-1">{{ friendsError }}</p>
+          <p v-else-if="friendsError" class="mt-2 text-xs text-[rgba(239,68,68,0.9)] px-1">{{ friendsError }}</p>
 
           <div v-else class="mt-2 flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
             <button
@@ -77,13 +77,13 @@
               @click="openConversation(friend)"
             >
               <UiAvatar :src="friend.avatar" :name="friend.displayName" size="md" />
-              <span class="text-[11px] text-slate-600 dark:text-dark-300 truncate w-full">{{ friend.displayName }}</span>
+              <span class="text-[11px] text-[var(--t2)] truncate w-full">{{ friend.displayName }}</span>
             </button>
           </div>
         </div>
 
         <div class="px-4 py-2">
-          <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-dark-400">Recent</p>
+          <p class="section-label">Recent</p>
         </div>
 
         <div class="flex-1 overflow-y-auto px-2 pb-2">
@@ -91,7 +91,7 @@
             <UiSkeleton v-for="idx in 5" :key="idx" variant="rectangular" class="h-16 rounded-xl" />
           </div>
 
-          <div v-else-if="sortedConversations.length === 0" class="p-4 text-sm text-slate-500 dark:text-dark-400">
+          <div v-else-if="sortedConversations.length === 0" class="p-4 text-sm text-[var(--t2)]">
             No recent conversations.
           </div>
 
@@ -103,8 +103,8 @@
               class="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
               :class="[
                 selectedUserId === String(conversation.user.id)
-                  ? 'bg-slate-200/70 dark:bg-dark-800 border border-slate-300 dark:border-dark-600'
-                  : 'hover:bg-slate-100 dark:hover:bg-dark-800/60 border border-transparent',
+                  ? 'bg-[var(--surface2)] border-l-2 border-l-[var(--gold)] border-[var(--line)]'
+                  : 'hover:bg-[var(--surface2)] border border-transparent',
               ]"
               @click="openConversation(conversation.user)"
             >
@@ -115,18 +115,18 @@
                   <p class="text-sm font-medium text-slate-800 dark:text-dark-50 truncate">
                     {{ conversation.user.displayName }}
                   </p>
-                  <span class="text-[11px] text-slate-500 dark:text-dark-400 shrink-0">
+                  <span class="mono-label text-[11px] text-[var(--t3)] shrink-0">
                     {{ formatRelativeTime(conversation.lastMessageAt) }}
                   </span>
                 </div>
-                <p class="text-xs truncate" :class="conversation.unreadCount > 0 ? 'text-slate-800 dark:text-dark-100 font-medium' : 'text-slate-600 dark:text-dark-300'">
+                <p class="text-xs truncate" :class="conversation.unreadCount > 0 ? 'text-[var(--t1)] font-medium' : 'text-[var(--t2)]'">
                   {{ conversation.lastMessageText || 'No messages yet' }}
                 </p>
               </div>
 
               <span
                 v-if="conversation.unreadCount > 0"
-                class="shrink-0 min-w-5 px-1.5 h-5 rounded-full bg-emerald-500 dark:bg-accent text-white text-[11px] font-semibold inline-flex items-center justify-center"
+                class="shrink-0 min-w-5 px-1.5 h-5 rounded-full bg-[var(--gold)] text-[#07090f] text-[11px] font-semibold inline-flex items-center justify-center"
               >
                 {{ conversation.unreadCount }}
               </span>
@@ -135,19 +135,19 @@
         </div>
       </aside>
 
-      <section class="flex flex-col min-h-0 bg-slate-100/40 dark:bg-[#060b14] lg:order-1" :class="showMobileConversation ? 'flex' : 'hidden lg:flex'">
+      <section class="flex flex-col min-h-0 bg-[var(--ink)] lg:order-1" :class="showMobileConversation ? 'flex' : 'hidden lg:flex'">
         <template v-if="activeUser">
-          <header class="px-4 py-3 border-b border-slate-300/50 dark:border-dark-700/70 flex items-center gap-3 bg-white/75 dark:bg-dark-900/60">
+          <header class="px-4 py-3 border-b border-[var(--line)] flex items-center gap-3 bg-[color-mix(in_srgb,var(--ink2)_90%,transparent)]">
             <UiButton class="lg:hidden" variant="ghost" size="sm" @click="closeMobileConversation">
               Back
             </UiButton>
             <UiAvatar :src="activeUser.avatar" :name="activeUser.displayName" size="md" />
             <div class="min-w-0 flex-1">
-              <p class="font-medium text-slate-800 dark:text-dark-50 truncate">{{ activeUser.displayName }}</p>
-              <p class="text-xs text-slate-500 dark:text-dark-400 truncate">@{{ activeUser.username }}</p>
+              <p class="font-display text-2xl leading-6 text-[var(--t1)] truncate">{{ activeUser.displayName }}</p>
+              <p class="mono-label text-[11px] text-[var(--t3)] truncate">@{{ activeUser.username }}</p>
             </div>
-            <div class="hidden sm:flex items-center gap-2 text-slate-500 dark:text-dark-300">
-              <span class="text-xs">DM</span>
+            <div class="hidden sm:flex items-center gap-2 text-[var(--t2)]">
+              <span class="mono-label text-[10px] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1">DM</span>
             </div>
           </header>
 
@@ -164,9 +164,9 @@
               </UiButton>
             </div>
 
-            <p v-if="messagesLoading" class="text-sm text-slate-500 dark:text-dark-400 text-center">Loading messages...</p>
+            <p v-if="messagesLoading" class="text-sm text-[var(--t2)] text-center">Loading messages...</p>
 
-            <p v-else-if="messages.length === 0" class="text-sm text-slate-500 dark:text-dark-400 text-center pt-10">
+            <p v-else-if="messages.length === 0" class="text-sm text-[var(--t2)] text-center pt-10">
               Start the conversation.
             </p>
 
@@ -180,14 +180,14 @@
                 class="max-w-[85%] sm:max-w-[68%] rounded-2xl px-3 py-2"
                 :class="[
                   isOwnMessage(message)
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-accent dark:to-accent-dark text-white'
-                    : 'bg-white dark:bg-dark-800/90 text-slate-800 dark:text-dark-100 border border-slate-300/50 dark:border-dark-700',
+                    ? 'bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f]'
+                    : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
                 ]"
               >
                 <p class="text-sm whitespace-pre-wrap break-words">{{ message.messageText }}</p>
                 <p
-                  class="mt-1 text-[11px]"
-                  :class="isOwnMessage(message) ? 'text-white/80' : 'text-slate-500 dark:text-dark-400'"
+                  class="mt-1 mono-label text-[10px]"
+                  :class="isOwnMessage(message) ? 'text-[#07090f]/70' : 'text-[var(--t3)]'"
                 >
                   {{ formatMessageTime(message.createdAt) }}
                   <span v-if="isOwnMessage(message)">· {{ message.isRead ? 'Seen' : 'Sent' }}</span>
@@ -196,12 +196,12 @@
             </div>
           </div>
 
-          <form class="px-3 sm:px-4 py-3 border-t border-slate-300/50 dark:border-dark-700/70 bg-white/80 dark:bg-dark-900/70" @submit.prevent="handleSendMessage">
-            <div class="flex items-center gap-2 rounded-full border border-slate-300/70 dark:border-dark-700 bg-white dark:bg-dark-800 px-3 py-2">
+          <form class="px-3 sm:px-4 py-3 border-t border-[var(--line)] bg-[var(--ink2)]" @submit.prevent="handleSendMessage">
+            <div class="flex items-center gap-2 rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
               <textarea
                 v-model="messageDraft"
                 rows="1"
-                class="flex-1 resize-none bg-transparent text-sm text-slate-800 dark:text-dark-100 placeholder:text-slate-400 dark:placeholder:text-dark-400 focus:outline-none"
+                class="flex-1 resize-none bg-transparent text-sm text-[var(--t1)] placeholder:text-[var(--t3)] focus:outline-none"
                 placeholder="Message..."
                 :disabled="sendingMessage"
               />
@@ -212,7 +212,7 @@
           </form>
         </template>
 
-        <div v-else class="flex-1 flex items-center justify-center text-sm text-slate-500 dark:text-dark-400">
+        <div v-else class="flex-1 flex items-center justify-center text-sm text-[var(--t2)]">
           Select a conversation to begin messaging.
         </div>
       </section>

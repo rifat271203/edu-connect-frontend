@@ -1,42 +1,42 @@
 <template>
-  <div class="max-w-2xl mx-auto p-4 pb-24 lg:pb-4">
+  <div class="max-w-[700px] mx-auto p-4 pb-24 lg:pb-6">
     <!-- Header -->
-    <header class="mb-6">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Settings</h1>
-      <p class="text-[var(--text-2)]">Manage your account preferences</p>
+    <header class="mb-6 space-y-1">
+      <h1 class="font-display text-4xl text-[var(--t1)]">Settings</h1>
+      <p class="text-[var(--t2)] text-sm">Manage your account preferences</p>
     </header>
     
     <!-- Settings Sections -->
     <div class="space-y-6">
       <!-- Account -->
-      <UiCard class="p-4">
-        <h2 class="text-lg font-semibold text-[var(--text)] mb-4">Account</h2>
+      <UiCard class="!p-6">
+        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Account</h2>
         
-        <div class="space-y-4">
-          <div class="flex items-center justify-between py-2">
+        <div class="space-y-1 divide-y divide-[var(--line)]">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Email</p>
-              <p class="text-sm text-[var(--text-3)]">{{ userStore.user?.email || 'Not available' }}</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Email</p>
+              <p class="text-sm text-[var(--t2)]">{{ userStore.user?.email || 'Not available' }}</p>
             </div>
-            <UiButton variant="ghost" size="sm" disabled>Managed</UiButton>
+            <UiButton variant="ghost" size="sm" disabled class="mono-label">Managed</UiButton>
           </div>
           
-          <div class="flex items-center justify-between py-2">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Password</p>
-              <p class="text-sm text-[var(--text-3)]">••••••••••••</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Password</p>
+              <p class="mono-label text-sm text-[var(--t2)]">••••••••••••</p>
             </div>
             <UiButton variant="ghost" size="sm" @click="togglePasswordForm">
               {{ showPasswordForm ? 'Cancel' : 'Change' }}
             </UiButton>
           </div>
 
-          <div v-if="showPasswordForm" class="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3 space-y-3">
+          <div v-if="showPasswordForm" class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] p-3 space-y-3 mt-3">
             <UiInput v-model="currentPassword" type="password" placeholder="Current password" />
             <UiInput v-model="newPassword" type="password" placeholder="New password" />
             <UiInput v-model="confirmNewPassword" type="password" placeholder="Confirm new password" />
 
-            <p v-if="passwordError" class="text-sm text-[var(--danger)]">{{ passwordError }}</p>
+            <p v-if="passwordError" class="text-sm text-[rgba(239,68,68,0.9)]">{{ passwordError }}</p>
             <p v-if="passwordSuccess" class="text-sm text-emerald-400">{{ passwordSuccess }}</p>
 
             <div class="flex justify-end">
@@ -46,46 +46,46 @@
             </div>
           </div>
           
-          <div class="flex items-center justify-between py-2">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Two-Factor Authentication</p>
-              <p class="text-sm text-[var(--text-3)]">Add an extra layer of security</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Two-Factor Authentication</p>
+              <p class="text-sm text-[var(--t2)]">Add an extra layer of security</p>
             </div>
-            <UiButton variant="secondary" size="sm">Enable</UiButton>
+            <UiButton size="sm">Enable</UiButton>
           </div>
         </div>
       </UiCard>
       
       <!-- Appearance -->
-      <UiCard class="p-4">
-        <h2 class="text-lg font-semibold text-[var(--text)] mb-4">Appearance</h2>
+      <UiCard class="!p-6">
+        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Appearance</h2>
         
-        <div class="space-y-4">
-          <div class="flex items-center justify-between py-2">
+        <div class="space-y-1 divide-y divide-[var(--line)]">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Quick Theme Toggle</p>
-              <p class="text-sm text-[var(--text-3)]">Switch instantly between light and dark</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Quick Theme Toggle</p>
+              <p class="text-sm text-[var(--t2)]">Switch instantly between light and dark</p>
             </div>
             <button
               type="button"
               role="switch"
               :aria-checked="isDarkMode"
               :aria-label="isDarkMode ? 'Switch to light theme' : 'Switch to dark theme'"
-              class="relative h-6 w-11 rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
-              :class="isDarkMode ? 'border-[var(--primary)] bg-[var(--primary)]' : 'border-[var(--border)] bg-[var(--secondary)]'"
+              class="relative h-6 w-11 rounded-full border transition-colors duration-200 focus-visible:outline-none"
+              :class="isDarkMode ? 'border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)]' : 'border-[var(--line)] bg-[var(--surface3)]'"
               @click="toggleTheme"
             >
               <span
                 class="absolute left-1 top-1 h-4 w-4 rounded-full transition-transform duration-200"
-                :class="isDarkMode ? 'translate-x-5 bg-[var(--on-primary)]' : 'translate-x-0 bg-[var(--on-secondary)]'"
+                :class="isDarkMode ? 'translate-x-5 bg-white' : 'translate-x-0 bg-white'"
               />
             </button>
           </div>
 
-          <div class="flex items-center justify-between py-2">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Theme</p>
-              <p class="text-sm text-[var(--text-3)]">Choose your preferred theme (system, dark, or light)</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Theme</p>
+              <p class="text-sm text-[var(--t2)]">Choose your preferred theme (system, dark, or light)</p>
             </div>
             <select
               v-model="selectedTheme"
@@ -101,14 +101,14 @@
             </select>
           </div>
 
-          <div class="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-3)]">
+          <div class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] px-3 py-2 text-xs text-[var(--t3)]">
             Active display mode:
-            <span class="font-semibold text-[var(--text)] capitalize">{{ resolvedTheme }}</span>
+            <span class="font-semibold text-[var(--t1)] capitalize">{{ resolvedTheme }}</span>
           </div>
           
-          <div class="py-2">
-            <p class="font-medium text-[var(--text)]">Brand Accent</p>
-            <p class="text-sm text-[var(--text-3)] mb-3">Choose between the new premium preset and the classic green accent</p>
+          <div class="py-4">
+            <p class="font-semibold text-[14px] text-[var(--t1)]">Brand Accent</p>
+            <p class="text-sm text-[var(--t2)] mb-3">Choose between the new premium preset and the classic green accent</p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
@@ -117,14 +117,14 @@
                 type="button"
                 class="rounded-xl border px-3 py-2 text-left transition-all duration-150"
                 :class="selectedAccent === option.value
-                  ? 'border-[var(--primary)] bg-[var(--sidebar-item-active-bg)]'
-                  : 'border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--card-hover)]'"
+                  ? 'border-[var(--gold)] bg-[var(--gold-dim)]'
+                  : 'border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--surface2)]'"
                 @click="selectedAccent = option.value"
               >
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="text-sm font-medium text-[var(--text)]">{{ option.label }}</p>
-                    <p class="text-xs text-[var(--text-3)]">{{ option.description }}</p>
+                    <p class="text-sm font-semibold text-[var(--t1)]">{{ option.label }}</p>
+                    <p class="text-xs text-[var(--t2)]">{{ option.description }}</p>
                   </div>
                   <div class="flex items-center gap-1">
                     <span
@@ -142,36 +142,36 @@
       </UiCard>
       
       <!-- Notifications -->
-      <UiCard class="p-4">
-        <h2 class="text-lg font-semibold text-[var(--text)] mb-4">Notifications</h2>
+      <UiCard class="!p-6">
+        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Notifications</h2>
         
-        <div class="space-y-4">
-          <div class="flex items-center justify-between py-2">
+        <div class="space-y-1 divide-y divide-[var(--line)]">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Push Notifications</p>
-              <p class="text-sm text-[var(--text-3)]">Receive notifications on your device</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Push Notifications</p>
+              <p class="text-sm text-[var(--t2)]">Receive notifications on your device</p>
             </div>
-            <button class="w-11 h-6 rounded-full relative border border-[var(--border)]" style="background: var(--primary);">
+            <button class="w-11 h-6 rounded-full relative border border-[var(--line-gold)]" style="background: linear-gradient(135deg,#c4a464,#e8c882);">
               <span class="absolute right-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-primary);" />
             </button>
           </div>
           
-          <div class="flex items-center justify-between py-2">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Email Notifications</p>
-              <p class="text-sm text-[var(--text-3)]">Receive updates via email</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Email Notifications</p>
+              <p class="text-sm text-[var(--t2)]">Receive updates via email</p>
             </div>
-            <button class="w-11 h-6 rounded-full relative border border-[var(--border)]" style="background: var(--secondary);">
+            <button class="w-11 h-6 rounded-full relative border border-[var(--line)]" style="background: var(--surface3);">
               <span class="absolute left-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-secondary);" />
             </button>
           </div>
           
-          <div class="flex items-center justify-between py-2">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Friend Requests</p>
-              <p class="text-sm text-[var(--text-3)]">Get notified for new friend requests</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Friend Requests</p>
+              <p class="text-sm text-[var(--t2)]">Get notified for new friend requests</p>
             </div>
-            <button class="w-11 h-6 rounded-full relative border border-[var(--border)]" style="background: var(--primary);">
+            <button class="w-11 h-6 rounded-full relative border border-[var(--line-gold)]" style="background: linear-gradient(135deg,#c4a464,#e8c882);">
               <span class="absolute right-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-primary);" />
             </button>
           </div>
@@ -179,14 +179,14 @@
       </UiCard>
       
       <!-- Privacy -->
-      <UiCard class="p-4">
-        <h2 class="text-lg font-semibold text-[var(--text)] mb-4">Privacy</h2>
+      <UiCard class="!p-6">
+        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Privacy</h2>
         
-        <div class="space-y-4">
-          <div class="flex items-center justify-between py-2">
+        <div class="space-y-1 divide-y divide-[var(--line)]">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Profile Visibility</p>
-              <p class="text-sm text-[var(--text-3)]">Who can see your profile</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Profile Visibility</p>
+              <p class="text-sm text-[var(--t2)]">Who can see your profile</p>
             </div>
             <div class="flex items-center gap-2">
               <select
@@ -208,23 +208,23 @@
             </div>
           </div>
 
-          <p v-if="profileVisibilityError" class="text-sm text-[var(--danger)]">{{ profileVisibilityError }}</p>
+          <p v-if="profileVisibilityError" class="text-sm text-[rgba(239,68,68,0.9)]">{{ profileVisibilityError }}</p>
           <p v-if="profileVisibilitySuccess" class="text-sm text-emerald-400">{{ profileVisibilitySuccess }}</p>
 
-          <div class="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-3)]">
+          <div class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] px-3 py-2 text-xs text-[var(--t3)]">
             Current visibility:
-            <span class="font-semibold text-[var(--text)]">
+            <span class="font-semibold text-[var(--t1)]">
               {{ profileVisibilitySelection === 'public' ? 'Public' : 'Private' }}
             </span>
             <span v-if="profileVisibilityLoading" class="ml-2">(Loading...)</span>
           </div>
           
-          <div class="flex items-center justify-between py-2">
+          <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-[var(--text)]">Show Online Status</p>
-              <p class="text-sm text-[var(--text-3)]">Let others see when you're online</p>
+              <p class="font-semibold text-[14px] text-[var(--t1)]">Show Online Status</p>
+              <p class="text-sm text-[var(--t2)]">Let others see when you're online</p>
             </div>
-            <button class="w-11 h-6 rounded-full relative border border-[var(--border)]" style="background: var(--primary);">
+            <button class="w-11 h-6 rounded-full relative border border-[var(--line-gold)]" style="background: linear-gradient(135deg,#c4a464,#e8c882);">
               <span class="absolute right-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-primary);" />
             </button>
           </div>
@@ -232,13 +232,13 @@
       </UiCard>
       
       <!-- Danger Zone -->
-      <UiCard class="p-4" style="border-color: color-mix(in srgb, var(--danger) 30%, var(--border));">
-        <h2 class="text-lg font-semibold text-[var(--danger)] mb-4">Danger Zone</h2>
+      <UiCard class="!p-6" style="border-color: rgba(239,68,68,0.35);">
+        <h2 class="font-display text-3xl leading-8 text-[rgba(239,68,68,0.9)] mb-4">Danger Zone</h2>
         
-        <div class="flex items-center justify-between py-2">
+        <div class="flex items-center justify-between py-4">
           <div>
-            <p class="font-medium text-[var(--text)]">Delete Account</p>
-            <p class="text-sm text-[var(--text-3)]">Permanently delete your account and data</p>
+            <p class="font-semibold text-[14px] text-[var(--t1)]">Delete Account</p>
+            <p class="text-sm text-[var(--t2)]">Permanently delete your account and data</p>
           </div>
           <UiButton variant="danger" size="sm">Delete</UiButton>
         </div>

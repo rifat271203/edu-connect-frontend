@@ -1,9 +1,9 @@
 <template>
-  <header class="border-b border-dark-700/60 bg-dark-950/90 backdrop-blur-xl">
+  <header class="border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--ink2)_92%,transparent)] backdrop-blur-xl">
     <div class="px-4 lg:px-6 py-3.5 sm:py-4 flex items-center gap-3">
       <button
         @click="emit('go-back')"
-        class="md:hidden p-2 -ml-2 rounded-lg border border-dark-700/70 bg-dark-900/60 text-dark-200 hover:text-dark-50 hover:border-dark-500 transition-colors"
+        class="md:hidden p-2 -ml-2 rounded-lg border border-[var(--line)] bg-[var(--surface2)] text-[var(--t2)] hover:text-[var(--gold2)] hover:border-[var(--line-gold)] transition-colors"
         title="Go back"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -11,29 +11,29 @@
         </svg>
       </button>
 
-      <div class="hidden sm:flex w-10 h-10 rounded-xl bg-accent/15 border border-accent/35 items-center justify-center">
-        <svg class="w-6 h-6 text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      <div class="hidden sm:flex w-10 h-10 rounded-xl border border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] items-center justify-center">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
         </svg>
       </div>
 
       <div class="min-w-0">
-        <h1 class="text-base sm:text-lg font-semibold text-dark-50">AI Tutor</h1>
-        <p class="text-xs text-dark-400 truncate">Structured, reliable explanations for serious study</p>
+        <h1 class="font-display text-3xl leading-7 text-[var(--t1)]">AI Tutor</h1>
+        <p class="text-xs text-[var(--t2)] truncate">Structured, reliable explanations for serious study</p>
       </div>
 
       <div class="ml-auto hidden md:flex items-center gap-2">
-        <span class="px-2.5 py-1 rounded-full bg-dark-800/80 border border-dark-700/80 text-[11px] text-dark-300">
+        <span class="px-2.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] text-[11px] mono-label text-[var(--t2)]">
           {{ messageCount }} messages
         </span>
-        <span class="px-2.5 py-1 rounded-full bg-dark-800/80 border border-dark-700/80 text-[11px] text-dark-300">
+        <span class="px-2.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] text-[11px] mono-label text-[var(--t2)]">
           {{ savedChatCount }} saved chats
         </span>
       </div>
 
       <button
         @click="emit('clear-chat')"
-        class="p-2 text-dark-400 hover:text-accent-light hover:bg-dark-800 rounded-lg transition-colors"
+        class="btn-ghost !h-9 !w-9 !p-0"
         title="Clear Chat"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

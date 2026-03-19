@@ -3,11 +3,12 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'inline-flex items-center justify-center gap-2 font-medium transition-all duration-150',
-      'focus:outline-none focus-visible:shadow-[0_0_0_4px_var(--ring)]',
+      'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200',
+      'focus:outline-none focus-visible:shadow-[0_0_0_3px_var(--gold-dim)]',
       'disabled:cursor-not-allowed disabled:pointer-events-none',
       sizeClasses,
       variantClasses,
+      block ? 'w-full' : '',
       { 'cursor-wait': loading }
     ]"
   >
@@ -80,8 +81,8 @@ const sizeClasses = computed(() => {
   
   const sizes = {
     sm: 'h-9 px-3 text-sm rounded-[10px]',
-    md: 'h-10 px-4 text-sm rounded-[12px]',
-    lg: 'h-11 px-5 text-base rounded-[12px]'
+    md: 'h-10 px-4 text-sm rounded-[10px]',
+    lg: 'h-11 px-5 text-base rounded-[10px]'
   }
   return sizes[props.size]
 })

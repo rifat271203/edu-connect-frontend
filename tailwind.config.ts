@@ -12,6 +12,19 @@ export default <Config>{
   theme: {
     extend: {
       colors: {
+        ink: '#07090f',
+        'ink-2': '#0c1120',
+        'surface-base': '#141c2e',
+        'surface-2': '#1a2438',
+        'surface-3': '#1f2d45',
+        gold: '#c4a464',
+        'gold-2': '#e8c882',
+        line: 'rgba(255,255,255,0.06)',
+        'line-2': 'rgba(255,255,255,0.10)',
+        'line-gold': 'rgba(196,164,100,0.28)',
+        'text-1': '#f4f1eb',
+        'text-2': 'rgba(244,241,235,0.58)',
+        'text-3': 'rgba(244,241,235,0.28)',
         // Custom Color Theme
         theme: {
           gray: '#9C9A9A',
@@ -100,8 +113,9 @@ export default <Config>{
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Inter', 'system-ui', 'sans-serif']
+        sans: ['Manrope', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Instrument Serif', 'ui-serif', 'Georgia', 'serif'],
+        mono: ['DM Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.875rem' }]

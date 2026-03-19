@@ -1,15 +1,15 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 bg-[var(--surface)] backdrop-blur-lg border-t border-[var(--border)] z-40 lg:hidden">
-    <div class="flex items-center justify-around py-2 px-4">
+  <nav class="fixed bottom-0 left-0 right-0 bg-[color-mix(in_srgb,var(--ink2)_92%,transparent)] backdrop-blur-xl border-t border-[var(--line)] z-40 lg:hidden">
+    <div class="flex items-center justify-around py-2 px-3">
       <NuxtLink
         v-for="item in navItems"
         :key="item.path"
         :to="item.path"
-        class="flex flex-col items-center gap-1 p-2 rounded-xl transition-colors"
-        :class="isActive(item.path) ? 'text-[var(--primary)] bg-[var(--sidebar-item-active-bg)]' : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--sidebar-item-hover)]'"
+        class="flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200"
+        :class="isActive(item.path) ? 'text-[var(--gold)] bg-[var(--gold-dim)] border border-[var(--line-gold)]' : 'text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)] border border-transparent'"
       >
         <span v-html="item.icon" class="w-6 h-6" />
-        <span class="text-xs">{{ item.label }}</span>
+        <span class="text-[11px] font-medium">{{ item.label }}</span>
       </NuxtLink>
     </div>
   </nav>

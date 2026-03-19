@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'bg-gradient-to-r from-dark-800 via-dark-700 to-dark-800 bg-[length:200%_100%] animate-shimmer rounded',
+      'skeleton bg-[length:200%_100%] animate-shimmer rounded-[10px]',
       variantClasses,
       { 'rounded-full': circle }
     ]"

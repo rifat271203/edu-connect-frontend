@@ -1,29 +1,31 @@
 <template>
-  <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] flex overflow-x-hidden">
+  <div class="relative min-h-screen bg-[var(--ink)] text-[var(--t1)] flex overflow-x-hidden">
+    <div class="ec-grain-overlay" />
+
     <!-- Left Sidebar - Desktop -->
-    <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex" />
+    <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex relative z-20" />
     
     <!-- Main Content Area -->
-    <main :class="['w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[260px]' : '']">
+    <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[240px]' : '']">
       <!-- Mobile Header -->
-      <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40 backdrop-blur-lg">
-        <div class="flex items-center justify-between px-4 py-3">
+      <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40">
+        <div class="flex h-[60px] items-center justify-between px-4">
           <NuxtLink to="/home" class="flex items-center gap-2 group">
-            <div class="w-8 h-8 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center shadow-[var(--shadow-sm)] transition-all duration-150 group-hover:bg-[var(--primary-hover)]">
-              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            <div class="w-8 h-8 rounded-xl border border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] flex items-center justify-center transition-all duration-200 group-hover:translate-y-[-1px]">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
               </svg>
             </div>
-            <span class="text-lg font-semibold text-[var(--text)]">EduConnect</span>
+            <span class="font-display text-xl text-[var(--t1)]">EduConnect</span>
           </NuxtLink>
           
           <div class="flex items-center gap-2">
-            <button class="btn-ghost !h-10 !w-10 !p-0">
+            <button class="btn-ghost !h-9 !w-9 !p-0">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </button>
-            <button v-if="!isGuest" @click="toggleMobileMenu" class="btn-ghost !h-10 !w-10 !p-0">
+            <button v-if="!isGuest" @click="toggleMobileMenu" class="btn-ghost !h-9 !w-9 !p-0">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
@@ -35,12 +37,12 @@
       <!-- Page Content -->
       <div class="flex-1 flex min-h-0">
         <!-- Middle Content (Feed) -->
-        <div class="flex-1 min-w-0 min-h-0">
+        <div class="flex-1 min-w-0 min-h-0 bg-[var(--ink)]">
           <slot />
         </div>
         
         <!-- Right Sidebar - Desktop (hidden on ai-tutor/messages pages) -->
-        <LayoutRightSidebar v-if="showDesktopRightSidebar" class="hidden xl:block" />
+        <LayoutRightSidebar v-if="showDesktopRightSidebar" class="hidden 2xl:block" />
       </div>
     </main>
     
@@ -61,26 +63,26 @@
     <LayoutMobileNav v-if="!isGuest && !isAiTutorRoute" class="lg:hidden" />
 
     <!-- First-login profile picture modal -->
-    <div
-      v-if="userStore.shouldShowProfilePicPrompt"
-      class="fixed inset-0 z-[70] flex items-center justify-center p-4"
-    >
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        v-if="userStore.shouldShowProfilePicPrompt"
+        class="fixed inset-0 z-[70] flex items-center justify-center p-4"
+      >
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      <div class="relative w-full max-w-md card-theme p-6">
-        <h2 class="text-xl font-semibold text-[var(--text)]">Add a profile photo</h2>
-        <p class="mt-2 text-sm text-[var(--text-2)]">
-          Upload a profile picture so classmates can recognize you.
-        </p>
+        <div class="relative w-full max-w-md card-theme p-6">
+          <h2 class="font-display text-2xl text-[var(--t1)]">Add a profile photo</h2>
+          <p class="mt-2 text-sm text-[var(--t2)]">
+            Upload a profile picture so classmates can recognize you.
+          </p>
 
-        <div class="mt-5 flex items-center gap-4">
-          <div class="h-24 w-24 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-            <img
-              :src="profilePicPreviewUrl || userStore.user?.avatar"
-              alt="Profile preview"
-              class="h-full w-full object-cover"
-            />
-          </div>
+          <div class="mt-5 flex items-center gap-4">
+            <div class="h-24 w-24 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface2)]">
+              <img
+                :src="profilePicPreviewUrl || userStore.user?.avatar"
+                alt="Profile preview"
+                class="h-full w-full object-cover"
+              />
+            </div>
 
           <div class="flex-1">
             <input

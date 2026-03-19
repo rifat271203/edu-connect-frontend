@@ -1,13 +1,13 @@
 <template>
-  <div class="max-w-2xl mx-auto p-4 pb-24 lg:pb-4">
+  <div class="mx-auto w-full max-w-3xl p-4 pb-24 lg:pb-6">
     <!-- Header -->
-    <header class="mb-6">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Home</h1>
-      <p class="text-[var(--text-2)]">See what your classmates are up to</p>
+    <header class="mb-6 space-y-1">
+      <h1 class="font-display text-4xl text-[var(--t1)]">Home</h1>
+      <p class="text-sm text-[var(--t2)]">See what your classmates are up to</p>
     </header>
 
     <!-- Create Post -->
-    <UiCard v-if="!isGuest" class="feed-composer mb-6 p-4">
+    <UiCard v-if="!isGuest" class="feed-composer mb-6 !p-5">
       <div class="flex items-start gap-3">
         <UiAvatar 
           :src="userStore.user?.avatar"
@@ -18,11 +18,11 @@
           <textarea
             v-model="newPostContent"
             rows="3"
-            class="textarea-field px-4 resize-none"
+            class="w-full resize-none border-0 bg-transparent p-0 text-[15px] text-[var(--t1)] placeholder:text-[var(--t3)] focus:outline-none"
             placeholder="What's on your mind?"
           />
 
-          <div v-if="mediaPreviewUrl" class="mt-3 rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface-2)]">
+          <div v-if="mediaPreviewUrl" class="mt-4 rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--surface2)]">
             <img
               v-if="selectedMediaType === 'image'"
               :src="mediaPreviewUrl"
@@ -46,18 +46,18 @@
             @change="handleMediaSelected"
           />
 
-          <div class="feed-composer__actions flex-wrap">
+          <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
             <div class="flex items-center gap-2">
-              <UiButton variant="secondary" @click="openMediaPicker">
+              <UiButton variant="ghost" @click="openMediaPicker">
                 Add photo/video
               </UiButton>
-              <span v-if="selectedMediaFile" class="text-xs text-[var(--text-3)] max-w-[200px] truncate" :title="selectedMediaFile.name">
+              <span v-if="selectedMediaFile" class="mono-label text-[11px] text-[var(--t3)] max-w-[200px] truncate" :title="selectedMediaFile.name">
                 {{ selectedMediaFile.name }}
               </span>
               <button
                 v-if="selectedMediaFile"
                 type="button"
-                class="text-xs text-[var(--danger)] hover:opacity-80 transition-colors"
+                class="mono-label text-[11px] text-[rgba(239,68,68,0.9)] hover:opacity-80 transition-colors"
                 @click="clearSelectedMedia"
               >
                 Remove
@@ -72,12 +72,12 @@
       </div>
     </UiCard>
 
-    <UiCard v-else class="mb-6 p-4 text-sm text-[var(--text-2)]">
+    <UiCard v-else class="mb-6 !p-5 text-sm text-[var(--t2)]">
       You are browsing the Educational Social Feed as a guest. Log in to create posts, like, comment, and enroll in courses.
-      <NuxtLink to="/login" class="ml-1 font-semibold text-[var(--primary)] hover:opacity-80">Log in</NuxtLink>
+      <NuxtLink to="/login" class="ml-1 font-semibold text-[var(--gold)] hover:text-[var(--gold2)]">Log in</NuxtLink>
     </UiCard>
 
-    <p v-if="displayError" class="mb-4 text-sm text-[var(--danger)]">{{ displayError }}</p>
+    <p v-if="displayError" class="mb-4 text-sm text-[rgba(239,68,68,0.9)]">{{ displayError }}</p>
 
     <p v-if="classroomInfo" class="mb-4 text-sm text-green-400">{{ classroomInfo }}</p>
     <p v-if="classroomError" class="mb-4 text-sm text-[var(--danger)]">{{ classroomError }}</p>
@@ -85,13 +85,13 @@
     <!-- Posts Feed -->
     <div class="space-y-4">
       <template v-if="!isTeacher">
-        <UiCard class="p-4">
-          <div class="mb-2 flex items-center justify-between gap-3">
+        <UiCard class="!p-5">
+          <div class="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h2 class="text-lg font-semibold text-[var(--text)]">Course feed</h2>
-              <p class="text-sm text-[var(--text-2)]">Teacher-created courses available for enrollment</p>
+              <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Course feed</h2>
+              <p class="text-sm text-[var(--t3)]">Teacher-created courses available for enrollment</p>
             </div>
-            <UiButton variant="secondary" size="sm" :disabled="classroomCoursesLoading" @click="loadClassroomFeed">
+            <UiButton variant="ghost" size="sm" :disabled="classroomCoursesLoading" @click="loadClassroomFeed">
               Refresh
             </UiButton>
           </div>
@@ -109,19 +109,19 @@
             <div
               v-for="course in classroomCourses"
               :key="`home-course-${course.id}`"
-              class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3"
+              class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--line-gold)]"
             >
               <div class="mb-3 flex items-center gap-3">
                 <UiAvatar :src="course.instructor.avatar" :name="course.instructor.displayName" size="md" />
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-[var(--text)]">{{ course.instructor.displayName }}</p>
-                  <p class="text-xs text-[var(--text-3)]">@{{ course.instructor.username }} · {{ formatRelativeTime(course.createdAt) }}</p>
+                  <p class="truncate font-semibold text-[var(--t1)]">{{ course.instructor.displayName }}</p>
+                  <p class="mono-label text-[11px] text-[var(--t3)]">@{{ course.instructor.username }} · {{ formatRelativeTime(course.createdAt) }}</p>
                 </div>
-                <UiBadge :variant="course.status === 'archived' ? 'warning' : 'accent'">{{ course.status }}</UiBadge>
+                <UiBadge :variant="course.status === 'archived' ? 'warning' : 'active'">{{ course.status }}</UiBadge>
               </div>
 
-              <h3 class="text-base font-semibold text-[var(--text)]">{{ course.title }}</h3>
-              <div v-if="course.coursePicUrl" class="mt-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)]">
+              <h3 class="font-display text-[28px] leading-7 text-[var(--t1)]">{{ course.title }}</h3>
+              <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface2)]">
                 <img
                   :src="course.coursePicUrl"
                   :alt="`${course.title} cover`"
@@ -129,19 +129,19 @@
                   loading="lazy"
                 />
               </div>
-              <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--text-2)]">{{ course.description || 'No description added yet.' }}</p>
+              <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--t2)]">{{ course.description || 'No description added yet.' }}</p>
 
-              <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--text-3)]">
-                <span v-if="course.code" class="rounded-full bg-[var(--surface-2)] px-2 py-1">Code: {{ course.code }}</span>
-                <span v-if="course.department" class="rounded-full bg-[var(--surface-2)] px-2 py-1">Dept: {{ course.department }}</span>
-                <span class="rounded-full bg-[var(--surface-2)] px-2 py-1">Members: {{ course.memberCount }}</span>
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--t3)]">
+                <span v-if="course.code" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
+                <span v-if="course.department" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
+                <span class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
               </div>
 
               <div class="mt-3">
                 <NuxtLink
                   v-if="isGuest"
                   to="/login"
-                  class="inline-flex h-9 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] px-3 text-sm font-medium text-[var(--text)] transition-colors hover:bg-[var(--card-hover)]"
+                  class="inline-flex h-9 items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--surface2)] px-3 text-sm font-semibold text-[var(--t1)] transition-colors hover:border-[var(--line-gold)] hover:text-[var(--gold2)]"
                 >
                   Log in to enroll
                 </NuxtLink>
@@ -192,7 +192,7 @@
           @delete="handleDeletePost"
         />
 
-        <UiCard v-if="!isGuest && isCommentBoxOpen(post.id)" class="mt-2 p-3">
+        <UiCard v-if="!isGuest && isCommentBoxOpen(post.id)" class="mt-2 !p-4">
           <div class="flex items-start gap-3">
             <UiAvatar
               :src="userStore.user?.avatar"
