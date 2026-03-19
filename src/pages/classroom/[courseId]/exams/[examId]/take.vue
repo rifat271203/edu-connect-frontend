@@ -46,33 +46,93 @@
             :key="`all-${question.id}`"
             class="border-slate-200 bg-white dark:border-dark-700 dark:bg-dark-900"
           >
-            <QuestionInput :index="index" :question="question" />
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm font-semibold">Q{{ index + 1 }}. {{ question.question }}</p>
+                <BaseBadge size="sm" variant="neutral">{{ question.marks }} marks</BaseBadge>
+              </div>
+
+              <div v-if="question.type === 'mcq'" class="space-y-2">
+                <label
+                  v-for="(option, optionIndex) in question.options || []"
+                  :key="`${question.id}-option-${optionIndex}`"
+                  class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 dark:border-dark-700"
+                >
+                  <input
+                    type="radio"
+                    :name="`mcq-${question.id}`"
+                    :checked="isMcqSelected(question.id, optionIndex)"
+                    @change="setMcqAnswer(question.id, optionIndex)"
+                  >
+                  <span class="text-sm">{{ option }}</span>
+                </label>
+              </div>
+
+              <textarea
+                v-else
+                :value="getTextAnswer(question.id)"
+                :rows="question.type === 'long' ? 7 : 4"
+                class="textarea-field min-h-[120px] w-full rounded-xl px-3 py-2 text-sm"
+                placeholder="Type your answer..."
+                @input="setTextAnswer($event, question.id)"
+              />
+            </div>
           </BaseCard>
         </template>
 
         <BaseCard v-else class="border-slate-200 bg-white dark:border-dark-700 dark:bg-dark-900">
-          <QuestionInput
-            v-if="currentQuestion"
-            :index="currentQuestionIndex"
-            :question="currentQuestion"
-          />
+          <template v-if="currentQuestion">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm font-semibold">
+                  Q{{ currentQuestionIndex + 1 }}. {{ currentQuestion.question }}
+                </p>
+                <BaseBadge size="sm" variant="neutral">{{ currentQuestion.marks }} marks</BaseBadge>
+              </div>
 
-          <div class="mt-4 flex justify-between">
-            <BaseButton
-              variant="ghost"
-              :disabled="currentQuestionIndex === 0"
-              @click="currentQuestionIndex = Math.max(0, currentQuestionIndex - 1)"
-            >
-              Previous
-            </BaseButton>
-            <BaseButton
-              variant="secondary"
-              :disabled="currentQuestionIndex >= (exam?.questions.length || 1) - 1"
-              @click="currentQuestionIndex = Math.min((exam?.questions.length || 1) - 1, currentQuestionIndex + 1)"
-            >
-              Next
-            </BaseButton>
-          </div>
+              <div v-if="currentQuestion.type === 'mcq'" class="space-y-2">
+                <label
+                  v-for="(option, optionIndex) in currentQuestion.options || []"
+                  :key="`${currentQuestion.id}-single-option-${optionIndex}`"
+                  class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 dark:border-dark-700"
+                >
+                  <input
+                    type="radio"
+                    :name="`mcq-single-${currentQuestion.id}`"
+                    :checked="isMcqSelected(currentQuestion.id, optionIndex)"
+                    @change="setMcqAnswer(currentQuestion.id, optionIndex)"
+                  >
+                  <span class="text-sm">{{ option }}</span>
+                </label>
+              </div>
+
+              <textarea
+                v-else
+                :value="getTextAnswer(currentQuestion.id)"
+                :rows="currentQuestion.type === 'long' ? 7 : 4"
+                class="textarea-field min-h-[120px] w-full rounded-xl px-3 py-2 text-sm"
+                placeholder="Type your answer..."
+                @input="setTextAnswer($event, currentQuestion.id)"
+              />
+            </div>
+
+            <div class="mt-4 flex justify-between">
+              <BaseButton
+                variant="ghost"
+                :disabled="currentQuestionIndex === 0"
+                @click="currentQuestionIndex = Math.max(0, currentQuestionIndex - 1)"
+              >
+                Previous
+              </BaseButton>
+              <BaseButton
+                variant="secondary"
+                :disabled="currentQuestionIndex >= (exam?.questions.length || 1) - 1"
+                @click="currentQuestionIndex = Math.min((exam?.questions.length || 1) - 1, currentQuestionIndex + 1)"
+              >
+                Next
+              </BaseButton>
+            </div>
+          </template>
         </BaseCard>
       </main>
     </div>
@@ -90,8 +150,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, h, type PropType } from 'vue'
-import type { ExamQuestion } from '~/types/classroom-room'
 import { useExamStore } from '~/stores/exam'
 import { useClassroomStore } from '~/stores/classroom'
 import { useCountdownTimer } from '~/composables/useCountdownTimer'
@@ -123,7 +181,6 @@ const confirmSubmitOpen = ref(false)
 const answers = reactive<Record<string, string | number>>({})
 
 const currentQuestion = computed(() => exam.value?.questions[currentQuestionIndex.value] || null)
-
 const isNearEnd = computed(() => timeLeft.value < 5 * 60 * 1000)
 
 const isAnswered = (questionId: string) => {
@@ -135,6 +192,17 @@ const navigatorClass = (index: number, questionId: string) => {
   if (index === currentQuestionIndex.value) return 'border-indigo-600 bg-indigo-600 text-white'
   if (isAnswered(questionId)) return 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
   return 'border-slate-200 text-slate-600 dark:border-dark-700 dark:text-dark-300'
+}
+
+const isMcqSelected = (questionId: string, optionIndex: number) => Number(answers[questionId]) === optionIndex
+const setMcqAnswer = (questionId: string, optionIndex: number) => {
+  answers[questionId] = optionIndex
+}
+
+const getTextAnswer = (questionId: string) => String(answers[questionId] || '')
+const setTextAnswer = (event: Event, questionId: string) => {
+  const target = event.target as HTMLTextAreaElement
+  answers[questionId] = target.value
 }
 
 const submitWithConfirm = () => {
@@ -182,62 +250,5 @@ onUnmounted(() => {
 useHead(() => ({
   title: `${classroomStore.course?.title || 'Classroom'} • Take Exam`,
 }))
-
-const QuestionInput = defineComponent({
-  props: {
-    index: {
-      type: Number,
-      required: true,
-    },
-    question: {
-      type: Object as PropType<ExamQuestion>,
-      required: true,
-    },
-  },
-  setup(props) {
-    const model = computed({
-      get: () => answers[props.question.id],
-      set: (value: string | number) => {
-        answers[props.question.id] = value
-      },
-    })
-
-    return () =>
-      h('div', { class: 'space-y-3' }, [
-        h('div', { class: 'flex items-center justify-between gap-3' }, [
-          h('p', { class: 'text-sm font-semibold' }, `Q${props.index + 1}. ${props.question.question}`),
-          h(BaseBadge, { size: 'sm', variant: 'neutral' }, () => `${props.question.marks} marks`),
-        ]),
-        props.question.type === 'mcq'
-          ? h(
-              'div',
-              { class: 'space-y-2' },
-              (props.question.options || []).map((option, optionIndex) =>
-                h('label', { class: 'flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 dark:border-dark-700' }, [
-                  h('input', {
-                    type: 'radio',
-                    name: `mcq-${props.question.id}`,
-                    checked: Number(model.value) === optionIndex,
-                    onChange: () => {
-                      model.value = optionIndex
-                    },
-                  }),
-                  h('span', { class: 'text-sm' }, option),
-                ]),
-              ),
-            )
-          : h('textarea', {
-              value: String(model.value || ''),
-              rows: props.question.type === 'long' ? 7 : 4,
-              class: 'textarea-field min-h-[120px] w-full rounded-xl px-3 py-2 text-sm',
-              placeholder: 'Type your answer...',
-              onInput: (event: Event) => {
-                const target = event.target as HTMLTextAreaElement
-                model.value = target.value
-              },
-            }),
-      ])
-  },
-})
 </script>
 
