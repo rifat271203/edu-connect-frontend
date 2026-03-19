@@ -238,6 +238,21 @@ const normalizeProfilePicUploadResponse = (payload: unknown): UploadProfilePicRe
   return { profilePicUrl }
 }
 
+const BACKEND_UPLOAD_PREFIX = 'https://sincere-spontaneity-production-ab4e.up.railway.app/uploads/'
+
+/**
+ * Rewrites a Railway-hosted upload URL to go through the Nuxt proxy route
+ * (/uploads/...) so the browser loads it from the same origin, avoiding
+ * ERR_BLOCKED_BY_RESPONSE.NotSameSite caused by Cross-Origin-Resource-Policy.
+ */
+const toMediaUrl = (value: string | undefined | false): string => {
+  if (!value) return ''
+  if (value.startsWith(BACKEND_UPLOAD_PREFIX)) {
+    return '/uploads/' + value.slice(BACKEND_UPLOAD_PREFIX.length)
+  }
+  return value
+}
+
 const toId = (value: unknown, fallback = ''): string => {
   if (typeof value === 'string' || typeof value === 'number') return String(value)
   return fallback
@@ -311,7 +326,7 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     name.toLowerCase().replace(/\s+/g, '') ||
     fallbackSeed
 
-  const profilePicUrl =
+  const profilePicUrl = toMediaUrl(
     (typeof nested.avatar === 'string' && nested.avatar) ||
     (typeof nested.profilePicUrl === 'string' && nested.profilePicUrl) ||
     (typeof nested.profile_pic_url === 'string' && nested.profile_pic_url) ||
@@ -322,6 +337,7 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
     (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
     ''
+  )
 
   const isProfilePublic = toBoolean(
     nested.isProfilePublic ??
@@ -415,12 +431,13 @@ const normalizePost = (value: unknown): FeedPost => {
     (typeof source.text === 'string' && source.text) ||
     ''
 
-  const mediaUrl =
+  const mediaUrl = toMediaUrl(
     (typeof source.mediaUrl === 'string' && source.mediaUrl) ||
     (typeof source.media_url === 'string' && source.media_url) ||
     (typeof source.media === 'string' && source.media) ||
     (typeof source.image === 'string' && source.image) ||
     undefined
+  ) || undefined
 
   const mediaType = resolvePostMediaType(source, mediaUrl)
 
@@ -600,11 +617,12 @@ const normalizeMyProfile = (payload: unknown): MyProfileSummary => {
       role: typeof profileSource.role === 'string' ? profileSource.role : undefined,
       department: typeof profileSource.department === 'string' ? profileSource.department : undefined,
       institution: typeof profileSource.institution === 'string' ? profileSource.institution : undefined,
-      profilePicUrl:
+      profilePicUrl: toMediaUrl(
         (typeof profileSource.profilePicUrl === 'string' && profileSource.profilePicUrl) ||
         (typeof profileSource.profile_pic_url === 'string' && profileSource.profile_pic_url) ||
         (typeof profileSource.avatar === 'string' && profileSource.avatar) ||
-        undefined,
+        undefined
+      ) || undefined,
       isProfilePublic: toBoolean(profileSource.isProfilePublic ?? profileSource.is_profile_public, false),
       createdAt:
         (typeof profileSource.createdAt === 'string' && profileSource.createdAt) ||
@@ -658,11 +676,12 @@ const normalizePublicUserProfile = (payload: unknown): PublicUserProfileSummary 
       role: typeof profileSource.role === 'string' ? profileSource.role : undefined,
       department: typeof profileSource.department === 'string' ? profileSource.department : undefined,
       institution: typeof profileSource.institution === 'string' ? profileSource.institution : undefined,
-      profilePicUrl:
+      profilePicUrl: toMediaUrl(
         (typeof profileSource.profilePicUrl === 'string' && profileSource.profilePicUrl) ||
         (typeof profileSource.profile_pic_url === 'string' && profileSource.profile_pic_url) ||
         (typeof profileSource.avatar === 'string' && profileSource.avatar) ||
-        undefined,
+        undefined
+      ) || undefined,
       isProfilePublic: toBoolean(profileSource.isProfilePublic ?? profileSource.is_profile_public, false),
       createdAt:
         (typeof profileSource.createdAt === 'string' && profileSource.createdAt) ||
@@ -1020,13 +1039,14 @@ const normalizeFriend = (value: unknown): SocialFriend => {
     name.toLowerCase().replace(/\s+/g, '') ||
     'user'
 
-  const profilePicUrl =
+  const profilePicUrl = toMediaUrl(
     (typeof source.profilePicUrl === 'string' && source.profilePicUrl) ||
     (typeof source.profile_pic_url === 'string' && source.profile_pic_url) ||
     (typeof source.avatar === 'string' && source.avatar) ||
     base.profilePicUrl ||
     base.avatar ||
     ''
+  )
 
   return {
     id: base.id,

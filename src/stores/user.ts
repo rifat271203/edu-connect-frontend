@@ -5,6 +5,17 @@ import { uploadProfilePicture as uploadProfilePictureApi } from '~/services/api/
 const getProfilePicSkipStorageKey = (userId: string | number) => `educonnect_profile_pic_prompt_skipped_${String(userId)}`
 const authCookieMaxAgeSeconds = 60 * 60 * 24 * 30
 
+// Rewrites Railway /uploads/ URLs to use the Nuxt proxy so the browser
+// doesn't hit Cross-Origin-Resource-Policy restrictions.
+const BACKEND_UPLOAD_PREFIX = 'https://sincere-spontaneity-production-ab4e.up.railway.app/uploads/'
+const rewriteUploadUrl = (url?: string): string | undefined => {
+  if (!url) return url
+  if (url.startsWith(BACKEND_UPLOAD_PREFIX)) {
+    return '/uploads/' + url.slice(BACKEND_UPLOAD_PREFIX.length)
+  }
+  return url
+}
+
 const setClientCookie = (name: string, value: string, maxAgeSeconds = authCookieMaxAgeSeconds) => {
   if (!process.client) return
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`
@@ -128,7 +139,11 @@ export const useUserStore = defineStore('user', {
 
         if (userStr) {
           try {
-            this.user = JSON.parse(userStr)
+            const parsed = JSON.parse(userStr)
+            // Migrate stale Railway upload URLs to the Nuxt proxy path
+            if (parsed?.avatar) parsed.avatar = rewriteUploadUrl(parsed.avatar)
+            if (parsed?.profilePicUrl) parsed.profilePicUrl = rewriteUploadUrl(parsed.profilePicUrl)
+            this.user = parsed
           } catch (e) {
             console.error('Failed to parse user data', e)
             this.clearSession()

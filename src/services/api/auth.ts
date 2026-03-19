@@ -63,6 +63,16 @@ const toBoolean = (value: unknown, fallback = false): boolean => {
   return fallback
 }
 
+const BACKEND_UPLOAD_PREFIX = 'https://sincere-spontaneity-production-ab4e.up.railway.app/uploads/'
+
+const toMediaUrl = (value: string | undefined | false): string | undefined => {
+  if (!value) return undefined
+  if (value.startsWith(BACKEND_UPLOAD_PREFIX)) {
+    return '/uploads/' + value.slice(BACKEND_UPLOAD_PREFIX.length)
+  }
+  return value
+}
+
 const normalizeAuthResponse = (
   payload: unknown,
   tokenFromResponse?: string,
@@ -112,18 +122,20 @@ const normalizeAuthResponse = (
       (typeof source.username === 'string' && source.username) ||
       (typeof root.username === 'string' && root.username) ||
       deriveUsername(name, email),
-    avatar:
+    avatar: toMediaUrl(
       (typeof source.profilePicUrl === 'string' && source.profilePicUrl) ||
       (typeof source.profile_pic_url === 'string' && source.profile_pic_url) ||
       (typeof source.avatar === 'string' && source.avatar) ||
       (typeof root.avatar === 'string' && root.avatar) ||
-      undefined,
-    profilePicUrl:
+      undefined
+    ),
+    profilePicUrl: toMediaUrl(
       (typeof source.profilePicUrl === 'string' && source.profilePicUrl) ||
       (typeof source.profile_pic_url === 'string' && source.profile_pic_url) ||
       (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
       (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
-      undefined,
+      undefined
+    ),
     isProfilePublic: toBoolean(
       source.isProfilePublic ?? source.is_profile_public ?? root.isProfilePublic ?? root.is_profile_public,
       false
@@ -234,17 +246,19 @@ export const getCurrentUser = async (): Promise<ApiResponse<AuthUser>> => {
     username:
       (typeof userSource.username === 'string' && userSource.username) ||
       deriveUsername(name, email),
-    avatar:
+    avatar: toMediaUrl(
       (typeof userSource.profilePicUrl === 'string' && userSource.profilePicUrl) ||
       (typeof userSource.profile_pic_url === 'string' && userSource.profile_pic_url) ||
       (typeof userSource.avatar === 'string' && userSource.avatar) ||
-      undefined,
-    profilePicUrl:
+      undefined
+    ),
+    profilePicUrl: toMediaUrl(
       (typeof userSource.profilePicUrl === 'string' && userSource.profilePicUrl) ||
       (typeof userSource.profile_pic_url === 'string' && userSource.profile_pic_url) ||
       (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
       (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
-      undefined,
+      undefined
+    ),
     isProfilePublic: toBoolean(
       userSource.isProfilePublic ?? userSource.is_profile_public ?? root.isProfilePublic ?? root.is_profile_public,
       false
