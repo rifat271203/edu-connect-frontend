@@ -1,7 +1,7 @@
 <template>
   <div 
     class="relative inline-flex shrink-0" 
-    :class="[sizeClasses, { 'ring-2 ring-[var(--line-gold)]': hasRing }]"
+    :class="[sizeClasses, { 'ring-2 ring-[rgba(255,255,255,0.14)]': hasRing }]"
   >
     <img
       v-if="src && !imageError"
@@ -13,7 +13,7 @@
     />
     <div
       v-else
-      class="rounded-full flex items-center justify-center text-white font-bold uppercase tracking-[0.02em]"
+      class="rounded-full flex items-center justify-center text-white font-bold uppercase tracking-[0.02em] font-['Manrope']"
       :class="sizeClasses"
       :style="{ background: fallbackBackground }"
     >

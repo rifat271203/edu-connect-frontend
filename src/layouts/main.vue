@@ -1,22 +1,20 @@
 <template>
   <div class="relative min-h-screen bg-[var(--ink)] text-[var(--t1)] flex overflow-x-hidden">
-    <div class="ec-grain-overlay" />
-
     <!-- Left Sidebar - Desktop -->
     <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex relative z-20" />
     
     <!-- Main Content Area -->
-    <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[240px]' : '']">
+    <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[220px]' : '']">
       <!-- Mobile Header -->
       <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40">
         <div class="flex h-[60px] items-center justify-between px-4">
           <NuxtLink to="/home" class="flex items-center gap-2 group">
-            <div class="w-8 h-8 rounded-xl border border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] flex items-center justify-center transition-all duration-200 group-hover:translate-y-[-1px]">
+            <div class="w-8 h-8 rounded-lg border border-[rgba(196,164,100,0.38)] bg-[var(--surface2)] text-[var(--gold)] flex items-center justify-center transition-all duration-150 group-hover:border-[var(--gold)]">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
               </svg>
             </div>
-            <span class="font-display text-xl text-[var(--t1)]">EduConnect</span>
+            <span class="font-semibold text-[18px] tracking-[-0.02em] text-[var(--t1)]">EduConnect</span>
           </NuxtLink>
           
           <div class="flex items-center gap-2">
@@ -54,7 +52,7 @@
       >
         <div class="absolute inset-0 bg-[var(--theme-overlay)] backdrop-blur-sm" />
         <LayoutSidebar 
-          class="absolute left-0 top-0 bottom-0 w-64 animate-slide-up" 
+          class="absolute left-0 top-0 bottom-0 w-[220px] animate-slide-up" 
           @navigate="toggleMobileMenu"
         />
     </div>
@@ -70,7 +68,7 @@
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
         <div class="relative w-full max-w-md card-theme p-6">
-          <h2 class="font-display text-2xl text-[var(--t1)]">Add a profile photo</h2>
+          <h2 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Add a profile photo</h2>
           <p class="mt-2 text-sm text-[var(--t2)]">
             Upload a profile picture so classmates can recognize you.
           </p>

@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'ui-card relative overflow-hidden transition-all duration-200',
+      'ui-card relative overflow-hidden transition-all duration-150',
       hover ? 'ui-card--hoverable cursor-pointer' : '',
       paddingClasses
     ]"
@@ -26,8 +26,8 @@ const props = withDefaults(defineProps<Props>(), {
 const paddingClasses = computed(() => {
   const paddings = {
     none: '',
-    sm: 'p-3',
-    md: 'p-4',
+    sm: 'px-4 py-3.5',
+    md: 'px-5 py-[18px]',
     lg: 'p-6'
   }
   return paddings[props.padding]

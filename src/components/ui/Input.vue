@@ -7,8 +7,8 @@
         :class="[
           'absolute left-4 transition-all duration-150 pointer-events-none',
         isFocused || modelValue
-          ? 'top-2 text-xs text-[var(--primary)]'
-          : 'top-1/2 -translate-y-1/2 text-sm text-[var(--text-3)]'
+          ? 'top-2 text-[11px] font-medium text-[var(--primary)]'
+          : 'top-1/2 -translate-y-1/2 text-[13px] text-[var(--text-3)]'
       ]"
     >
       {{ label }}
@@ -33,7 +33,7 @@
         :readonly="readonly"
         :class="[
           'ui-input w-full',
-          'focus:outline-none transition-all duration-150',
+          'focus:outline-none transition-all duration-150 text-[13px]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           error 
             ? 'is-error' 

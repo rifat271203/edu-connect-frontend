@@ -1,11 +1,11 @@
 <template>
   <div class="max-w-4xl mx-auto p-4 pb-24 lg:pb-6">
     <!-- Profile Header -->
-    <div class="mb-6 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 md:p-6">
+    <div class="mb-6 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6">
       <div class="flex flex-col md:flex-row md:items-end gap-4">
         <!-- Avatar -->
         <div class="relative">
-          <div class="w-20 h-20 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-[var(--gold)]/60 bg-[var(--surface2)]">
+          <div class="w-20 h-20 md:w-20 md:h-20 rounded-full overflow-hidden border border-[var(--line2)] bg-[var(--surface2)]">
             <img 
               :src="userStore.user?.avatar" 
               alt="Profile" 
@@ -14,7 +14,7 @@
           </div>
           <button
             type="button"
-            class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] flex items-center justify-center"
+            class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[var(--gold)] text-[#07090f] flex items-center justify-center"
             :disabled="updatingProfilePic"
             @click="openProfilePicPicker"
           >
@@ -35,9 +35,9 @@
         
         <!-- Name & Edit -->
         <div class="flex-1">
-          <h1 class="font-display text-4xl leading-8 text-[var(--t1)]">{{ userStore.user?.name || 'User' }}</h1>
-          <p class="mono-label text-[12px] text-[var(--t3)] mt-1">@{{ userStore.user?.username || 'user' }}</p>
-          <p class="text-[13px] text-[var(--t2)] mt-1">
+          <h1 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">{{ userStore.user?.name || 'User' }}</h1>
+          <p class="text-[13px] text-[rgba(244,241,235,0.4)] mt-1">@{{ userStore.user?.username || 'user' }}</p>
+          <p class="text-[13px] text-[rgba(244,241,235,0.5)] mt-1">
             {{ myProfile?.department || 'Department' }} · {{ myProfile?.institution || 'Institution' }}
           </p>
           <label class="mt-3 inline-flex items-center gap-2 text-xs text-[var(--t2)] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-3 py-1.5">
@@ -56,7 +56,7 @@
           <p v-if="visibilityError" class="mt-1 text-xs text-[rgba(239,68,68,0.9)]">{{ visibilityError }}</p>
         </div>
         
-        <UiButton variant="ghost" class="w-full md:w-auto border-[var(--line-gold)] !text-[var(--gold)] hover:!bg-[var(--gold-dim)]" @click="openProfilePicPicker">
+        <UiButton variant="ghost" class="w-full md:w-auto" @click="openProfilePicPicker">
           {{ updatingProfilePic ? 'Updating...' : 'Update Photo' }}
         </UiButton>
       </div>
@@ -67,32 +67,32 @@
     
     <!-- Bio -->
     <UiCard class="mb-6 !p-4 rounded-[12px]">
-      <p class="font-display text-[26px] leading-7 text-[var(--t2)] italic">
+      <p class="text-[15px] leading-relaxed text-[rgba(244,241,235,0.7)] italic">
         {{ userStore.user?.bio || 'Learning enthusiast | Building the future 🚀' }}
       </p>
     </UiCard>
     
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
-        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.postCount }}</div>
-        <div class="mono-label text-[11px] text-[var(--t3)]">Posts</div>
+      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.postCount }}</div>
+        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Posts</div>
       </div>
-      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
-        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.shareCount }}</div>
-        <div class="mono-label text-[11px] text-[var(--t3)]">Shares</div>
+      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.shareCount }}</div>
+        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Shares</div>
       </div>
-      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
-        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.likeGivenCount }}</div>
-        <div class="mono-label text-[11px] text-[var(--t3)]">Likes Given</div>
+      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.likeGivenCount }}</div>
+        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Likes Given</div>
       </div>
-      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
-        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.commentCount }}</div>
-        <div class="mono-label text-[11px] text-[var(--t3)]">Comments</div>
+      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.commentCount }}</div>
+        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Comments</div>
       </div>
-      <div class="text-center rounded-full bg-[var(--surface)] border border-[var(--line)] p-3 transition-all duration-200 hover:border-[var(--line-gold)]">
-        <div class="font-display text-3xl leading-7 text-[var(--gold)]">{{ myStats.friendCount }}</div>
-        <div class="mono-label text-[11px] text-[var(--t3)]">Friends</div>
+      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.friendCount }}</div>
+        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Friends</div>
       </div>
     </div>
     
@@ -102,8 +102,8 @@
         v-for="tab in tabs" 
         :key="tab"
         @click="activeTab = tab"
-        class="pb-2 text-sm font-semibold transition-colors"
-        :class="activeTab === tab ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--t3)] hover:text-[var(--t2)] border-b-2 border-transparent'"
+        class="pb-2 text-[14px] font-semibold transition-colors"
+        :class="activeTab === tab ? 'text-[var(--t1)] border-b-2 border-[var(--gold)]' : 'text-[rgba(244,241,235,0.45)] hover:text-[var(--t2)] border-b-2 border-transparent'"
       >
         {{ tab }}
       </button>
@@ -130,20 +130,20 @@
     <!-- Activity -->
     <div v-if="activeTab === 'Activity'" class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <UiCard class="p-4 text-center">
-        <p class="font-display text-3xl text-[var(--gold)]">{{ myActivitySummary.likes }}</p>
-        <p class="mono-label text-[11px] text-[var(--t3)]">Liked Posts</p>
+        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myActivitySummary.likes }}</p>
+        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Liked Posts</p>
       </UiCard>
       <UiCard class="p-4 text-center">
-        <p class="font-display text-3xl text-[var(--gold)]">{{ myActivitySummary.comments }}</p>
-        <p class="mono-label text-[11px] text-[var(--t3)]">Comments Made</p>
+        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myActivitySummary.comments }}</p>
+        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Comments Made</p>
       </UiCard>
       <UiCard class="p-4 text-center">
-        <p class="font-display text-3xl text-[var(--gold)]">{{ myActivitySummary.shares }}</p>
-        <p class="mono-label text-[11px] text-[var(--t3)]">Shares</p>
+        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myActivitySummary.shares }}</p>
+        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Shares</p>
       </UiCard>
       <UiCard class="p-4 text-center">
-        <p class="font-display text-3xl text-[var(--gold)]">{{ myPosts.length }}</p>
-        <p class="mono-label text-[11px] text-[var(--t3)]">Own Posts</p>
+        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myPosts.length }}</p>
+        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Own Posts</p>
       </UiCard>
     </div>
 
@@ -151,7 +151,7 @@
     <div v-if="activeTab === 'Friends'" class="space-y-4">
       <UiCard class="p-4">
         <div class="mb-4 flex items-center justify-between gap-2">
-          <h3 class="font-semibold text-dark-50">Friends</h3>
+          <h3 class="font-semibold text-[var(--t1)]">Friends</h3>
           <UiButton
             v-if="myFriends.length > 8"
             variant="ghost"
@@ -182,7 +182,7 @@
             v-for="friend in visibleFriends"
             :key="`friend-${friend.id}`"
             :to="`/profile/${friend.id}`"
-            class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] p-3 hover:border-[var(--line-gold)] hover:bg-[var(--surface3)] transition-colors"
+            class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] p-3 hover:border-[var(--line2)] hover:bg-[var(--surface3)] transition-colors"
           >
             <div class="flex items-start gap-3">
               <UiAvatar
@@ -192,7 +192,7 @@
               />
 
               <div class="min-w-0">
-                <p class="text-sm font-medium text-dark-50 truncate">{{ friend.name || friend.displayName }}</p>
+                <p class="text-sm font-medium text-[var(--t1)] truncate">{{ friend.name || friend.displayName }}</p>
                 <p class="text-xs text-[var(--t2)] truncate">{{ friend.email || `@${friend.username}` }}</p>
                 <p class="mt-1 text-[11px] mono-label text-[var(--t3)] truncate">
                   {{ friend.role || 'member' }} · {{ friend.department || 'Department' }}
@@ -211,17 +211,17 @@
     <!-- About -->
     <div v-if="activeTab === 'About'" class="space-y-4">
       <UiCard class="p-4">
-        <h3 class="font-semibold text-dark-50 mb-3">Account</h3>
-        <div class="space-y-2 text-sm text-dark-200">
-          <p><span class="text-dark-400">Email:</span> {{ myProfile?.email || userStore.user?.email }}</p>
-          <p><span class="text-dark-400">Role:</span> {{ myProfile?.role || userStore.user?.role || 'student' }}</p>
-          <p><span class="text-dark-400">Department:</span> {{ myProfile?.department || userStore.user?.department || 'N/A' }}</p>
-          <p><span class="text-dark-400">Institution:</span> {{ myProfile?.institution || userStore.user?.institution || 'N/A' }}</p>
+        <h3 class="font-semibold text-[var(--t1)] mb-3">Account</h3>
+        <div class="space-y-2 text-sm text-[var(--t2)]">
+          <p><span class="text-[var(--t3)]">Email:</span> {{ myProfile?.email || userStore.user?.email }}</p>
+          <p><span class="text-[var(--t3)]">Role:</span> {{ myProfile?.role || userStore.user?.role || 'student' }}</p>
+          <p><span class="text-[var(--t3)]">Department:</span> {{ myProfile?.department || userStore.user?.department || 'N/A' }}</p>
+          <p><span class="text-[var(--t3)]">Institution:</span> {{ myProfile?.institution || userStore.user?.institution || 'N/A' }}</p>
         </div>
       </UiCard>
 
       <UiCard class="p-4">
-        <h3 class="font-semibold text-dark-50 mb-3">Skills</h3>
+        <h3 class="font-semibold text-[var(--t1)] mb-3">Skills</h3>
         <div class="flex flex-wrap gap-2">
           <UiBadge v-for="skill in skills" :key="skill" variant="accent">{{ skill }}</UiBadge>
         </div>

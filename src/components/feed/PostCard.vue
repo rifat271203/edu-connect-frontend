@@ -1,5 +1,5 @@
 <template>
-  <UiCard class="post-card !p-4">
+  <UiCard class="post-card !px-5 !py-[18px]">
     <!-- Header -->
     <div class="flex items-center gap-3 mb-4">
       <NuxtLink :to="`/profile/${post.user.username}`" class="shrink-0">
@@ -12,11 +12,11 @@
       <div class="flex-1 min-w-0">
         <NuxtLink 
           :to="`/profile/${post.user.username}`"
-          class="font-semibold text-[var(--t1)] hover:text-[var(--gold2)] transition-colors"
+          class="text-[15px] font-semibold text-[var(--t1)] hover:text-[var(--t1)] transition-colors"
         >
           {{ post.user.displayName }}
         </NuxtLink>
-        <p class="mono-label text-[11px] text-[var(--t3)]">@{{ post.user.username }} · {{ formattedTimestamp }}</p>
+        <p class="text-[12px] text-[rgba(244,241,235,0.35)]">@{{ post.user.username }} · {{ formattedTimestamp }}</p>
       </div>
       <button
         v-if="allowDelete && isOwnPost"
@@ -32,7 +32,7 @@
     
     <!-- Content -->
     <div class="mb-4">
-      <p class="text-[var(--t1)] whitespace-pre-wrap leading-relaxed">{{ post.content }}</p>
+      <p class="text-[13.5px] text-[var(--t1)] whitespace-pre-wrap leading-relaxed">{{ post.content }}</p>
     </div>
     
     <!-- Media -->
@@ -58,7 +58,7 @@
       <span 
         v-for="tag in post.tags" 
         :key="tag"
-        class="mono-label text-[11px] text-[var(--gold)] hover:text-[var(--gold2)] cursor-pointer"
+        class="text-[12px] font-medium text-[var(--t2)] hover:text-[var(--t1)] cursor-pointer"
       >
         {{ tag }}
       </span>
@@ -76,7 +76,7 @@
             ? 'text-[var(--t3)] opacity-60 cursor-not-allowed'
             : post.isLiked
               ? 'text-[rgba(239,68,68,0.9)]'
-              : 'text-[var(--t3)] hover:text-[var(--gold2)] hover:bg-[var(--surface2)]'
+              : 'text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)]'
         ]"
       >
         <svg 
@@ -88,7 +88,7 @@
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
-        <span class="mono-label text-[12px]">{{ post.likes }}</span>
+        <span class="text-[12px] font-medium">{{ post.likes }}</span>
       </button>
       
       <!-- Comment -->
@@ -96,20 +96,20 @@
         @click="$emit('comment', post.id)"
         :disabled="isGuest"
         class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200"
-        :class="isGuest ? 'text-[var(--t3)] opacity-60 cursor-not-allowed' : 'text-[var(--t3)] hover:text-[var(--gold2)] hover:bg-[var(--surface2)]'"
+        :class="isGuest ? 'text-[var(--t3)] opacity-60 cursor-not-allowed' : 'text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)]'"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
-        <span class="mono-label text-[12px]">{{ post.comments }}</span>
+        <span class="text-[12px] font-medium">{{ post.comments }}</span>
       </button>
       
       <!-- Share -->
-      <button class="flex items-center gap-2 px-2.5 py-1.5 text-[var(--t3)] hover:text-[var(--gold2)] hover:bg-[var(--surface2)] rounded-lg transition-all duration-200">
+      <button class="flex items-center gap-2 px-2.5 py-1.5 text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)] rounded-lg transition-all duration-200">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
         </svg>
-        <span class="mono-label text-[12px]">{{ post.shares }}</span>
+        <span class="text-[12px] font-medium">{{ post.shares }}</span>
       </button>
     </div>
   </UiCard>

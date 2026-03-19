@@ -14,9 +14,9 @@
       <p v-if="successMessage" class="mb-4 text-sm text-green-400">{{ successMessage }}</p>
 
       <template v-if="publicProfile">
-        <div class="mb-6 rounded-2xl border border-surface-glass-border bg-dark-900/70 p-4 md:p-6">
+        <div class="mb-6 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6">
           <div class="flex flex-col md:flex-row md:items-end gap-4">
-            <div class="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-dark-800 bg-dark-800/70">
+            <div class="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-[var(--line2)] bg-[var(--surface2)]">
               <img
                 :src="publicProfile.profile.profilePicUrl"
                 :alt="publicProfile.profile.name"
@@ -25,10 +25,10 @@
             </div>
 
             <div class="flex-1 min-w-0">
-              <h1 class="text-2xl font-bold text-dark-50 truncate">{{ publicProfile.profile.name }}</h1>
-              <p class="text-dark-200">@{{ publicHandle }}</p>
-              <p class="text-xs text-dark-400 mt-1">{{ profileMetaLine }}</p>
-              <p class="text-xs text-dark-300 mt-1">
+              <h1 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)] truncate">{{ publicProfile.profile.name }}</h1>
+              <p class="text-[13px] text-[rgba(244,241,235,0.4)]">@{{ publicHandle }}</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)] mt-1">{{ profileMetaLine }}</p>
+              <p class="text-[12px] text-[rgba(244,241,235,0.35)] mt-1">
                 {{ publicProfile.profile.isProfilePublic ? 'Public profile' : 'Private profile' }}
               </p>
             </div>
@@ -47,32 +47,32 @@
         </div>
 
         <UiCard class="mb-6 p-4">
-          <p class="text-dark-100 leading-relaxed">
+          <p class="text-[13px] text-[rgba(244,241,235,0.6)] leading-relaxed">
             {{ publicProfile.profile.role || 'Member' }} at {{ publicProfile.profile.institution || 'EduConnect' }}
           </p>
         </UiCard>
 
         <div class="grid grid-cols-3 gap-3 mb-8">
-          <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-            <div class="text-xl font-bold text-dark-50">{{ publicProfile.stats.postCount }}</div>
-            <div class="text-sm text-dark-300">Posts</div>
+          <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+            <div class="text-[20px] font-bold text-[var(--t1)]">{{ publicProfile.stats.postCount }}</div>
+            <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Posts</div>
           </div>
-          <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-            <div class="text-xl font-bold text-dark-50">{{ publicProfile.stats.shareCount }}</div>
-            <div class="text-sm text-dark-300">Shares</div>
+          <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+            <div class="text-[20px] font-bold text-[var(--t1)]">{{ publicProfile.stats.shareCount }}</div>
+            <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Shares</div>
           </div>
-          <div class="text-center rounded-xl bg-dark-900/50 border border-surface-glass-border p-3">
-            <div class="text-xl font-bold text-dark-50">{{ publicProfile.stats.friendCount }}</div>
-            <div class="text-sm text-dark-300">Friends</div>
+          <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
+            <div class="text-[20px] font-bold text-[var(--t1)]">{{ publicProfile.stats.friendCount }}</div>
+            <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Friends</div>
           </div>
         </div>
 
-        <div class="flex gap-1 border-b border-surface-glass-border mb-6">
+        <div class="flex gap-4 border-b border-[var(--line)] mb-6">
           <button
             v-for="tab in tabs"
             :key="tab"
-            class="tab-button"
-            :class="{ active: activeTab === tab }"
+            class="pb-2 text-[14px] font-semibold transition-colors"
+            :class="activeTab === tab ? 'text-[var(--t1)] border-b-2 border-[var(--gold)]' : 'text-[rgba(244,241,235,0.45)] border-b-2 border-transparent hover:text-[var(--t2)]'"
             @click="activeTab = tab"
           >
             {{ tab }}
@@ -87,19 +87,19 @@
           />
 
           <UiCard v-if="publicProfile.recentPosts.length === 0" class="p-4">
-            <p class="text-sm text-dark-300">No public posts available.</p>
+            <p class="text-sm text-[var(--t3)]">No public posts available.</p>
           </UiCard>
         </div>
 
         <div v-if="activeTab === 'About'" class="space-y-4">
           <UiCard class="p-4">
-            <h3 class="font-semibold text-dark-50 mb-3">Account</h3>
-            <div class="space-y-2 text-sm text-dark-200">
-              <p><span class="text-dark-400">Email:</span> {{ publicProfile.profile.email || 'Hidden' }}</p>
-              <p><span class="text-dark-400">Role:</span> {{ publicProfile.profile.role || 'member' }}</p>
-              <p><span class="text-dark-400">Department:</span> {{ publicProfile.profile.department || 'N/A' }}</p>
-              <p><span class="text-dark-400">Institution:</span> {{ publicProfile.profile.institution || 'N/A' }}</p>
-              <p><span class="text-dark-400">Connection:</span> {{ connectionLabel }}</p>
+            <h3 class="font-semibold text-[var(--t1)] mb-3">Account</h3>
+            <div class="space-y-2 text-sm text-[var(--t2)]">
+              <p><span class="text-[var(--t3)]">Email:</span> {{ publicProfile.profile.email || 'Hidden' }}</p>
+              <p><span class="text-[var(--t3)]">Role:</span> {{ publicProfile.profile.role || 'member' }}</p>
+              <p><span class="text-[var(--t3)]">Department:</span> {{ publicProfile.profile.department || 'N/A' }}</p>
+              <p><span class="text-[var(--t3)]">Institution:</span> {{ publicProfile.profile.institution || 'N/A' }}</p>
+              <p><span class="text-[var(--t3)]">Connection:</span> {{ connectionLabel }}</p>
             </div>
           </UiCard>
         </div>

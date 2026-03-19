@@ -7,13 +7,13 @@
       :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
     >
       <div v-if="message.role === 'assistant'" class="flex items-start gap-2.5 sm:gap-3 w-full max-w-[88%] sm:max-w-[80%] lg:max-w-[76%]">
-        <div class="w-8 h-8 rounded-lg bg-[var(--gold-dim)] border border-[var(--line-gold)] text-[var(--gold)] flex items-center justify-center flex-shrink-0">
+        <div class="w-8 h-8 rounded-lg bg-[var(--surface2)] border border-[var(--line)] text-[var(--gold)] flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
         <div class="min-w-0 w-full">
-          <p class="mono-label text-[10px] uppercase tracking-[0.15em] text-[var(--gold)] mb-1">AI Tutor</p>
+          <p class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[rgba(244,241,235,0.35)] mb-1">AI Tutor</p>
 
           <div
             v-if="message.isStreaming"
@@ -62,9 +62,9 @@
           class="flex-shrink-0"
         />
         <div class="min-w-0 w-full">
-          <p class="mono-label text-[10px] uppercase tracking-[0.15em] text-[var(--t3)] mb-1 text-right">You</p>
-          <div class="bg-[linear-gradient(135deg,#c4a464,#e8c882)] rounded-[14px] rounded-bl-[4px] p-3.5 sm:p-4 border border-[rgba(196,164,100,0.45)]">
-            <p class="text-[#07090f] whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-relaxed font-medium">{{ message.content }}</p>
+          <p class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[var(--t3)] mb-1 text-right">You</p>
+          <div class="bg-[var(--gold)] rounded-[14px] rounded-br-[4px] p-3.5 sm:p-4 border border-transparent">
+            <p class="text-[#07090f] whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-[14px] leading-relaxed font-medium">{{ message.content }}</p>
           </div>
         </div>
       </div>
@@ -72,13 +72,13 @@
 
     <div v-if="isTyping" class="flex justify-start">
       <div class="flex items-start gap-2.5 sm:gap-3 max-w-[88%] sm:max-w-[80%] lg:max-w-[76%]">
-        <div class="w-8 h-8 rounded-lg bg-[var(--gold-dim)] border border-[var(--line-gold)] text-[var(--gold)] flex items-center justify-center">
+        <div class="w-8 h-8 rounded-lg bg-[var(--surface2)] border border-[var(--line)] text-[var(--gold)] flex items-center justify-center">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
         <div class="bg-[var(--surface2)] border border-[var(--line)] rounded-[14px] rounded-bl-[4px] px-3.5 sm:px-4 py-3">
-          <p class="mono-label text-[10px] text-[var(--t3)] mb-2">AI Tutor is generating a response...</p>
+          <p class="text-[10px] text-[var(--t3)] mb-2 uppercase tracking-[0.08em] font-semibold">AI Tutor is generating a response...</p>
           <div class="flex gap-1.5">
             <span class="w-2 h-2 bg-[var(--gold)] rounded-full animate-bounce" style="animation-delay: 0ms"></span>
             <span class="w-2 h-2 bg-[var(--gold)] rounded-full animate-bounce" style="animation-delay: 150ms"></span>

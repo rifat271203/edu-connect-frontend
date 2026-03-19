@@ -9,8 +9,8 @@
       >
         <div class="px-4 pt-4 pb-3 border-b border-[var(--line)]">
           <div class="flex items-center justify-between">
-            <p class="font-display text-3xl leading-7 text-[var(--t1)]">Messages</p>
-            <p class="mono-label text-[11px] text-[var(--t3)]">@{{ userStore.user?.username || 'user' }}</p>
+            <p class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Messages</p>
+            <p class="text-[12px] text-[rgba(244,241,235,0.35)]">@{{ userStore.user?.username || 'user' }}</p>
           </div>
 
           <div class="mt-3 flex gap-2">
@@ -59,7 +59,7 @@
         <div class="px-3 py-3 border-b border-[var(--line)]">
           <div class="flex items-center justify-between px-1">
             <p class="section-label">Friends</p>
-            <span class="mono-label text-[11px] text-[var(--t3)]">{{ visibleFriends.length }}</span>
+            <span class="text-[11px] font-semibold text-[var(--t3)]">{{ visibleFriends.length }}</span>
           </div>
 
           <div v-if="friendsLoading" class="mt-2 flex gap-2 overflow-hidden">
@@ -103,7 +103,7 @@
               class="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
               :class="[
                 selectedUserId === String(conversation.user.id)
-                  ? 'bg-[var(--surface2)] border-l-2 border-l-[var(--gold)] border-[var(--line)]'
+                  ? 'bg-[rgba(196,164,100,0.1)] border-l-2 border-l-[var(--gold)] border-[var(--line)]'
                   : 'hover:bg-[var(--surface2)] border border-transparent',
               ]"
               @click="openConversation(conversation.user)"
@@ -112,10 +112,10 @@
 
               <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between gap-2">
-                  <p class="text-sm font-medium text-slate-800 dark:text-dark-50 truncate">
+                  <p class="text-[13px] font-medium text-[var(--t1)] truncate">
                     {{ conversation.user.displayName }}
                   </p>
-                  <span class="mono-label text-[11px] text-[var(--t3)] shrink-0">
+                  <span class="text-[11px] text-[var(--t3)] shrink-0">
                     {{ formatRelativeTime(conversation.lastMessageAt) }}
                   </span>
                 </div>
@@ -143,11 +143,11 @@
             </UiButton>
             <UiAvatar :src="activeUser.avatar" :name="activeUser.displayName" size="md" />
             <div class="min-w-0 flex-1">
-              <p class="font-display text-2xl leading-6 text-[var(--t1)] truncate">{{ activeUser.displayName }}</p>
-              <p class="mono-label text-[11px] text-[var(--t3)] truncate">@{{ activeUser.username }}</p>
+              <p class="text-[15px] font-semibold text-[var(--t1)] truncate">{{ activeUser.displayName }}</p>
+              <p class="text-[12px] text-[rgba(244,241,235,0.35)] truncate">@{{ activeUser.username }}</p>
             </div>
             <div class="hidden sm:flex items-center gap-2 text-[var(--t2)]">
-              <span class="mono-label text-[10px] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1">DM</span>
+              <span class="text-[10px] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 uppercase tracking-[0.1em] font-semibold">DM</span>
             </div>
           </header>
 
@@ -177,17 +177,17 @@
               :class="isOwnMessage(message) ? 'justify-end' : 'justify-start'"
             >
               <div
-                class="max-w-[85%] sm:max-w-[68%] rounded-2xl px-3 py-2"
+                class="max-w-[85%] sm:max-w-[68%] rounded-[12px] px-3 py-2"
                 :class="[
                   isOwnMessage(message)
-                    ? 'bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f]'
+                    ? 'bg-[var(--gold)] text-[#07090f]'
                     : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
                 ]"
               >
-                <p class="text-sm whitespace-pre-wrap break-words">{{ message.messageText }}</p>
+                <p class="text-[14px] whitespace-pre-wrap break-words">{{ message.messageText }}</p>
                 <p
-                  class="mt-1 mono-label text-[10px]"
-                  :class="isOwnMessage(message) ? 'text-[#07090f]/70' : 'text-[var(--t3)]'"
+                  class="mt-1 text-[10px]"
+                  :class="isOwnMessage(message) ? 'text-[#07090f]/65' : 'text-[rgba(244,241,235,0.3)]'"
                 >
                   {{ formatMessageTime(message.createdAt) }}
                   <span v-if="isOwnMessage(message)">· {{ message.isRead ? 'Seen' : 'Sent' }}</span>
@@ -197,11 +197,11 @@
           </div>
 
           <form class="px-3 sm:px-4 py-3 border-t border-[var(--line)] bg-[var(--ink2)]" @submit.prevent="handleSendMessage">
-            <div class="flex items-center gap-2 rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+            <div class="flex items-center gap-2 rounded-[10px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
               <textarea
                 v-model="messageDraft"
                 rows="1"
-                class="flex-1 resize-none bg-transparent text-sm text-[var(--t1)] placeholder:text-[var(--t3)] focus:outline-none"
+                class="flex-1 resize-none bg-transparent text-[14px] text-[var(--t1)] placeholder:text-[rgba(244,241,235,0.3)] focus:outline-none"
                 placeholder="Message..."
                 :disabled="sendingMessage"
               />

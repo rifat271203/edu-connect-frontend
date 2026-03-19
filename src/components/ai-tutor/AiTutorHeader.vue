@@ -3,7 +3,7 @@
     <div class="px-4 lg:px-6 py-3.5 sm:py-4 flex items-center gap-3">
       <button
         @click="emit('go-back')"
-        class="md:hidden p-2 -ml-2 rounded-lg border border-[var(--line)] bg-[var(--surface2)] text-[var(--t2)] hover:text-[var(--gold2)] hover:border-[var(--line-gold)] transition-colors"
+        class="md:hidden p-2 -ml-2 rounded-lg border border-[var(--line)] bg-[var(--surface2)] text-[var(--t2)] hover:text-[var(--t1)] hover:border-[var(--line2)] transition-colors"
         title="Go back"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -11,22 +11,22 @@
         </svg>
       </button>
 
-      <div class="hidden sm:flex w-10 h-10 rounded-xl border border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] items-center justify-center">
+      <div class="hidden sm:flex w-10 h-10 rounded-xl border border-[rgba(196,164,100,0.38)] bg-[var(--surface2)] text-[var(--gold)] items-center justify-center">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
         </svg>
       </div>
 
       <div class="min-w-0">
-        <h1 class="font-display text-3xl leading-7 text-[var(--t1)]">AI Tutor</h1>
-        <p class="text-xs text-[var(--t2)] truncate">Structured, reliable explanations for serious study</p>
+        <h1 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">AI Tutor</h1>
+        <p class="text-[13px] text-[rgba(244,241,235,0.5)] truncate">Structured, reliable explanations for serious study</p>
       </div>
 
       <div class="ml-auto hidden md:flex items-center gap-2">
-        <span class="px-2.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] text-[11px] mono-label text-[var(--t2)]">
+        <span class="px-2.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] text-[11px] font-medium text-[var(--t2)]">
           {{ messageCount }} messages
         </span>
-        <span class="px-2.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] text-[11px] mono-label text-[var(--t2)]">
+        <span class="px-2.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] text-[11px] font-medium text-[var(--t2)]">
           {{ savedChatCount }} saved chats
         </span>
       </div>

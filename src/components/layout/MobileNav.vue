@@ -5,11 +5,11 @@
         v-for="item in navItems"
         :key="item.path"
         :to="item.path"
-        class="flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200"
-        :class="isActive(item.path) ? 'text-[var(--gold)] bg-[var(--gold-dim)] border border-[var(--line-gold)]' : 'text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)] border border-transparent'"
+        class="flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-150"
+        :class="isActive(item.path) ? 'text-[var(--t1)] bg-[rgba(196,164,100,0.1)] border-l-2 border-l-[var(--gold)]' : 'text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)]'"
       >
         <span v-html="item.icon" class="w-6 h-6" />
-        <span class="text-[11px] font-medium">{{ item.label }}</span>
+        <span class="text-[11px] font-medium tracking-[0]">{{ item.label }}</span>
       </NuxtLink>
     </div>
   </nav>

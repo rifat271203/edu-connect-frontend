@@ -17,10 +17,10 @@
           >
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <div>
-                <p class="text-sm font-semibold text-[var(--t1)]">Choose your tutor category first</p>
-                <p class="text-xs text-[var(--t2)] mt-1">Select Physics, Chemistry, or Math before asking any question.</p>
+                <p class="text-[15px] font-semibold text-[var(--t1)]">Choose your tutor category first</p>
+                <p class="text-[12.5px] text-[rgba(244,241,235,0.5)] mt-1">Select Physics, Chemistry, or Math before asking any question.</p>
               </div>
-              <div class="text-xs mono-label text-[var(--t3)]">
+              <div class="text-[12px] font-medium text-[var(--t3)]">
                 Current: <span class="font-semibold text-[var(--gold)]">{{ selectedCategoryLabel }}</span>
               </div>
             </div>
@@ -30,23 +30,23 @@
                 v-for="option in categoryOptions"
                 :key="option.value"
                 @click="setCategory(option.value)"
-                class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] px-3 py-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--line-gold)] hover:bg-[var(--surface3)]"
+                class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] px-3 py-3 text-left transition-all duration-150 hover:border-[var(--line2)] hover:bg-[var(--surface3)]"
                 :class="selectedCategory === option.value ? 'border-[var(--gold)] bg-[var(--gold-dim)] ring-1 ring-[var(--line-gold)]' : ''"
               >
-                <p class="text-sm font-bold text-[var(--t1)]">{{ option.label }}</p>
-                <p class="text-xs text-[var(--t2)] mt-1">{{ option.description }}</p>
+                <p class="text-[15px] font-bold text-[var(--t1)]">{{ option.label }}</p>
+                <p class="text-[12.5px] text-[rgba(244,241,235,0.5)] mt-1">{{ option.description }}</p>
               </button>
             </div>
           </div>
 
           <div v-else key="category-indicator" class="max-w-4xl mx-auto flex justify-end">
             <div class="inline-flex items-center gap-2 rounded-full border border-[var(--line-gold)] bg-[var(--gold-dim)] px-3 py-2">
-              <span class="mono-label text-[11px] uppercase tracking-wide text-[var(--gold)]">Tutor Mode</span>
+              <span class="text-[10px] uppercase tracking-[0.1em] font-semibold text-[var(--gold)]">Tutor Mode</span>
               <span class="h-1 w-1 rounded-full bg-[var(--gold)]"></span>
-              <span class="text-xs font-semibold text-[var(--gold2)]">{{ selectedCategoryLabel }}</span>
+              <span class="text-[12px] font-semibold text-[var(--gold)]">{{ selectedCategoryLabel }}</span>
               <button
                 @click="selectedCategory = null"
-                class="ml-1 rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 text-[11px] font-medium text-[var(--t2)] transition-colors hover:border-[var(--line-gold)] hover:text-[var(--gold2)]"
+                class="ml-1 rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 text-[11px] font-medium text-[var(--t2)] transition-colors hover:border-[var(--line-gold)] hover:text-[var(--gold)]"
               >
                 Change
               </button>
@@ -73,7 +73,7 @@
       />
 
       <div v-else class="flex-1 px-4 lg:px-6 py-8">
-        <div class="max-w-4xl mx-auto rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6 text-sm text-[var(--t2)]">
+        <div class="max-w-4xl mx-auto rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6 text-[13.5px] text-[var(--t2)]">
           Select one category above to activate AI Tutor.
         </div>
       </div>

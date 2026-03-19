@@ -2,12 +2,12 @@
   <div class="mx-auto w-full max-w-3xl p-4 pb-24 lg:pb-6">
     <!-- Header -->
     <header class="mb-6 space-y-1">
-      <h1 class="font-display text-4xl text-[var(--t1)]">Home</h1>
-      <p class="text-sm text-[var(--t2)]">See what your classmates are up to</p>
+      <h1 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Home</h1>
+      <p class="text-[13.5px] text-[rgba(244,241,235,0.5)]">See what your classmates are up to</p>
     </header>
 
     <!-- Create Post -->
-    <UiCard v-if="!isGuest" class="feed-composer mb-6 !p-5">
+    <UiCard v-if="!isGuest" class="feed-composer mb-6 !p-4">
       <div class="flex items-start gap-3">
         <UiAvatar 
           :src="userStore.user?.avatar"
@@ -18,7 +18,7 @@
           <textarea
             v-model="newPostContent"
             rows="3"
-            class="w-full resize-none border-0 bg-transparent p-0 text-[15px] text-[var(--t1)] placeholder:text-[var(--t3)] focus:outline-none"
+            class="w-full resize-none border-0 bg-transparent p-0 text-[14px] text-[var(--t1)] placeholder:text-[rgba(244,241,235,0.3)] focus:outline-none"
             placeholder="What's on your mind?"
           />
 
@@ -46,18 +46,18 @@
             @change="handleMediaSelected"
           />
 
-          <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
+          <div class="mt-[10px] flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
             <div class="flex items-center gap-2">
               <UiButton variant="ghost" @click="openMediaPicker">
                 Add photo/video
               </UiButton>
-              <span v-if="selectedMediaFile" class="mono-label text-[11px] text-[var(--t3)] max-w-[200px] truncate" :title="selectedMediaFile.name">
+              <span v-if="selectedMediaFile" class="text-[12px] text-[var(--t3)] max-w-[200px] truncate" :title="selectedMediaFile.name">
                 {{ selectedMediaFile.name }}
               </span>
               <button
                 v-if="selectedMediaFile"
                 type="button"
-                class="mono-label text-[11px] text-[rgba(239,68,68,0.9)] hover:opacity-80 transition-colors"
+                class="text-[12px] text-[rgba(239,68,68,0.9)] hover:opacity-80 transition-colors"
                 @click="clearSelectedMedia"
               >
                 Remove
@@ -88,8 +88,8 @@
         <UiCard class="!p-5">
           <div class="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Course feed</h2>
-              <p class="text-sm text-[var(--t3)]">Teacher-created courses available for enrollment</p>
+              <h2 class="text-[16px] font-bold text-[var(--t1)]">Course feed</h2>
+              <p class="text-[13.5px] text-[rgba(244,241,235,0.55)]">Teacher-created courses available for enrollment</p>
             </div>
             <UiButton variant="ghost" size="sm" :disabled="classroomCoursesLoading" @click="loadClassroomFeed">
               Refresh
@@ -109,18 +109,18 @@
             <div
               v-for="course in classroomCourses"
               :key="`home-course-${course.id}`"
-              class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--line-gold)]"
+              class="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-4 transition-all duration-200 hover:border-[var(--line2)] hover:translate-y-[-1px]"
             >
               <div class="mb-3 flex items-center gap-3">
                 <UiAvatar :src="course.instructor.avatar" :name="course.instructor.displayName" size="md" />
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-semibold text-[var(--t1)]">{{ course.instructor.displayName }}</p>
-                  <p class="mono-label text-[11px] text-[var(--t3)]">@{{ course.instructor.username }} · {{ formatRelativeTime(course.createdAt) }}</p>
+                  <p class="truncate text-[15px] font-semibold text-[var(--t1)]">{{ course.instructor.displayName }}</p>
+                  <p class="text-[12px] text-[rgba(244,241,235,0.35)]">@{{ course.instructor.username }} · {{ formatRelativeTime(course.createdAt) }}</p>
                 </div>
                 <UiBadge :variant="course.status === 'archived' ? 'warning' : 'active'">{{ course.status }}</UiBadge>
               </div>
 
-              <h3 class="font-display text-[28px] leading-7 text-[var(--t1)]">{{ course.title }}</h3>
+              <h3 class="text-[16px] font-bold text-[var(--t1)]">{{ course.title }}</h3>
               <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface2)]">
                 <img
                   :src="course.coursePicUrl"
@@ -129,19 +129,19 @@
                   loading="lazy"
                 />
               </div>
-              <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--t2)]">{{ course.description || 'No description added yet.' }}</p>
+              <p class="mt-2 whitespace-pre-wrap text-[13px] text-[rgba(244,241,235,0.55)]">{{ course.description || 'No description added yet.' }}</p>
 
-              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--t3)]">
-                <span v-if="course.code" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
-                <span v-if="course.department" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
-                <span class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-[rgba(244,241,235,0.3)]">
+                <span v-if="course.code" class="rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
+                <span v-if="course.department" class="rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
+                <span class="rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
               </div>
 
               <div class="mt-3">
                 <NuxtLink
                   v-if="isGuest"
                   to="/login"
-                  class="inline-flex h-9 items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--surface2)] px-3 text-sm font-semibold text-[var(--t1)] transition-colors hover:border-[var(--line-gold)] hover:text-[var(--gold2)]"
+                  class="inline-flex h-9 items-center justify-center rounded-[8px] border border-[var(--line)] bg-[var(--surface2)] px-3 text-[13px] font-semibold text-[var(--t1)] transition-colors hover:border-[var(--line2)]"
                 >
                   Log in to enroll
                 </NuxtLink>

@@ -2,29 +2,29 @@
   <div class="max-w-[700px] mx-auto p-4 pb-24 lg:pb-6">
     <!-- Header -->
     <header class="mb-6 space-y-1">
-      <h1 class="font-display text-4xl text-[var(--t1)]">Settings</h1>
-      <p class="text-[var(--t2)] text-sm">Manage your account preferences</p>
+      <h1 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Settings</h1>
+      <p class="text-[13.5px] text-[rgba(244,241,235,0.5)]">Manage your account preferences</p>
     </header>
     
     <!-- Settings Sections -->
     <div class="space-y-6">
       <!-- Account -->
       <UiCard class="!p-6">
-        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Account</h2>
+        <h2 class="text-[16px] font-bold text-[var(--t1)] mb-4">Account</h2>
         
         <div class="space-y-1 divide-y divide-[var(--line)]">
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Email</p>
-              <p class="text-sm text-[var(--t2)]">{{ userStore.user?.email || 'Not available' }}</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">{{ userStore.user?.email || 'Not available' }}</p>
             </div>
-            <UiButton variant="ghost" size="sm" disabled class="mono-label">Managed</UiButton>
+            <UiButton variant="ghost" size="sm" disabled>Managed</UiButton>
           </div>
           
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Password</p>
-              <p class="mono-label text-sm text-[var(--t2)]">••••••••••••</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">••••••••••••</p>
             </div>
             <UiButton variant="ghost" size="sm" @click="togglePasswordForm">
               {{ showPasswordForm ? 'Cancel' : 'Change' }}
@@ -49,7 +49,7 @@
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Two-Factor Authentication</p>
-              <p class="text-sm text-[var(--t2)]">Add an extra layer of security</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Add an extra layer of security</p>
             </div>
             <UiButton size="sm">Enable</UiButton>
           </div>
@@ -58,13 +58,13 @@
       
       <!-- Appearance -->
       <UiCard class="!p-6">
-        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Appearance</h2>
+        <h2 class="text-[16px] font-bold text-[var(--t1)] mb-4">Appearance</h2>
         
         <div class="space-y-1 divide-y divide-[var(--line)]">
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Quick Theme Toggle</p>
-              <p class="text-sm text-[var(--t2)]">Switch instantly between light and dark</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Switch instantly between light and dark</p>
             </div>
             <button
               type="button"
@@ -72,7 +72,7 @@
               :aria-checked="isDarkMode"
               :aria-label="isDarkMode ? 'Switch to light theme' : 'Switch to dark theme'"
               class="relative h-6 w-11 rounded-full border transition-colors duration-200 focus-visible:outline-none"
-              :class="isDarkMode ? 'border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)]' : 'border-[var(--line)] bg-[var(--surface3)]'"
+              :class="isDarkMode ? 'border-transparent bg-[var(--gold)]' : 'border-[var(--line)] bg-[var(--surface3)]'"
               @click="toggleTheme"
             >
               <span
@@ -85,7 +85,7 @@
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Theme</p>
-              <p class="text-sm text-[var(--t2)]">Choose your preferred theme (system, dark, or light)</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Choose your preferred theme (system, dark, or light)</p>
             </div>
             <select
               v-model="selectedTheme"
@@ -108,7 +108,7 @@
           
           <div class="py-4">
             <p class="font-semibold text-[14px] text-[var(--t1)]">Brand Accent</p>
-            <p class="text-sm text-[var(--t2)] mb-3">Choose between the new premium preset and the classic green accent</p>
+            <p class="text-[13px] text-[rgba(244,241,235,0.5)] mb-3">Choose between the new premium preset and the classic green accent</p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
@@ -143,15 +143,15 @@
       
       <!-- Notifications -->
       <UiCard class="!p-6">
-        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Notifications</h2>
+        <h2 class="text-[16px] font-bold text-[var(--t1)] mb-4">Notifications</h2>
         
         <div class="space-y-1 divide-y divide-[var(--line)]">
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Push Notifications</p>
-              <p class="text-sm text-[var(--t2)]">Receive notifications on your device</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Receive notifications on your device</p>
             </div>
-            <button class="w-11 h-6 rounded-full relative border border-[var(--line-gold)]" style="background: linear-gradient(135deg,#c4a464,#e8c882);">
+            <button class="w-11 h-6 rounded-full relative border border-transparent bg-[var(--gold)]">
               <span class="absolute right-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-primary);" />
             </button>
           </div>
@@ -159,7 +159,7 @@
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Email Notifications</p>
-              <p class="text-sm text-[var(--t2)]">Receive updates via email</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Receive updates via email</p>
             </div>
             <button class="w-11 h-6 rounded-full relative border border-[var(--line)]" style="background: var(--surface3);">
               <span class="absolute left-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-secondary);" />
@@ -169,9 +169,9 @@
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Friend Requests</p>
-              <p class="text-sm text-[var(--t2)]">Get notified for new friend requests</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Get notified for new friend requests</p>
             </div>
-            <button class="w-11 h-6 rounded-full relative border border-[var(--line-gold)]" style="background: linear-gradient(135deg,#c4a464,#e8c882);">
+            <button class="w-11 h-6 rounded-full relative border border-transparent bg-[var(--gold)]">
               <span class="absolute right-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-primary);" />
             </button>
           </div>
@@ -180,13 +180,13 @@
       
       <!-- Privacy -->
       <UiCard class="!p-6">
-        <h2 class="font-display text-3xl leading-8 text-[var(--t1)] mb-4">Privacy</h2>
+        <h2 class="text-[16px] font-bold text-[var(--t1)] mb-4">Privacy</h2>
         
         <div class="space-y-1 divide-y divide-[var(--line)]">
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Profile Visibility</p>
-              <p class="text-sm text-[var(--t2)]">Who can see your profile</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Who can see your profile</p>
             </div>
             <div class="flex items-center gap-2">
               <select
@@ -222,9 +222,9 @@
           <div class="flex items-center justify-between py-4">
             <div>
               <p class="font-semibold text-[14px] text-[var(--t1)]">Show Online Status</p>
-              <p class="text-sm text-[var(--t2)]">Let others see when you're online</p>
+              <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Let others see when you're online</p>
             </div>
-            <button class="w-11 h-6 rounded-full relative border border-[var(--line-gold)]" style="background: linear-gradient(135deg,#c4a464,#e8c882);">
+            <button class="w-11 h-6 rounded-full relative border border-transparent bg-[var(--gold)]">
               <span class="absolute right-1 top-1 w-4 h-4 rounded-full" style="background: var(--on-primary);" />
             </button>
           </div>
@@ -233,12 +233,12 @@
       
       <!-- Danger Zone -->
       <UiCard class="!p-6" style="border-color: rgba(239,68,68,0.35);">
-        <h2 class="font-display text-3xl leading-8 text-[rgba(239,68,68,0.9)] mb-4">Danger Zone</h2>
+        <h2 class="text-[16px] font-bold text-[rgba(239,68,68,0.9)] mb-4">Danger Zone</h2>
         
         <div class="flex items-center justify-between py-4">
           <div>
             <p class="font-semibold text-[14px] text-[var(--t1)]">Delete Account</p>
-            <p class="text-sm text-[var(--t2)]">Permanently delete your account and data</p>
+            <p class="text-[13px] text-[rgba(244,241,235,0.5)]">Permanently delete your account and data</p>
           </div>
           <UiButton variant="danger" size="sm">Delete</UiButton>
         </div>

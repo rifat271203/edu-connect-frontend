@@ -1,8 +1,8 @@
 <template>
   <div class="mx-auto max-w-5xl p-4 pb-24 lg:pb-6">
     <header class="mb-6 space-y-1">
-      <h1 class="font-display text-4xl text-[var(--t1)]">Classroom</h1>
-      <p class="text-[var(--t2)] text-sm">
+      <h1 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Classroom</h1>
+      <p class="text-[13.5px] text-[rgba(244,241,235,0.5)]">
         {{
           isTeacher
             ? 'Create and manage private courses for your students.'
@@ -14,8 +14,8 @@
     <UiCard class="mb-6 !p-5">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Live class meetings</h2>
-          <p class="text-sm text-[var(--t2)]">
+          <h2 class="text-[16px] font-bold text-[var(--t1)]">Live class meetings</h2>
+          <p class="text-[13.5px] text-[rgba(244,241,235,0.55)]">
             {{ isTeacher ? 'Start a room and share the ID with your class.' : 'Join a room using the ID shared by your teacher.' }}
           </p>
         </div>
@@ -54,7 +54,7 @@
     <template v-else>
       <section v-if="isTeacher" class="space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Your course feed</h2>
+          <h2 class="text-[16px] font-bold text-[var(--t1)]">Your course feed</h2>
           <div class="flex items-center gap-2">
             <UiButton @click="openCreateCourseModal">Create Course</UiButton>
             <UiButton variant="ghost" size="sm" :disabled="coursesLoading" @click="loadTeacherCourses">
@@ -72,13 +72,13 @@
             <div class="mb-3 flex items-center gap-3">
               <UiAvatar :src="course.instructor.avatar" :name="course.instructor.displayName" size="md" />
               <div class="min-w-0 flex-1">
-                <p class="font-semibold text-[var(--t1)] truncate">{{ course.instructor.displayName }}</p>
-                <p class="mono-label text-[11px] text-[var(--t3)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
+                <p class="text-[14px] font-semibold text-[var(--t1)] truncate">{{ course.instructor.displayName }}</p>
+                <p class="text-[12px] text-[rgba(244,241,235,0.35)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
               </div>
               <UiBadge :variant="course.status === 'archived' ? 'warning' : 'success'">{{ course.status }}</UiBadge>
             </div>
 
-            <h3 class="font-display text-[30px] leading-8 text-[var(--t1)]">{{ course.title }}</h3>
+            <h3 class="text-[16px] font-bold text-[var(--t1)]">{{ course.title }}</h3>
             <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface2)]">
               <img
                 :src="course.coursePicUrl"
@@ -87,12 +87,12 @@
                 loading="lazy"
               />
             </div>
-            <p class="mt-1 whitespace-pre-wrap text-sm text-[var(--t2)]">{{ course.description || 'No description added yet.' }}</p>
+            <p class="mt-1 whitespace-pre-wrap text-[13px] text-[rgba(244,241,235,0.55)]">{{ course.description || 'No description added yet.' }}</p>
 
-            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--t3)]">
-              <span v-if="course.code" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
-              <span v-if="course.department" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
-              <span class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
+            <div class="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-[rgba(244,241,235,0.3)]">
+              <span v-if="course.code" class="rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
+              <span v-if="course.department" class="rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
+              <span class="rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
             </div>
 
             <div class="mt-4 flex flex-wrap gap-2">
@@ -179,7 +179,7 @@
       <section v-else class="space-y-6">
         <section>
           <div class="mb-3 flex items-center justify-between gap-3">
-            <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">My enrolled courses</h2>
+            <h2 class="text-[16px] font-bold text-[var(--t1)]">My enrolled courses</h2>
             <UiButton variant="ghost" size="sm" :disabled="enrollmentsLoading" @click="loadMyEnrollments">
               Refresh
             </UiButton>
@@ -199,14 +199,14 @@
             >
               <div class="flex items-start justify-between gap-2">
                 <div>
-                  <h3 class="font-semibold text-[16px] text-[var(--t1)]">{{ enrollment.course.title }}</h3>
+                  <h3 class="font-semibold text-[15px] text-[var(--t1)]">{{ enrollment.course.title }}</h3>
                   <p class="mt-1 text-[13px] text-[var(--t2)]">{{ enrollment.course.description || 'No description.' }}</p>
-                  <p class="mt-2 mono-label text-[11px] text-[var(--t3)]">
+                  <p class="mt-2 text-[12px] text-[rgba(244,241,235,0.35)]">
                     Teacher: {{ enrollment.course.instructor.displayName }} · {{ formatTimestamp(enrollment.enrolledAt) }}
                   </p>
                 </div>
                 <span
-                  class="mono-label inline-flex items-center rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em]"
+                  class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.1em] font-semibold"
                   :class="
                     (enrollment.status || '').toLowerCase() === 'approved'
                       ? 'bg-[rgba(52,211,153,0.1)] text-[#34d399]'
@@ -224,7 +224,7 @@
 
         <section>
           <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 class="font-display text-[30px] leading-8 text-[var(--t1)]">Course feed</h2>
+            <h2 class="text-[16px] font-bold text-[var(--t1)]">Course feed</h2>
             <div class="flex items-center gap-2">
               <div class="relative min-w-56">
                 <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--t3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -245,13 +245,13 @@
               <div class="mb-3 flex items-center gap-3">
                 <UiAvatar :src="course.instructor.avatar" :name="course.instructor.displayName" size="md" />
                 <div class="min-w-0 flex-1">
-                  <p class="font-semibold text-[var(--t1)] truncate">{{ course.instructor.displayName }}</p>
-                  <p class="mono-label text-[11px] text-[var(--t3)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
+                  <p class="text-[14px] font-semibold text-[var(--t1)] truncate">{{ course.instructor.displayName }}</p>
+                  <p class="text-[12px] text-[rgba(244,241,235,0.35)]">@{{ course.instructor.username }} · {{ formatTimestamp(course.createdAt) }}</p>
                 </div>
                 <UiBadge :variant="course.status === 'archived' ? 'warning' : 'accent'">{{ course.status }}</UiBadge>
               </div>
 
-              <h3 class="font-display text-[30px] leading-8 text-[var(--t1)]">{{ course.title }}</h3>
+              <h3 class="text-[16px] font-bold text-[var(--t1)]">{{ course.title }}</h3>
               <div v-if="course.coursePicUrl" class="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface2)]">
                 <img
                   :src="course.coursePicUrl"
@@ -260,12 +260,12 @@
                   loading="lazy"
                 />
               </div>
-              <p class="mt-1 whitespace-pre-wrap text-sm text-[var(--t2)]">{{ course.description || 'No description added yet.' }}</p>
+              <p class="mt-1 whitespace-pre-wrap text-[13px] text-[rgba(244,241,235,0.55)]">{{ course.description || 'No description added yet.' }}</p>
 
-              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--t3)]">
-                <span v-if="course.code" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
-                <span v-if="course.department" class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
-                <span class="mono-label rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-[rgba(244,241,235,0.3)]">
+                <span v-if="course.code" class="rounded-full bg-[var(--surface2)] px-2 py-1">Code: {{ course.code }}</span>
+                <span v-if="course.department" class="rounded-full bg-[var(--surface2)] px-2 py-1">Dept: {{ course.department }}</span>
+                <span class="rounded-full bg-[var(--surface2)] px-2 py-1">Members: {{ course.memberCount }}</span>
               </div>
 
               <div class="mt-4">
@@ -314,8 +314,8 @@
       <div class="relative w-full max-w-xl card-theme p-6">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h3 class="font-display text-3xl leading-8 text-[var(--t1)]">Create Course</h3>
-            <p class="mt-1 text-sm text-[var(--t2)]">Upload a course image and publish it as a course feed post.</p>
+            <h3 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Create Course</h3>
+            <p class="mt-1 text-[13.5px] text-[rgba(244,241,235,0.55)]">Upload a course image and publish it as a course feed post.</p>
           </div>
           <button
             type="button"

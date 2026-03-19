@@ -1,14 +1,14 @@
 <template>
-  <aside class="sidebar fixed left-0 top-0 bottom-0 w-[240px] z-30 flex flex-col">
+  <aside class="sidebar fixed left-0 top-0 bottom-0 w-[220px] z-30 flex flex-col">
     <!-- Logo -->
-    <div class="px-5 py-6 border-b border-[var(--line)]">
+    <div class="h-[60px] px-4 border-b border-[var(--line)] flex items-center">
       <NuxtLink to="/home" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl border border-[var(--line-gold)] bg-[linear-gradient(135deg,#c4a464,#e8c882)] text-[#07090f] flex items-center justify-center transition-all duration-200 group-hover:-translate-y-0.5">
+        <div class="w-8 h-8 rounded-lg border border-[rgba(196,164,100,0.38)] bg-[var(--surface2)] text-[var(--gold)] flex items-center justify-center transition-all duration-150 group-hover:border-[var(--gold)]">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
           </svg>
         </div>
-        <span class="font-display text-[29px] leading-none text-[var(--t1)]">EduConnect</span>
+        <span class="logo-wordmark text-[30px] leading-none text-[var(--t1)]">EduConnect</span>
       </NuxtLink>
     </div>
 
@@ -20,7 +20,7 @@
           <input
             v-model="searchQuery"
             type="text"
-            class="ui-input !h-10"
+            class="ui-input !h-9"
             placeholder="Search users"
             @keydown.enter.prevent="runUserSearch"
           />
@@ -28,14 +28,14 @@
           <div class="flex items-center gap-2">
             <select
               v-model="searchRole"
-              class="select-field flex-1 !h-10"
+              class="select-field flex-1 !h-9"
             >
               <option value="">All roles</option>
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>
             </select>
 
-            <UiButton size="sm" variant="ghost" :disabled="searchLoading || !searchQuery.trim()" @click="runUserSearch">
+            <UiButton size="sm" variant="ghost" class="!h-9" :disabled="searchLoading || !searchQuery.trim()" @click="runUserSearch">
               {{ searchLoading ? '...' : 'Search' }}
             </UiButton>
           </div>
@@ -75,14 +75,14 @@
         ]"
         @click="$emit('navigate')"
         >
-        <span v-html="item.icon" class="w-5 h-5" />
-        <span class="font-semibold text-[14px]">{{ item.label }}</span>
+        <span v-html="item.icon" class="w-[18px] h-[18px]" />
+        <span class="font-medium text-[13.5px] tracking-[0]">{{ item.label }}</span>
       </NuxtLink>
     </nav>
     
     <!-- User Section -->
     <div class="p-4 border-t border-[var(--line)] bg-[var(--ink2)]">
-      <div class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-3 flex items-center gap-3">
+      <div class="flex items-center gap-3">
         <UiAvatar 
           :src="userStore.user?.avatar"
           :name="userStore.user?.name || 'User'"

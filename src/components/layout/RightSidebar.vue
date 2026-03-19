@@ -1,18 +1,18 @@
 <template>
-  <aside class="w-[280px] shrink-0 border-l border-[var(--line)] bg-[var(--ink2)]">
+  <aside class="w-[260px] shrink-0 border-l border-[var(--line)] bg-[#0c1120]">
     <div class="sticky top-0 h-screen overflow-y-auto p-4 space-y-6">
       <!-- Friend Requests -->
       <div v-if="friendRequests.length > 0">
         <div class="mb-3 flex items-center justify-between">
-          <h3 class="section-label">Friend requests</h3>
-          <button class="text-[11px] mono-label text-[var(--gold)] hover:text-[var(--gold2)]">See all</button>
+          <h3 class="section-label section-label-lined">Friend requests</h3>
+          <button class="text-[11px] font-medium text-[var(--gold)] hover:text-[var(--gold-hover)]">See all</button>
         </div>
         
         <div class="space-y-2">
           <div 
             v-for="request in friendRequests" 
             :key="request.id"
-            class="widget-card p-3 flex items-center gap-3"
+            class="p-2.5 flex items-center gap-3 border-b border-[var(--line-soft)]"
           >
               <UiAvatar 
                 :src="request.avatar" 
@@ -20,8 +20,8 @@
                 size="md"
               />
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[var(--text)] truncate">{{ request.name }}</p>
-                <p class="text-xs text-[var(--text-3)]">{{ request.subtitle }}</p>
+                <p class="text-[13px] font-semibold text-[var(--t1)] truncate">{{ request.name }}</p>
+                <p class="text-[12px] text-[var(--t2)]">{{ request.subtitle }}</p>
               </div>
               <div class="flex gap-2">
                 <UiButton size="sm" variant="primary" class="!px-3" @click="acceptFriendRequest(request.id)">
@@ -42,15 +42,15 @@
       <!-- Notifications -->
       <div>
         <div class="mb-3 flex items-center justify-between">
-          <h3 class="section-label">Recent activity</h3>
-          <button class="text-[11px] mono-label text-[var(--gold)] hover:text-[var(--gold2)]" @click="notificationsStore.markAllAsRead">Mark all read</button>
+          <h3 class="section-label section-label-lined">Recent activity</h3>
+          <button class="text-[11px] font-medium text-[var(--gold)] hover:text-[var(--gold-hover)]" @click="notificationsStore.markAllAsRead">Mark all read</button>
         </div>
         
         <div class="space-y-2">
           <div 
             v-for="notification in notifications" 
             :key="notification.id"
-            class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-3 transition-all duration-200 hover:border-[var(--line-gold)] hover:bg-[var(--surface2)]"
+            class="flex items-start gap-3 py-[10px] border-b border-[var(--line-soft)]"
             :class="{ 'unread': !notification.read }"
             role="button"
             tabindex="0"
@@ -64,11 +64,11 @@
               size="sm"
             />
             <div class="flex-1 min-w-0">
-              <p class="text-sm text-[var(--t2)] leading-relaxed">
-                <span class="font-semibold text-[var(--t1)]">{{ notification.name }}</span>
+              <p class="text-[13px] text-[var(--t2)] leading-relaxed">
+                <span class="font-semibold text-[13px] text-[var(--t1)]">{{ notification.name }}</span>
                 {{ notification.action }}
               </p>
-              <p class="mono-label text-[10px] text-[var(--t3)] mt-1">{{ formatTimestamp(notification.time) }}</p>
+              <p class="text-[11px] text-[rgba(244,241,235,0.3)] mt-1">{{ formatTimestamp(notification.time) }}</p>
             </div>
           </div>
         </div>
@@ -77,9 +77,9 @@
       <!-- Popular Courses -->
       <div>
         <div class="mb-3 flex items-center justify-between gap-2">
-          <h3 class="section-label">Popular courses</h3>
+          <h3 class="section-label section-label-lined">Popular courses</h3>
           <button
-            class="text-[11px] mono-label text-[var(--gold)] hover:text-[var(--gold2)]"
+            class="text-[11px] font-medium text-[var(--gold)] hover:text-[var(--gold-hover)]"
             :disabled="coursesLoading"
             @click="loadPopularCourses"
           >
@@ -103,7 +103,7 @@
             v-else
             :key="`popular-course-${course.id}`"
             to="/classroom"
-            class="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-3 flex items-start gap-3 transition-all duration-200 hover:border-[var(--line-gold)] hover:bg-[var(--surface2)]"
+            class="py-[10px] border-b border-[var(--line-soft)] flex items-start gap-3 transition-all duration-150 hover:translate-x-[1px]"
           >
             <img
               v-if="course.coursePicUrl"
@@ -120,11 +120,11 @@
             />
 
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-semibold text-[var(--t1)] truncate">{{ course.title }}</p>
-              <p class="text-[11px] mono-label text-[var(--t3)] truncate mt-0.5">
+              <p class="text-[13px] font-semibold text-[var(--t1)] truncate">{{ course.title }}</p>
+              <p class="text-[11px] text-[var(--t3)] truncate mt-0.5">
                 {{ course.code || 'No code' }} · {{ course.instructor.displayName }}
               </p>
-              <p class="text-[11px] mono-label text-[var(--t3)] mt-1">{{ course.memberCount }} members</p>
+              <p class="text-[11px] text-[var(--t3)] mt-1">{{ course.memberCount }} members</p>
             </div>
 
             <UiBadge :variant="course.status === 'archived' ? 'warning' : 'accent'">
@@ -136,7 +136,7 @@
       
       <!-- Footer -->
       <div class="pt-4 border-t border-[var(--line)]">
-        <p class="mono-label text-[10px] text-[var(--t3)]">
+        <p class="text-[11px] text-[var(--t3)] uppercase tracking-[0.1em] font-semibold">
           © 2024 EduConnect · Privacy · Terms
         </p>
       </div>
