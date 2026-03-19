@@ -97,6 +97,12 @@
 
             <div class="mt-4 flex flex-wrap gap-2">
               <UiButton
+                size="sm"
+                @click="navigateTo(`/classroom/${encodeURIComponent(course.id)}`)"
+              >
+                Open Classroom
+              </UiButton>
+              <UiButton
                 v-if="course.status === 'archived'"
                 size="sm"
                 variant="secondary"
@@ -184,7 +190,13 @@
           </div>
 
           <div v-else class="grid gap-3 md:grid-cols-2">
-            <UiCard v-for="enrollment in myEnrollments" :key="`enrollment-${enrollment.id}`" class="p-4">
+            <UiCard
+              v-for="enrollment in myEnrollments"
+              :key="`enrollment-${enrollment.id}`"
+              class="p-4"
+              hover
+              @click="navigateTo(`/classroom/${encodeURIComponent(enrollment.course.id)}`)"
+            >
               <div class="flex items-start justify-between gap-2">
                 <div>
                   <h3 class="font-semibold text-[var(--text)]">{{ enrollment.course.title }}</h3>
