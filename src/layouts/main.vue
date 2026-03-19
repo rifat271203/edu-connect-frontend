@@ -1,7 +1,7 @@
 <template>
   <div class="relative min-h-screen bg-[var(--ink)] text-[var(--t1)] flex overflow-x-hidden">
     <!-- Left Sidebar - Desktop -->
-    <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex relative z-20" />
+    <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex z-20" />
     
     <!-- Main Content Area -->
     <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[220px]' : '']">
