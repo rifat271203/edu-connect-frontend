@@ -6,6 +6,9 @@ import type {
   ChemistryTutorSolution,
   MathTutorSolution,
   PhysicsTutorSolution,
+  TutorMainAnswer,
+  TutorSection,
+  TutorStructuredResponse,
   ReactionType,
   SubstrateClass,
   TutorCategory,
@@ -25,7 +28,14 @@ export interface AIAskRequest {
 }
 
 export interface AIAskResponse {
-  answer?: string | MathTutorSolution | PhysicsTutorSolution | ChemistryTutorSolution
+  answer?: string | MathTutorSolution | PhysicsTutorSolution | ChemistryTutorSolution | TutorStructuredResponse
+  response_schema?: string
+  schema_version?: string
+  topic?: string
+  method?: string
+  main_answer?: TutorMainAnswer
+  sections?: TutorSection[]
+  structured_response?: TutorStructuredResponse
   is_conversion?: boolean
   question_mode?: string
   steps?: Array<string | { title?: string; work?: string; result?: string }>

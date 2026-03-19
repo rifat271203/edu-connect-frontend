@@ -34,6 +34,49 @@ export interface TutorStep {
   result?: string
 }
 
+export type TutorSectionType =
+  | 'text'
+  | 'equation'
+  | 'step'
+  | 'bullet_points'
+  | 'final_answer'
+  | 'markdown'
+
+export interface TutorMainAnswer {
+  label?: string
+  text?: string
+  latex?: string
+}
+
+export interface TutorSection {
+  id?: string
+  type: TutorSectionType
+  title?: string
+  content?: string
+  latex?: string
+  items?: string[]
+  step?: number
+  explanation?: string
+  equations?: string[]
+  result?: string
+  result_latex?: string
+}
+
+export interface TutorStructuredResponse {
+  schema_version?: string
+  topic?: string
+  method?: string
+  main_answer?: TutorMainAnswer
+  sections: TutorSection[]
+}
+
+export interface TutorStreamProgress {
+  showTopic: boolean
+  showMethod: boolean
+  showMainAnswer: boolean
+  revealedSections: number
+}
+
 export interface MathTutorSolution {
   answer?: string
   steps?: TutorStep[]
@@ -95,6 +138,8 @@ export interface Message {
   content: string
   isStreaming?: boolean
   revealedMathSteps?: number
+  richResponse?: TutorStructuredResponse
+  streamProgress?: TutorStreamProgress
   diagram?: ReactionDiagramData
   mechanismSteps?: MechanismStep[]
   mathSolution?: MathTutorSolution

@@ -39,7 +39,7 @@
 
     <main>
       <section id="hero">
-        <div class="hero-badge"><span class="badge-dot"></span>Intelligent Learning Platform</div>
+        <div class="hero-badge"><span class="badge-dot"></span>Social Educational Learning Platform</div>
         <h1 class="hero-title">
           Where Education<br />
           <span class="italic">Meets Intelligence</span>
