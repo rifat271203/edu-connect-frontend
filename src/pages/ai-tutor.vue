@@ -111,12 +111,9 @@ import type {
   MathTutorSolution,
   Message,
   PhysicsTutorSolution,
-  TutorSection,
   TutorCategory,
-  TutorStructuredResponse,
   TutorStep,
 } from '~/types/aiTutor'
-import { splitStep } from '~/utils/mathFormat'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 
@@ -329,432 +326,6 @@ const toStringArray = (value: unknown): string[] => {
     .filter((item): item is string => typeof item === 'string')
     .map(item => item.trim())
     .filter(Boolean)
-}
-
-const asRecord = (value: unknown): Record<string, unknown> | null => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
-  return value as Record<string, unknown>
-}
-
-const asString = (value: unknown): string | undefined => {
-  if (typeof value !== 'string') return undefined
-  const trimmed = value.trim()
-  return trimmed || undefined
-}
-
-const tryParseJsonString = (value: string): Record<string, unknown> | null => {
-  const trimmed = value.trim()
-  if (!trimmed) return null
-
-  const jsonCandidate = trimmed
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/i, '')
-    .replace(/\s*```$/i, '')
-    .trim()
-
-  if (!(jsonCandidate.startsWith('{') && jsonCandidate.endsWith('}'))) return null
-
-  try {
-    const parsed = JSON.parse(jsonCandidate) as unknown
-    return asRecord(parsed)
-  } catch {
-    return null
-  }
-}
-
-const normalizeSectionType = (value: unknown): TutorSection['type'] => {
-  if (typeof value !== 'string') return 'text'
-
-  const normalized = value.trim().toLowerCase()
-
-  if (normalized === 'step') return 'step'
-  if (normalized === 'equation') return 'equation'
-  if (normalized === 'final_answer' || normalized === 'final-answer') return 'final_answer'
-  if (
-    normalized === 'bullet_points' ||
-    normalized === 'bullet-points' ||
-    normalized === 'bullets' ||
-    normalized === 'list'
-  ) {
-    return 'bullet_points'
-  }
-  if (normalized === 'markdown') return 'markdown'
-  return 'text'
-}
-
-const isLikelyEquationText = (value: string): boolean => {
-  const sample = value.trim()
-  if (!sample) return false
-
-  return /[=^_{}\\]|∫|√|\b(?:sin|cos|tan|log|ln|dx|dy|dz)\b/i.test(sample)
-}
-
-const normalizeMainAnswer = (value: unknown, fallbackFinalAnswer?: string): TutorStructuredResponse['main_answer'] => {
-  const raw = asRecord(value)
-  if (!raw) {
-    if (!fallbackFinalAnswer) return undefined
-    const isEquation = isLikelyEquationText(fallbackFinalAnswer)
-    return {
-      label: 'Final Answer',
-      latex: isEquation ? fallbackFinalAnswer : undefined,
-      text: isEquation ? undefined : fallbackFinalAnswer,
-    }
-  }
-
-  const label = asString(raw.label) || 'Final Answer'
-  const latex = asString(raw.latex)
-  const text = asString(raw.text) || asString(raw.content)
-
-  if (!latex && !text) {
-    if (!fallbackFinalAnswer) return undefined
-    const isEquation = isLikelyEquationText(fallbackFinalAnswer)
-    return {
-      label,
-      latex: isEquation ? fallbackFinalAnswer : undefined,
-      text: isEquation ? undefined : fallbackFinalAnswer,
-    }
-  }
-
-  return {
-    label,
-    latex,
-    text,
-  }
-}
-
-const toTutorSections = (value: unknown): TutorSection[] => {
-  if (!Array.isArray(value)) return []
-
-  return value
-    .map((entry, index): TutorSection | null => {
-      const raw = asRecord(entry)
-      if (!raw) return null
-
-      const type = normalizeSectionType(raw.type)
-      const title = asString(raw.title)
-      const content = asString(raw.content)
-      const latex = asString(raw.latex)
-      const explanation = asString(raw.explanation) || asString(raw.work)
-      const result = asString(raw.result)
-      const resultLatex = asString(raw.result_latex)
-
-      const section: TutorSection = {
-        id: asString(raw.id) || `section-${index + 1}`,
-        type,
-        title,
-        content,
-        latex,
-        step: typeof raw.step === 'number' ? raw.step : undefined,
-        explanation,
-        equations: toStringArray(raw.equations),
-        result,
-        result_latex: resultLatex,
-        items: toStringArray(raw.items),
-      }
-
-      const hasContent = Boolean(
-        section.title ||
-        section.content ||
-        section.latex ||
-        section.explanation ||
-        section.equations?.length ||
-        section.items?.length ||
-        section.result ||
-        section.result_latex
-      )
-
-      return hasContent ? section : null
-    })
-    .filter((section): section is TutorSection => Boolean(section))
-}
-
-const toTopicLabel = (category: TutorCategory): string => {
-  if (category === 'math') return 'Mathematics'
-  if (category === 'physics') return 'Physics'
-  if (category === 'chemistry') return 'Chemistry'
-  return 'Tutor'
-}
-
-const buildLegacySections = (
-  aiResponse: string,
-  mathSolution?: MathTutorSolution,
-  physicsSolution?: PhysicsTutorSolution,
-  chemistrySolution?: ChemistryTutorSolution
-): TutorSection[] => {
-  const sections: TutorSection[] = []
-
-  if (mathSolution?.answer) {
-    sections.push({
-      id: 'math-explanation',
-      type: 'text',
-      title: 'Explanation',
-      content: mathSolution.answer,
-    })
-  }
-
-  if (mathSolution?.steps?.length) {
-    mathSolution.steps.forEach((step, index) => {
-      const { textLines, mathLines } = splitStep(step.work)
-      sections.push({
-        id: `math-step-${index + 1}`,
-        type: 'step',
-        step: index + 1,
-        title: step.title || `Step ${index + 1}`,
-        explanation: textLines.join(' '),
-        equations: mathLines,
-        result: step.result,
-      })
-    })
-  }
-
-  if (physicsSolution?.given?.length) {
-    const givenItems = physicsSolution.given.map(item => {
-      const pieces = [item.symbol, item.value, item.unit, item.description].filter(Boolean)
-      return pieces.join(' — ')
-    })
-
-    sections.push({
-      id: 'physics-given',
-      type: 'bullet_points',
-      title: 'Given',
-      items: givenItems,
-    })
-  }
-
-  if (physicsSolution?.formula) {
-    sections.push({
-      id: 'physics-formula',
-      type: 'equation',
-      title: 'Formula',
-      latex: physicsSolution.formula,
-    })
-  }
-
-  if (physicsSolution?.steps?.length) {
-    physicsSolution.steps.forEach((step, index) => {
-      const { textLines, mathLines } = splitStep(step.work)
-      sections.push({
-        id: `physics-step-${index + 1}`,
-        type: 'step',
-        step: index + 1,
-        title: step.title || `Step ${index + 1}`,
-        explanation: textLines.join(' '),
-        equations: mathLines,
-        result: step.result,
-      })
-    })
-  }
-
-  if (chemistrySolution?.answer) {
-    sections.push({
-      id: 'chemistry-explanation',
-      type: 'text',
-      title: 'Explanation',
-      content: chemistrySolution.answer,
-    })
-  }
-
-  if (chemistrySolution?.equations?.length) {
-    chemistrySolution.equations.forEach((equation, index) => {
-      sections.push({
-        id: `chemistry-equation-${index + 1}`,
-        type: 'equation',
-        title: `Equation ${index + 1}`,
-        latex: equation,
-      })
-    })
-  }
-
-  if (chemistrySolution?.key_points?.length) {
-    sections.push({
-      id: 'chemistry-key-points',
-      type: 'bullet_points',
-      title: 'Key Points',
-      items: chemistrySolution.key_points,
-    })
-  }
-
-  if (!sections.length && aiResponse.trim()) {
-    sections.push({
-      id: 'generic-answer',
-      type: 'text',
-      title: 'Answer',
-      content: aiResponse,
-    })
-  }
-
-  return sections
-}
-
-const buildSectionsFromStructuredCandidate = (candidate: Record<string, unknown>): TutorSection[] => {
-  const sections = toTutorSections(candidate.sections)
-  if (sections.length) return sections
-
-  const fallbackSections: TutorSection[] = []
-
-  const candidateAnswer = asString(candidate.answer)
-  if (candidateAnswer) {
-    fallbackSections.push({
-      id: 'candidate-answer',
-      type: 'text',
-      title: 'Explanation',
-      content: candidateAnswer,
-    })
-  }
-
-  const candidateSteps = toTutorSteps(candidate.steps)
-  if (candidateSteps.length) {
-    candidateSteps.forEach((step, index) => {
-      const { textLines, mathLines } = splitStep(step.work)
-      fallbackSections.push({
-        id: `candidate-step-${index + 1}`,
-        type: 'step',
-        step: index + 1,
-        title: step.title || `Step ${index + 1}`,
-        explanation: textLines.join(' '),
-        equations: mathLines,
-        result: step.result,
-      })
-    })
-  }
-
-  const candidateEquations = toStringArray(candidate.equations)
-  if (candidateEquations.length) {
-    candidateEquations.forEach((equation, index) => {
-      fallbackSections.push({
-        id: `candidate-equation-${index + 1}`,
-        type: 'equation',
-        title: `Equation ${index + 1}`,
-        latex: equation,
-      })
-    })
-  }
-
-  const candidatePoints = toStringArray(candidate.key_points)
-  if (candidatePoints.length) {
-    fallbackSections.push({
-      id: 'candidate-key-points',
-      type: 'bullet_points',
-      title: 'Key Points',
-      items: candidatePoints,
-    })
-  }
-
-  return fallbackSections
-}
-
-const parseStructuredResponse = (
-  responseData: AIAskResponse,
-  resolvedCategory: TutorCategory,
-  aiResponse: string,
-  mathSolution?: MathTutorSolution,
-  physicsSolution?: PhysicsTutorSolution,
-  chemistrySolution?: ChemistryTutorSolution,
-): TutorStructuredResponse | undefined => {
-  const answerPayload = responseData.answer
-  const parsedAnswerObject = typeof answerPayload === 'string' ? tryParseJsonString(answerPayload) : null
-
-  const candidates: Array<Record<string, unknown> | null> = [
-    asRecord(responseData.structured_response),
-    asRecord(answerPayload),
-    parsedAnswerObject,
-    asRecord(responseData),
-  ]
-
-  for (const candidate of candidates) {
-    if (!candidate) continue
-
-    const containsStructuredFields = Boolean(
-      candidate.sections ||
-      candidate.main_answer ||
-      candidate.topic ||
-      candidate.method ||
-      candidate.steps ||
-      candidate.final_answer
-    )
-
-    if (!containsStructuredFields) continue
-
-    const topic = asString(candidate.topic) || toTopicLabel(resolvedCategory)
-    const method = asString(candidate.method)
-    const rootFinalAnswer = asString(candidate.final_answer)
-    const mainAnswer = normalizeMainAnswer(candidate.main_answer, rootFinalAnswer)
-    const sections = buildSectionsFromStructuredCandidate(candidate)
-
-    if (mainAnswer || sections.length || method) {
-      return {
-        schema_version:
-          asString(candidate.schema_version) ||
-          asString(responseData.schema_version) ||
-          asString(responseData.response_schema) ||
-          'tutor_response.v2',
-        topic,
-        method,
-        main_answer: mainAnswer,
-        sections,
-      }
-    }
-  }
-
-  const fallbackMainAnswer =
-    normalizeMainAnswer(undefined, mathSolution?.final_answer || physicsSolution?.final_answer || responseData.final_answer)
-
-  const fallbackSections = buildLegacySections(aiResponse, mathSolution, physicsSolution, chemistrySolution)
-
-  if (!fallbackMainAnswer && !fallbackSections.length) return undefined
-
-  return {
-    schema_version: 'tutor_response.v2',
-    topic: toTopicLabel(resolvedCategory),
-    method: undefined,
-    main_answer: fallbackMainAnswer,
-    sections: fallbackSections,
-  }
-}
-
-const createInitialStreamProgress = () => ({
-  showTopic: false,
-  showMethod: false,
-  showMainAnswer: false,
-  revealedSections: 0,
-})
-
-const revealStructuredMessage = async (messageIndex: number) => {
-  const message = messages.value[messageIndex]
-  if (!message?.richResponse || !message.streamProgress) return
-
-  const progress = message.streamProgress
-  const payload = message.richResponse
-
-  if (payload.topic) {
-    await wait(180)
-    progress.showTopic = true
-    await nextTick()
-    scrollToBottom()
-  }
-
-  if (payload.method) {
-    await wait(220)
-    progress.showMethod = true
-    await nextTick()
-    scrollToBottom()
-  }
-
-  if (payload.main_answer) {
-    await wait(240)
-    progress.showMainAnswer = true
-    await nextTick()
-    scrollToBottom()
-  }
-
-  for (let index = 0; index < payload.sections.length; index += 1) {
-    await wait(index === 0 ? 240 : 320)
-    progress.revealedSections = index + 1
-    await nextTick()
-    scrollToBottom()
-  }
-
-  message.isStreaming = false
 }
 
 const toTutorSteps = (value: unknown): TutorStep[] => {
@@ -1010,7 +581,6 @@ const resolveAssistantResponse = (
 ): {
   aiResponse: string
   resolvedCategory: TutorCategory
-  richResponse?: TutorStructuredResponse
   mathSolution?: MathTutorSolution
   physicsSolution?: PhysicsTutorSolution
   chemistrySolution?: ChemistryTutorSolution
@@ -1036,19 +606,9 @@ const resolveAssistantResponse = (
     aiResponse = responseData.answer.trim()
   }
 
-  const richResponse = parseStructuredResponse(
-    responseData,
-    resolvedCategory,
-    aiResponse,
-    mathSolution,
-    physicsSolution,
-    chemistrySolution,
-  )
-
   return {
     aiResponse,
     resolvedCategory,
-    richResponse,
     chemistrySolution,
     physicsSolution,
     mathSolution,
@@ -1078,12 +638,10 @@ const sendMessage = async (text: string) => {
       chemistrySolution,
       mathSolution,
       physicsSolution,
-      richResponse,
       resolvedCategory,
     } = resolveAssistantResponse(response.data, activeCategory)
 
     const hasStructuredContent = Boolean(
-      richResponse ||
       chemistrySolution ||
       physicsSolution ||
       mathSolution ||
@@ -1096,39 +654,13 @@ const sendMessage = async (text: string) => {
       hasMathSolution: Boolean(mathSolution),
       hasPhysicsSolution: Boolean(physicsSolution),
       hasChemistrySolution: Boolean(chemistrySolution),
-      hasRichResponse: Boolean(richResponse),
       aiResponseLength: aiResponse.length,
       answerStepLabelCount: countStepLabels(mathSolution?.answer),
       finalStepLabelCount: countStepLabels(mathSolution?.final_answer),
       stepsCount: mathSolution?.steps?.length || 0,
     })
 
-    if (richResponse) {
-      messages.value.push({
-        role: 'assistant',
-        content: '',
-        isStreaming: true,
-        revealedMathSteps: 0,
-        richResponse,
-        streamProgress: createInitialStreamProgress(),
-        mathSolution,
-        chemistrySolution,
-        physicsSolution,
-        diagram: chemistrySolution?.diagram || response.data.diagram,
-        mechanismSteps: chemistrySolution?.mechanism_steps || response.data.mechanism_steps,
-        showDiagram: false,
-        showMechanismSteps: false,
-        subject: response.data.subject || resolvedCategory,
-        category: response.data.category || resolvedCategory
-      })
-
-      const assistantMessageIndex = messages.value.length - 1
-      await nextTick()
-      scrollToBottom()
-      await revealStructuredMessage(assistantMessageIndex)
-      await nextTick()
-      renderMathInMessages()
-    } else if (hasStructuredContent) {
+    if (hasStructuredContent) {
       const shouldBypassStreaming = Boolean(mathSolution || chemistrySolution || physicsSolution)
 
       messages.value.push({
@@ -1158,7 +690,6 @@ const sendMessage = async (text: string) => {
         })
       } else {
         await nextTick()
-        renderMathInMessages()
       }
 
       const lastMsg = messages.value[messages.value.length - 1]

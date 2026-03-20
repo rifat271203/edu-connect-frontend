@@ -16,21 +16,14 @@
           <p class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[rgba(244,241,235,0.35)] mb-1">AI Tutor</p>
 
           <div
-            v-if="message.isStreaming && !message.richResponse"
+            v-if="message.isStreaming"
             class="bg-[var(--surface2)] border border-[var(--line)] rounded-[14px] rounded-bl-[4px] p-3.5 sm:p-4 text-[var(--t1)]"
           >
             <p class="whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-relaxed">{{ message.content }}</p>
           </div>
 
-          <AiTutorStructuredMessage
-            v-else-if="Boolean(message.richResponse) && !shouldUseChemistryRenderer(message)"
-            :message="message"
-            :message-index="index"
-            :render-markdown="renderMarkdown"
-          />
-
           <AiTutorChemistryMessage
-            v-else-if="shouldUseChemistryRenderer(message)"
+            v-else-if="isChemistryMessage(message)"
             :message="message"
             :message-index="index"
             :render-theme="renderTheme"
@@ -110,7 +103,6 @@ import { sanitizeMathText } from '~/utils/mathFormat'
 import AiTutorMathMessage from '~/components/ai-tutor/AiTutorMathMessage.vue'
 import AiTutorPhysicsMessage from '~/components/ai-tutor/AiTutorPhysicsMessage.vue'
 import AiTutorChemistryMessage from '~/components/ai-tutor/AiTutorChemistryMessage.vue'
-import AiTutorStructuredMessage from '~/components/ai-tutor/AiTutorStructuredMessage.vue'
 import MathZoomModal from '~/components/math/MathZoomModal.vue'
 
 const props = defineProps<{
@@ -154,17 +146,6 @@ const isChemistryMessage = (message: Message): boolean => {
     hint.includes('chemistry') ||
     hint.includes('chem') ||
     hint.includes('organic')
-  )
-}
-
-const shouldUseChemistryRenderer = (message: Message): boolean => {
-  if (!isChemistryMessage(message)) return false
-
-  return Boolean(
-    message.diagram ||
-    message.mechanismSteps?.length ||
-    message.chemistrySolution?.resonance ||
-    message.chemistrySolution?.is_conversion
   )
 }
 
