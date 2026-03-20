@@ -15,10 +15,10 @@ export const AI_TUTOR_PROMPTS_BY_CATEGORY: Record<TutorCategory, QuickPrompt[]> 
     { text: 'Difference between scalar and vector quantities with examples.', icon: questionIcon, tag: 'Basics' }
   ],
   chemistry: [
-    { text: 'Balance this equation step by step: Fe + O2 → Fe2O3', icon: mathIcon, tag: 'Chemical equations' },
-    { text: 'Explain ionic bond vs covalent bond with common examples.', icon: scienceIcon, tag: 'Bonding' },
-    { text: 'What is pH and how do I calculate it from H+ concentration?', icon: aiIcon, tag: 'Acids and bases' },
-    { text: 'Difference between endothermic and exothermic reactions.', icon: questionIcon, tag: 'Thermochemistry' }
+    { text: 'Convert Benzene to Toluene with a detailed mechanism.', icon: mathIcon, tag: 'Chemical equations' },
+    { text: 'Difference Between SN1 and SN2 Reactions.', icon: scienceIcon, tag: 'Bonding' },
+    { text: 'How can I identify phenol?', icon: aiIcon, tag: 'Acids and bases' },
+    { text: 'Benzene to Benzoyl Chloride', icon: questionIcon, tag: 'Thermochemistry' }
   ],
   math: [
     { text: 'Solve 2x + 5 = 15 step by step.', icon: mathIcon, tag: 'Algebra' },
