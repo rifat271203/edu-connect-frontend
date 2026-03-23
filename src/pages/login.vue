@@ -1131,6 +1131,19 @@ onUnmounted(() => {
 <style scoped>
 :global(html) { scroll-behavior: smooth; }
 
+/* Prevent layout shift during hydration */
+.landing-page {
+  /* Ensure minimum dimensions to prevent collapse */
+  min-width: 0;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.landing-page,
+.landing-page * {
+  box-sizing: border-box;
+}
+
 .landing-page {
   --ink: var(--ec-page-bg, #07090f);
   --ink2: #0c1120;
