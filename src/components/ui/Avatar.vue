@@ -13,7 +13,7 @@
     />
     <div
       v-else
-      class="rounded-full flex items-center justify-center text-white font-bold uppercase tracking-[0.02em] font-['Manrope']"
+      class="rounded-full flex items-center justify-center text-white font-bold uppercase tracking-[0.02em] font-['DM_Sans']"
       :class="sizeClasses"
       :style="{ background: fallbackBackground }"
     >

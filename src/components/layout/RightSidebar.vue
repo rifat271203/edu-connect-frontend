@@ -1,6 +1,6 @@
 <template>
-  <aside class="w-[260px] shrink-0 border-l border-[var(--line)] bg-[#0c1120]">
-    <div class="sticky top-0 h-screen overflow-y-auto p-4 space-y-6">
+  <aside class="w-[300px] shrink-0 border-l border-[var(--line)] bg-[var(--surface)]">
+    <div class="sticky top-0 h-screen overflow-y-auto p-6 space-y-8">
       <!-- Friend Requests -->
       <div v-if="friendRequests.length > 0">
         <div class="mb-3 flex items-center justify-between">

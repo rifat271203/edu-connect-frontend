@@ -4,7 +4,7 @@
     <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex z-20" />
     
     <!-- Main Content Area -->
-    <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[220px]' : '']">
+    <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[240px]' : '']">
       <!-- Mobile Header -->
       <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40">
         <div class="flex h-[60px] items-center justify-between px-4">
@@ -40,7 +40,7 @@
         </div>
         
         <!-- Right Sidebar - Desktop (hidden on ai-tutor/messages pages) -->
-        <LayoutRightSidebar v-if="showDesktopRightSidebar" class="hidden 2xl:block" />
+        <LayoutRightSidebar v-if="showDesktopRightSidebar" class="hidden xl:block" />
       </div>
     </main>
     
@@ -52,7 +52,7 @@
       >
         <div class="absolute inset-0 bg-[var(--theme-overlay)] backdrop-blur-sm" />
         <LayoutSidebar 
-          class="absolute left-0 top-0 bottom-0 w-[220px] animate-slide-up" 
+          class="absolute left-0 top-0 bottom-0 w-[240px] animate-slide-up" 
           @navigate="toggleMobileMenu"
         />
     </div>

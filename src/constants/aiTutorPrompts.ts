@@ -18,7 +18,7 @@ export const AI_TUTOR_PROMPTS_BY_CATEGORY: Record<TutorCategory, QuickPrompt[]> 
     { text: 'Convert Benzene to Toluene with a detailed mechanism.', icon: mathIcon, tag: 'Chemical equations' },
     { text: 'Difference Between SN1 and SN2 Reactions.', icon: scienceIcon, tag: 'Bonding' },
     { text: 'How can I identify phenol?', icon: aiIcon, tag: 'Acids and bases' },
-    { text: 'Benzene to Benzoyl Chloride', icon: questionIcon, tag: 'Thermochemistry' }
+    { text: 'Benzene to Benzoyl Chloridelo', icon: questionIcon, tag: 'Thermochemistry' }
   ],
   math: [
     { text: 'Solve 2x + 5 = 15 step by step.', icon: mathIcon, tag: 'Algebra' },
