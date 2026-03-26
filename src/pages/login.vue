@@ -242,7 +242,7 @@
                   <h3 class="auth-title">Welcome back</h3>
                   <p class="auth-sub">Sign in to your EduConnect dashboard</p>
 
-                  <div class="fg">
+                  <form class="fg" @submit.prevent="handleLogin">
                     <div class="af">
                       <label>Role</label>
                       <div class="sw">
@@ -277,11 +277,11 @@
                       <button class="ghost-btn" type="button">Forgot password?</button>
                     </div>
 
-                    <button class="abtn" :disabled="isLoginLoading" @click="handleLogin">
+                    <button class="abtn" type="submit" :disabled="isLoginLoading">
                       <span v-if="isLoginLoading" class="btn-inline"><span class="spin"></span>Signing in…</span>
                       <span v-else class="btn-inline">Sign In <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></span>
                     </button>
-                  </div>
+                  </form>
 
                   <div class="auth-div"><div class="adl"></div><span class="adt">or</span><div class="adl"></div></div>
                   <div class="soc-row">
@@ -299,7 +299,7 @@
                   <h3 class="auth-title">Join EduConnect</h3>
                   <p class="auth-sub">Start your learning journey today</p>
 
-                  <div class="fg fg2">
+                  <form class="fg fg2" @submit.prevent="handleRegister">
                     <div class="af c2">
                       <label>Role</label>
                       <div class="sw">
@@ -329,11 +329,11 @@
                     <div class="af"><label>Department</label><input v-model.trim="registerDepartment" type="text" placeholder="Computer Science" :class="{ err: Boolean(registerErrors.department) }" @input="clearRegisterFieldError('department')" /><span class="fe" :class="{ on: Boolean(registerErrors.department) }">{{ registerErrors.department }}</span></div>
                     <div class="af"><label>Institution</label><input v-model.trim="registerInstitution" type="text" placeholder="Dhaka College" :class="{ err: Boolean(registerErrors.institution) }" @input="clearRegisterFieldError('institution')" /><span class="fe" :class="{ on: Boolean(registerErrors.institution) }">{{ registerErrors.institution }}</span></div>
 
-                    <button class="abtn c2" :disabled="isRegisterLoading" @click="handleRegister">
+                    <button class="abtn c2" type="submit" :disabled="isRegisterLoading">
                       <span v-if="isRegisterLoading" class="btn-inline"><span class="spin"></span>Creating account…</span>
                       <span v-else class="btn-inline">Create Account <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg></span>
                     </button>
-                  </div>
+                  </form>
 
                   <p class="auth-footer">Have an account? <button class="sw-mode" type="button" @click="toLgn">Sign in →</button></p>
                   <div class="amsg err" :class="{ on: Boolean(registerErrorMessage) }">{{ registerErrorMessage }}</div>
