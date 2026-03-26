@@ -452,9 +452,9 @@ const scheduleTimeout = (fn: () => void, delay: number): void => {
   activeTimeouts.add(timerId)
 }
 
-const shouldEnableHeavyEffects = (): boolean => {
-  if (!process.client) return false
-  return window.innerWidth > 768 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const prefersReducedMotion = (): boolean => {
+  if (!process.client) return true
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 const getRevealObserver = (): IntersectionObserver | null => {
@@ -745,8 +745,10 @@ const initHeroScene = (): (() => void) => {
   const canvas = bgCanvasRef.value
   if (!canvas) return () => undefined
 
+  const isMobile = window.innerWidth <= 768
+
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.1 : 1.5))
   renderer.setClearColor(0x07090f, 1)
 
   const scene = new THREE.Scene()
@@ -763,7 +765,7 @@ const initHeroScene = (): (() => void) => {
 
   scene.add(new THREE.AmbientLight(0x1a2035, 1))
 
-  const nodeCount = 120
+  const nodeCount = isMobile ? 72 : 120
   const positions = new Float32Array(nodeCount * 3)
   const nodeData: Array<{ ox: number; oy: number; oz: number; vx: number; vy: number; vz: number; phase: number }> = []
 
@@ -794,13 +796,13 @@ const initHeroScene = (): (() => void) => {
   scene.add(nodePoints)
 
   const lineGeo = new THREE.BufferGeometry()
-  const lineArr = new Float32Array(50000 * 6)
+  const lineArr = new Float32Array((isMobile ? 18000 : 50000) * 6)
   lineGeo.setAttribute('position', new THREE.BufferAttribute(lineArr, 3))
   const lineMat = new THREE.LineBasicMaterial({ color: 0x8a6a38, transparent: true, opacity: 0.18 })
   const lineSegs = new THREE.LineSegments(lineGeo, lineMat)
   scene.add(lineSegs)
 
-  const dust = 600
+  const dust = isMobile ? 240 : 600
   const dustPos = new Float32Array(dust * 3)
   for (let i = 0; i < dust; i++) {
     dustPos[i * 3] = (Math.random() - 0.5) * 80
@@ -813,7 +815,7 @@ const initHeroScene = (): (() => void) => {
   scene.add(new THREE.Points(dustGeo, dustMat))
 
   const linePositions: number[] = []
-  const maxDistance = 5.5
+  const maxDistance = isMobile ? 4.8 : 5.5
   const buildLines = () => {
     linePositions.length = 0
     const pos = nodeGeo.attributes.position.array as Float32Array
@@ -1076,10 +1078,13 @@ onMounted(async () => {
   window.addEventListener('scroll', onScroll, { passive: true })
   onScroll()
 
-  if (shouldEnableHeavyEffects()) {
+  if (!prefersReducedMotion()) {
     cleanupFns.push(initHeroScene())
-    cleanupFns.push(initPurposeScene())
-    cleanupFns.push(initAboutScene())
+
+    if (window.innerWidth > 768) {
+      cleanupFns.push(initPurposeScene())
+      cleanupFns.push(initAboutScene())
+    }
   }
 
   cleanupFns.push(() => window.removeEventListener('scroll', onScroll))
