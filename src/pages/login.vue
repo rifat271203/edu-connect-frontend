@@ -1,7 +1,5 @@
 <template>
-  <div class="landing-page" @mousemove="handleMouseMove">
-    <div ref="cursorDotRef" class="cur-dot"></div>
-    <div ref="cursorRingRef" class="cur-ring"></div>
+  <div class="landing-page">
 
     <div class="grain"></div>
     <canvas id="bg-canvas" ref="bgCanvasRef"></canvas>
@@ -386,8 +384,6 @@ type MessageType = 'ok' | 'err' | ''
 const router = useRouter()
 const userStore = useUserStore()
 
-const cursorDotRef = ref<HTMLDivElement | null>(null)
-const cursorRingRef = ref<HTMLDivElement | null>(null)
 const bgCanvasRef = ref<HTMLCanvasElement | null>(null)
 const purposeCanvasRef = ref<HTMLCanvasElement | null>(null)
 const aboutCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -445,8 +441,6 @@ const authCookie = useCookie<string | null>('educonnect_auth', { path: '/', same
 const tokenCookie = useCookie<string | null>('educonnect_token', { path: '/', sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
 
 let revealObserver: IntersectionObserver | null = null
-let cursorAnimationFrame = 0
-const mousePos = { x: 0, y: 0, rx: 0, ry: 0 }
 const cleanupFns: Array<() => void> = []
 const activeTimeouts = new Set<number>()
 
@@ -456,6 +450,11 @@ const scheduleTimeout = (fn: () => void, delay: number): void => {
     fn()
   }, delay)
   activeTimeouts.add(timerId)
+}
+
+const shouldEnableHeavyEffects = (): boolean => {
+  if (!process.client) return false
+  return window.innerWidth > 768 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 const getRevealObserver = (): IntersectionObserver | null => {
@@ -724,32 +723,6 @@ const checkAuth = async (): Promise<void> => {
   if (token && isAuthenticated === 'true') {
     await router.push('/home')
   }
-}
-
-const handleMouseMove = (event: MouseEvent): void => {
-  mousePos.x = event.clientX
-  mousePos.y = event.clientY
-
-  if (cursorDotRef.value) {
-    cursorDotRef.value.style.left = `${mousePos.x}px`
-    cursorDotRef.value.style.top = `${mousePos.y}px`
-  }
-}
-
-const startCursorAnimation = (): void => {
-  const animate = () => {
-    mousePos.rx += (mousePos.x - mousePos.rx) * 0.12
-    mousePos.ry += (mousePos.y - mousePos.ry) * 0.12
-
-    if (cursorRingRef.value) {
-      cursorRingRef.value.style.left = `${mousePos.rx}px`
-      cursorRingRef.value.style.top = `${mousePos.ry}px`
-    }
-
-    cursorAnimationFrame = window.requestAnimationFrame(animate)
-  }
-
-  cursorAnimationFrame = window.requestAnimationFrame(animate)
 }
 
 const disposeScene = (scene: THREE.Scene): void => {
@@ -1103,20 +1076,17 @@ onMounted(async () => {
   window.addEventListener('scroll', onScroll, { passive: true })
   onScroll()
 
-  startCursorAnimation()
+  if (shouldEnableHeavyEffects()) {
+    cleanupFns.push(initHeroScene())
+    cleanupFns.push(initPurposeScene())
+    cleanupFns.push(initAboutScene())
+  }
 
-  cleanupFns.push(initHeroScene())
-  cleanupFns.push(initPurposeScene())
-  cleanupFns.push(initAboutScene())
   cleanupFns.push(() => window.removeEventListener('scroll', onScroll))
   cleanupFns.push(() => document.body.classList.remove('landing-body'))
 })
 
 onUnmounted(() => {
-  if (cursorAnimationFrame) {
-    window.cancelAnimationFrame(cursorAnimationFrame)
-  }
-
   cleanupFns.forEach((cleanup) => cleanup())
   cleanupFns.length = 0
 
@@ -1176,37 +1146,11 @@ onUnmounted(() => {
   color: var(--t1);
   overflow-x: hidden;
   min-height: 100vh;
-  cursor: none;
 }
 
 .landing-page,
 .landing-page * {
   box-sizing: border-box;
-}
-
-.cur-dot {
-  position: fixed;
-  z-index: 9999;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: transform 0.1s, background 0.2s;
-  box-shadow: 0 0 8px var(--gold);
-}
-
-.cur-ring {
-  position: fixed;
-  z-index: 9998;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid rgba(196, 164, 100, 0.45);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: all 0.18s ease;
 }
 
 #bg-canvas {
@@ -1580,6 +1524,68 @@ footer { background: var(--ink); border-top: 1px solid var(--line); padding: 56p
   .mob-btn { display: flex; }
   .purpose-grid, .about-grid, .contact-grid, .login-grid { grid-template-columns: 1fr; gap: 48px; }
   .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+
+  #hero {
+    padding: 96px clamp(16px, 4vw, 28px) 72px;
+  }
+
+  .hero-title {
+    font-size: clamp(2.1rem, 11vw, 3rem);
+    line-height: 1.08;
+  }
+
+  .hero-sub {
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 1.65;
+    max-width: 42ch;
+  }
+
+  .hero-actions {
+    margin-top: 28px;
+    gap: 10px;
+  }
+
+  .hero-pills {
+    margin-top: 36px;
+    gap: 8px;
+  }
+
+  .hero-pill {
+    font-size: 11.5px;
+    padding: 7px 12px;
+  }
+
+  #features, #purpose, #about, #testimonials, #contact, #login {
+    padding: 72px 0;
+  }
+
+  .sec-heading {
+    font-size: clamp(1.65rem, 8vw, 2.2rem);
+    line-height: 1.22;
+  }
+
+  .sec-body,
+  .fc p,
+  .step p,
+  .auth-sub,
+  .perk {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .auth-card {
+    padding: 24px;
+  }
+
+  .auth-title {
+    font-size: 1.45rem;
+  }
+
+  .purpose-canvas-wrap,
+  .about-canvas-wrap {
+    height: 300px;
+  }
 }
 
 @media (max-width: 580px) {

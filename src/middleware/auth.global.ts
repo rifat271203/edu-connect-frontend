@@ -1,5 +1,8 @@
 import { useUserStore } from '~/stores/user'
 
+const LAST_SYNC_KEY = 'educonnect_last_user_sync'
+const SYNC_INTERVAL_MS = 2 * 60 * 1000
+
 export default defineNuxtRouteMiddleware(async (to) => {
   // Only run on client side
   if (process.server) {
@@ -26,7 +29,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/login')
   }
 
-  await userStore.syncCurrentUser()
+  if (!userStore.user) {
+    await userStore.syncCurrentUser()
+  } else {
+    const now = Date.now()
+    const lastSync = Number(sessionStorage.getItem(LAST_SYNC_KEY) || '0')
+
+    if (now - lastSync > SYNC_INTERVAL_MS) {
+      sessionStorage.setItem(LAST_SYNC_KEY, String(now))
+      void userStore.syncCurrentUser()
+    }
+  }
 
   if (!userStore.isAuthenticated) {
     return navigateTo('/login')

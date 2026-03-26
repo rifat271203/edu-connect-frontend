@@ -38,7 +38,7 @@ export default defineNuxtConfig({
         { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css' }
       ]
     },
-    pageTransition: { name: 'fade', mode: 'out-in' }
+    pageTransition: { name: 'fade' }
   },
 
   routeRules: {
