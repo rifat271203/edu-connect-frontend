@@ -74,7 +74,7 @@
             <div v-reveal class="fc rv d1">
               <div class="fc-num">01</div>
               <div class="fc-img"><img src="/images/aipoint.jpeg" alt="AI Tutor" /></div>
-              <h3>AI Tutor, 24/7</h3>
+              <h3>AI Tutor Here, 24/7</h3>
               <p>Instant personalized explanations, step-by-step problem solving, and adaptive paths — available any hour of the day.</p>
             </div>
             <div v-reveal class="fc rv d2">
