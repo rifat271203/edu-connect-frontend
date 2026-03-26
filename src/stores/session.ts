@@ -6,11 +6,17 @@ interface SessionState {
   roomId: string | null
   role: ClassroomRole | null
   token: string | null
+  userId: string | null
+  displayName: string | null
   participants: Participant[]
   chatMessages: ChatMessage[]
   isRecording: boolean
   sessionStatus: SessionStatus
   waitingRoom: Participant[]
+  localStream: MediaStream | null
+  isScreenSharing: boolean
+  isMuted: boolean
+  isCameraOff: boolean
 }
 
 interface SessionTokenResponse {
@@ -70,11 +76,17 @@ export const useSessionStore = defineStore('session', {
     roomId: null,
     role: null,
     token: null,
+    userId: null,
+    displayName: null,
     participants: [],
     chatMessages: [],
     isRecording: false,
     sessionStatus: 'idle',
     waitingRoom: [],
+    localStream: null,
+    isScreenSharing: false,
+    isMuted: false,
+    isCameraOff: false,
   }),
 
   actions: {
@@ -88,6 +100,8 @@ export const useSessionStore = defineStore('session', {
 
       this.token = response.token
       this.role = role
+      this.userId = userId
+      this.displayName = name
       return response.token
     },
 
@@ -153,6 +167,47 @@ export const useSessionStore = defineStore('session', {
       })
 
       this.waitingRoom = this.waitingRoom.filter((participant) => participant.socketId !== socketId)
+    },
+
+    setLocalStream(stream: MediaStream | null) {
+      this.localStream = stream
+    },
+
+    setIsScreenSharing(value: boolean) {
+      this.isScreenSharing = value
+    },
+
+    setIsMuted(value: boolean) {
+      this.isMuted = value
+    },
+
+    setIsCameraOff(value: boolean) {
+      this.isCameraOff = value
+    },
+
+    updateParticipant(socketId: string, updates: Partial<Participant>) {
+      this.participants = this.participants.map((participant) => {
+        if (participant.socketId !== socketId) return participant
+        return { ...participant, ...updates }
+      })
+    },
+
+    removeParticipant(socketId: string) {
+      this.participants = this.participants.filter((participant) => participant.socketId !== socketId)
+    },
+
+    clearSession() {
+      this.roomId = null
+      this.role = null
+      this.participants = []
+      this.chatMessages = []
+      this.isRecording = false
+      this.sessionStatus = 'idle'
+      this.waitingRoom = []
+      this.localStream = null
+      this.isScreenSharing = false
+      this.isMuted = false
+      this.isCameraOff = false
     },
   },
 })

@@ -7,53 +7,104 @@
       :local-stream="previewStream"
       :waiting-room="sessionStore.waitingRoom"
       :requested-to-join="requestedToJoin"
+      :is-muted="isMuted"
+      :is-camera-off="isCameraOff"
       @change-camera="handleChangeCamera"
       @change-microphone="handleChangeMicrophone"
+      @toggle-mute="toggleMute"
+      @toggle-camera="toggleCamera"
       @start-session="handleStartSession"
       @request-join="handleRequestJoin"
       @admit="handleAdmit"
     />
 
-    <TeacherView
-      v-else-if="sessionStore.sessionStatus === 'live' && sessionRole === 'teacher'"
-      :local-stream="webrtc.localStream.value"
-      :remote-streams="webrtc.remoteStreams.value"
-      :participants="sessionStore.participants"
-      :chat-messages="sessionStore.chatMessages"
-      :is-muted="webrtc.isMuted.value"
-      :is-recording="sessionStore.isRecording"
-      @toggle-mute="webrtc.toggleMute"
-      @toggle-camera="webrtc.toggleCamera"
-      @toggle-screen-share="webrtc.startScreenShare"
-      @toggle-record="toggleRecord"
-      @send-chat="sendChat"
-      @mute-all="muteAll"
-      @mute-participant="muteParticipant"
-      @remove-participant="removeParticipant"
-      @end-session="handleEndSession"
-    />
+    <template v-else-if="sessionStore.sessionStatus === 'live'">
+      <!-- Teacher View -->
+      <template v-if="sessionRole === 'teacher'">
+        <div class="mx-auto max-w-7xl p-4 lg:p-6">
+          <ParticipantGrid
+            :participants="sessionStore.participants"
+            :local-stream="webrtc.localStream.value"
+            :remote-streams="webrtc.remoteStreams.value"
+            :local-user-id="selfSocketId"
+            :local-display-name="userStore.user?.name || 'You'"
+            :is-local-muted="webrtc.isMuted.value"
+            :is-local-camera-off="webrtc.isCameraOff.value"
+            :local-hand-raised="false"
+          />
+        </div>
 
-    <template v-else-if="sessionStore.sessionStatus === 'live' && sessionRole === 'student'">
-      <StudentView
-        :teacher-stream="teacherStream"
-        :local-stream="webrtc.localStream.value"
-        :teacher-muted="teacherMuted"
-        :is-muted="webrtc.isMuted.value"
-        :has-hand-raised="localHasHandRaised"
-        @toggle-mute="webrtc.toggleMute"
-        @toggle-camera="webrtc.toggleCamera"
-        @toggle-hand-raise="toggleHandRaise"
-        @toggle-chat="showStudentChat = !showStudentChat"
-        @leave-session="handleLeaveSession"
-      />
+        <!-- Sidebar -->
+        <div class="fixed right-4 top-4 z-50 h-[70vh] w-[min(92vw,360px)]">
+          <ChatPanel
+            v-if="showChat"
+            :messages="sessionStore.chatMessages"
+            :is-open="showChat"
+            @send="sendChat"
+          />
+          <WaitingRoomPanel
+            v-else-if="showWaitingRoom"
+            :waiting-room="sessionStore.waitingRoom"
+            @admit="handleAdmit"
+            @deny="handleDeny"
+          />
+        </div>
 
-      <div v-if="showStudentChat" class="fixed right-4 top-4 z-50 h-[70vh] w-[min(92vw,360px)]">
-        <ChatPanel
-          :messages="sessionStore.chatMessages"
-          :is-open="showStudentChat"
-          @send="sendChat"
+        <ControlBar
+          role="teacher"
+          :is-muted="webrtc.isMuted.value"
+          :is-camera-off="webrtc.isCameraOff.value"
+          :is-screen-sharing="webrtc.isScreenSharing.value"
+          :is-recording="sessionStore.isRecording"
+          :hand-raised="false"
+          @toggle-mute="webrtc.toggleMute"
+          @toggle-camera="webrtc.toggleCamera"
+          @toggle-screen-share="webrtc.startScreenShare"
+          @toggle-record="toggleRecord"
+          @toggle-chat="showChat = !showChat; showWaitingRoom = false"
+          @toggle-participants="showWaitingRoom = !showWaitingRoom; showChat = false"
+          @end-session="handleEndSession"
         />
-      </div>
+      </template>
+
+      <!-- Student View -->
+      <template v-else>
+        <div class="mx-auto max-w-7xl p-4 lg:p-6">
+          <ParticipantGrid
+            :participants="sessionStore.participants"
+            :local-stream="webrtc.localStream.value"
+            :remote-streams="webrtc.remoteStreams.value"
+            :local-user-id="selfSocketId"
+            :local-display-name="userStore.user?.name || 'You'"
+            :is-local-muted="webrtc.isMuted.value"
+            :is-local-camera-off="webrtc.isCameraOff.value"
+            :local-hand-raised="localHasHandRaised"
+          />
+        </div>
+
+        <!-- Chat Panel -->
+        <div v-if="showChat" class="fixed right-4 top-4 z-50 h-[70vh] w-[min(92vw,360px)]">
+          <ChatPanel
+            :messages="sessionStore.chatMessages"
+            :is-open="showChat"
+            @send="sendChat"
+          />
+        </div>
+
+        <ControlBar
+          role="student"
+          :is-muted="webrtc.isMuted.value"
+          :is-camera-off="webrtc.isCameraOff.value"
+          :is-screen-sharing="false"
+          :is-recording="false"
+          :hand-raised="localHasHandRaised"
+          @toggle-mute="webrtc.toggleMute"
+          @toggle-camera="webrtc.toggleCamera"
+          @toggle-hand-raise="toggleHandRaise"
+          @toggle-chat="showChat = !showChat"
+          @leave-session="handleLeaveSession"
+        />
+      </template>
     </template>
 
     <div v-else class="flex min-h-screen items-center justify-center p-6 text-center text-dark-300">
@@ -81,9 +132,12 @@ const sessionRole = computed<ClassroomRole>(() => (route.query.role === 'teacher
 
 const previewStream = ref<MediaStream | null>(null)
 const requestedToJoin = ref(false)
-const showStudentChat = ref(false)
+const showChat = ref(false)
+const showWaitingRoom = ref(false)
 const localHasHandRaised = ref(false)
 const startedLive = ref(false)
+const isMuted = ref(false)
+const isCameraOff = ref(false)
 
 const listenerCleanups: Array<() => void> = []
 
@@ -148,6 +202,12 @@ const initLobbyPreview = async (constraints?: MediaStreamConstraints) => {
 
     previewStream.value?.getTracks().forEach((track) => track.stop())
     previewStream.value = stream
+
+    // Update mute/camera state based on tracks
+    const audioTracks = stream.getAudioTracks()
+    const videoTracks = stream.getVideoTracks()
+    isMuted.value = !audioTracks.some((track) => track.enabled)
+    isCameraOff.value = !videoTracks.some((track) => track.enabled)
   } catch (error) {
     showErrorToast(getReadableMediaError(error))
   }
@@ -167,23 +227,21 @@ const handleChangeMicrophone = async (deviceId: string) => {
   })
 }
 
+const toggleMute = () => {
+  isMuted.value = !isMuted.value
+  previewStream.value?.getAudioTracks().forEach((track) => {
+    track.enabled = !isMuted.value
+  })
+}
+
+const toggleCamera = () => {
+  isCameraOff.value = !isCameraOff.value
+  previewStream.value?.getVideoTracks().forEach((track) => {
+    track.enabled = !isCameraOff.value
+  })
+}
+
 const selfSocketId = computed(() => signaling.socket.value?.id || '')
-
-const teacherParticipant = computed(() => {
-  const ownSocketId = selfSocketId.value
-  return (
-    sessionStore.participants.find((participant) => participant.role === 'teacher' && participant.socketId !== ownSocketId) ||
-    sessionStore.participants.find((participant) => participant.role === 'teacher') ||
-    null
-  )
-})
-
-const teacherStream = computed(() => {
-  if (!teacherParticipant.value) return null
-  return webrtc.remoteStreams.value.get(teacherParticipant.value.socketId) || null
-})
-
-const teacherMuted = computed(() => Boolean(teacherParticipant.value?.isMuted))
 
 const startLive = async () => {
   if (startedLive.value || !roomId.value) return
@@ -222,6 +280,11 @@ const handleAdmit = (socketId: string) => {
   sessionStore.admitParticipant(socketId)
 }
 
+const handleDeny = (socketId: string) => {
+  // Remove from waiting room
+  sessionStore.waitingRoom = sessionStore.waitingRoom.filter((p) => p.socketId !== socketId)
+}
+
 const sendChat = (message: string) => {
   const trimmed = message.trim()
   if (!trimmed) return
@@ -252,33 +315,6 @@ const toggleHandRaise = () => {
 
 const toggleRecord = () => {
   sessionStore.isRecording = !sessionStore.isRecording
-}
-
-const muteAll = () => {
-  signaling.emit('hand-raise', {
-    roomId: roomId.value,
-    socketId: selfSocketId.value,
-    hasHandRaised: false,
-  })
-  signaling.emit('send-chat', {
-    roomId: roomId.value,
-    message: 'Teacher muted all participants.',
-  })
-}
-
-const muteParticipant = (socketId: string) => {
-  signaling.emit('hand-raise', {
-    roomId: roomId.value,
-    socketId,
-    hasHandRaised: false,
-  })
-}
-
-const removeParticipant = (socketId: string) => {
-  signaling.emit('leave-room', {
-    roomId: roomId.value,
-  })
-  webrtc.removePeer(socketId)
 }
 
 const handleEndSession = async () => {
@@ -432,4 +468,3 @@ onUnmounted(() => {
   webrtc.endSession()
 })
 </script>
-

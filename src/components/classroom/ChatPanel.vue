@@ -17,9 +17,11 @@
         :key="item.id"
         class="rounded-xl border border-dark-700/70 bg-dark-800/70 px-3 py-2"
       >
-        <p class="text-xs font-semibold text-dark-100">{{ item.senderName }}</p>
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold text-dark-100">{{ item.senderName }}</p>
+          <p class="text-[10px] text-dark-400">{{ formatTimestamp(item.timestamp) }}</p>
+        </div>
         <p class="mt-1 whitespace-pre-wrap text-sm text-dark-200">{{ item.message }}</p>
-        <p class="mt-1 text-[10px] text-dark-400">{{ item.timestamp }}</p>
       </article>
 
       <p v-if="messages.length === 0" class="text-sm text-dark-400">No messages yet.</p>
@@ -62,6 +64,26 @@ const listRef = ref<HTMLElement | null>(null)
 const draft = ref('')
 const unreadCount = ref(0)
 
+const formatTimestamp = (timestamp: string): string => {
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) {
+    return timestamp
+  }
+
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+
+  if (diffSec < 60) return 'Just now'
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`
+
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date)
+}
+
 watch(
   () => props.messages.length,
   () => {
@@ -94,4 +116,3 @@ const handleSend = () => {
   draft.value = ''
 }
 </script>
-
