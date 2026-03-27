@@ -1,105 +1,118 @@
 <template>
-  <div class="bg-dark-900/85 border border-dark-700/80 rounded-2xl rounded-tl-md p-4 sm:p-5 text-dark-100 shadow-sm">
-    <div class="flex items-center justify-between gap-2 mb-3">
-      <p class="text-[11px] uppercase tracking-wide text-accent-light">Physics Solution</p>
-      <span
-        v-if="typeof message.physicsSolution?.contextUsed === 'boolean'"
-        class="rounded-full border border-dark-600 bg-dark-800/70 px-2 py-0.5 text-[11px] text-dark-300"
-      >
-        {{ message.physicsSolution?.contextUsed ? 'Context used' : 'No context used' }}
+  <div class="space-y-4 max-w-2xl">
+    <!-- Tag Row -->
+    <div class="flex flex-wrap gap-1.5">
+      <span class="px-2.5 py-1 rounded-full text-[11px] font-medium" :style="{ background: 'rgba(45,212,191,0.1)', color: '#2dd4bf', border: '1px solid rgba(45,212,191,0.2)', fontFamily: 'DM Mono' }">
+        Physics Solution
+      </span>
+      <span v-if="typeof message.physicsSolution?.contextUsed === 'boolean'" class="px-2.5 py-1 rounded-full text-[11px] font-medium" :style="{ background: 'var(--bg3)', color: 'var(--text2)', border: '1px solid var(--line)', fontFamily: 'DM Mono' }">
+        {{ message.physicsSolution?.contextUsed ? 'Context used' : 'No context' }}
       </span>
     </div>
 
-    <blockquote
-      v-if="message.physicsSolution?.law_or_principle"
-      class="mb-3 rounded-xl border border-indigo-400/20 bg-indigo-500/10 px-3 py-2 text-sm text-indigo-200"
-    >
+    <!-- Law or Principle -->
+    <blockquote v-if="message.physicsSolution?.law_or_principle" class="px-6 py-4 rounded-[20px] border-l-3 italic" :style="{ 
+      background: 'rgba(45,212,191,0.08)',
+      borderColor: '#2dd4bf',
+      color: '#2dd4bf',
+      fontFamily: 'DM Sans',
+      fontSize: '14px'
+    }">
       {{ message.physicsSolution.law_or_principle }}
     </blockquote>
 
-    <div v-if="message.physicsSolution?.answer" class="rounded-xl border border-dark-700/70 bg-dark-950/50 p-3 sm:p-4 mb-3">
-      <p class="text-[11px] uppercase tracking-wide text-dark-400 mb-2">Answer</p>
-      <p class="text-sm text-dark-200 whitespace-pre-wrap leading-relaxed">{{ message.physicsSolution.answer }}</p>
+    <!-- Answer Section -->
+    <div v-if="message.physicsSolution?.answer" class="px-6 py-4 rounded-[20px]" :style="{ background: 'var(--bg3)', border: '1px solid var(--line2)' }">
+      <p class="text-sm leading-relaxed" style="color: 'var(--text2)', fontFamily: 'DM Sans'">{{ message.physicsSolution.answer }}</p>
     </div>
 
-    <div v-if="message.physicsSolution?.given?.length" class="mb-3 rounded-xl border border-dark-700/65 bg-dark-950/35 overflow-hidden">
-      <p class="text-[11px] uppercase tracking-wide text-dark-400 px-3 pt-3 mb-2">Given</p>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-xs">
-          <thead>
-            <tr class="border-y border-dark-700/70 text-dark-400">
-              <th class="px-3 py-2 text-left">Symbol</th>
-              <th class="px-3 py-2 text-left">Value</th>
-              <th class="px-3 py-2 text-left">Unit</th>
-              <th class="px-3 py-2 text-left">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, idx) in message.physicsSolution.given" :key="`given-${messageIndex}-${idx}`" class="border-b border-dark-700/40 text-dark-200">
-              <td class="px-3 py-2">{{ item.symbol }}</td>
-              <td class="px-3 py-2">{{ item.value }}</td>
-              <td class="px-3 py-2">{{ item.unit }}</td>
-              <td class="px-3 py-2">{{ item.description }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Given Values Table -->
+    <div v-if="message.physicsSolution?.given?.length" class="overflow-x-auto rounded-[20px] border" :style="{ background: 'var(--bg3)', borderColor: 'var(--line2)' }">
+      <table class="w-full text-sm" style="fontFamily: 'DM Mono'">
+        <thead>
+          <tr :style="{ background: 'var(--bg2)', borderBottom: '1px solid var(--line)' }">
+            <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.5px]" style="color: 'var(--text3)'">Symbol</th>
+            <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.5px]" style="color: 'var(--text3)'">Value</th>
+            <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.5px]" style="color: 'var(--text3)'">Unit</th>
+            <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.5px]" style="color: 'var(--text3)'">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, idx) in message.physicsSolution.given" :key="`given-${messageIndex}-${idx}`" :style="{ borderBottom: '1px solid var(--line)', color: 'var(--text2)' }">
+            <td class="px-4 py-2">{{ item.symbol }}</td>
+            <td class="px-4 py-2">{{ item.value }}</td>
+            <td class="px-4 py-2">{{ item.unit }}</td>
+            <td class="px-4 py-2">{{ item.description }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div v-if="message.physicsSolution?.formula" class="mb-3 rounded-xl border border-dark-700/65 bg-dark-950/35 p-3">
-      <p class="text-[11px] uppercase tracking-wide text-dark-400 mb-2">Formula</p>
+    <!-- Formula -->
+    <div v-if="message.physicsSolution?.formula" class="px-6 py-4 rounded-[20px]" :style="{ background: 'var(--bg3)', border: '1px solid var(--line2)' }">
+      <p class="text-[11px] uppercase tracking-[0.5px] font-medium mb-3" style="color: 'var(--text3)', fontFamily: 'DM Mono'">Formula</p>
       <MathBlock
         :content="message.physicsSolution.formula"
         :display-mode="true"
+        class="text-sm cursor-pointer hover:opacity-80"
+        style="color: var(--text2); fontFamily: 'DM Mono'"
         @click="emit('open-math-zoom', message.physicsSolution.formula)"
       />
     </div>
 
-    <div v-if="message.physicsSolution?.steps?.length" class="mb-3">
-      <p class="text-[11px] uppercase tracking-wide text-dark-400 mb-2">Steps</p>
-      <ol class="space-y-2.5">
-        <li
-          v-for="(step, stepIndex) in message.physicsSolution.steps"
-          :key="`physics-step-${messageIndex}-${stepIndex}`"
-          class="rounded-xl border border-dark-700/65 bg-dark-950/35 px-3 py-3"
-        >
-          <div class="flex items-center gap-2 mb-2">
-            <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-accent/20 text-[11px] font-semibold text-accent-light px-1.5">
-              {{ stepIndex + 1 }}
-            </span>
-            <p class="text-xs text-dark-300 font-semibold">{{ step.title || `Step ${stepIndex + 1}` }}</p>
+    <!-- Steps Section -->
+    <div v-if="message.physicsSolution?.steps?.length" class="space-y-2">
+      <p class="text-[11px] uppercase tracking-[0.5px] font-medium" style="color: 'var(--text3)', fontFamily: 'DM Mono'">Step-by-step breakdown</p>
+      
+      <div
+        v-for="(step, stepIndex) in message.physicsSolution.steps"
+        :key="`physics-step-${messageIndex}-${stepIndex}`"
+        class="rounded-[20px] border px-5 py-4 space-y-2"
+        :style="{ background: 'var(--bg3)', border: '1px solid var(--line)' }"
+      >
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 text-sm font-medium" :style="{ 
+            background: 'var(--gold-dim)',
+            color: 'var(--gold2)',
+            border: '1px solid rgba(212,168,67,0.2)',
+            fontFamily: 'DM Mono'
+          }">
+            {{ stepIndex + 1 }}
           </div>
-
-          <MathBlock
-            v-if="step.work"
-            :content="step.work"
-            :display-mode="true"
-            @click="emit('open-math-zoom', step.work)"
-          />
-
-          <div
-            v-if="step.result"
-            class="mt-2 rounded-lg border border-emerald-400/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300"
-          >
-            Result: {{ step.result }}
+          <div class="flex-1">
+            <p class="font-semibold text-sm" style="color: 'var(--text)', fontFamily: 'Syne'">{{ step.title || `Step ${stepIndex + 1}` }}</p>
           </div>
-        </li>
-      </ol>
+        </div>
+
+        <MathBlock
+          v-if="step.work"
+          :content="step.work"
+          :display-mode="true"
+          class="text-sm cursor-pointer hover:opacity-80 ml-10"
+          style="color: var(--text2); fontFamily: 'DM Mono'"
+          @click="emit('open-math-zoom', step.work)"
+        />
+
+        <div v-if="step.result" class="ml-10 px-3 py-2 rounded-lg border" :style="{ background: 'rgba(45,212,191,0.1)', borderColor: 'rgba(45,212,191,0.2)', color: '#2dd4bf', fontSize: '13px', fontFamily: 'DM Mono' }">
+          Result: {{ step.result }}
+        </div>
+      </div>
     </div>
 
-    <div v-if="message.physicsSolution?.final_answer" class="rounded-xl border border-accent/25 bg-accent/5 p-3 sm:p-4 mb-3">
-      <p class="text-[11px] uppercase tracking-wide text-accent-light/90 mb-2">Final Answer</p>
+    <!-- Final Answer -->
+    <div v-if="message.physicsSolution?.final_answer" class="px-6 py-4 rounded-[20px] border" :style="{ background: 'var(--gold-dim)', borderColor: 'rgba(212,168,67,0.25)' }">
+      <p class="text-[11px] uppercase tracking-[0.5px] font-medium mb-3" style="color: 'var(--gold2)', fontFamily: 'DM Mono'">Final Answer</p>
       <MathBlock
         :content="message.physicsSolution.final_answer"
         :display-mode="true"
+        class="text-sm cursor-pointer hover:opacity-80"
+        style="color: var(--gold2); fontFamily: 'Syne'"
         @click="emit('open-math-zoom', message.physicsSolution.final_answer)"
       />
     </div>
 
-    <div
-      v-if="message.physicsSolution?.diagram_hint"
-      class="rounded-xl border border-sky-400/20 bg-sky-500/10 px-3 py-2 text-sm text-sky-200"
-    >
+    <!-- Diagram Hint -->
+    <div v-if="message.physicsSolution?.diagram_hint" class="px-6 py-4 rounded-[20px] border italic" :style="{ background: 'rgba(45,212,191,0.08)', borderColor: 'rgba(45,212,191,0.2)', color: '#2dd4bf', fontFamily: 'DM Mono', fontSize: '13px' }">
       📌 {{ message.physicsSolution.diagram_hint }}
     </div>
   </div>

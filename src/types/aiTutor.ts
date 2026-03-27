@@ -73,6 +73,45 @@ export interface ChemistryResonance {
   note?: string
 }
 
+export interface ChemistryOverview {
+  title?: string
+  text?: string
+}
+
+export interface ChemistryMetadata {
+  reaction_type?: ReactionType
+  substrate_class?: SubstrateClass | string
+  carbon_change?: CarbonChange
+  difficulty_level?: 'basic' | 'intermediate' | 'advanced'
+  context_used?: boolean
+}
+
+export interface ChemistryCompound {
+  name: string
+  role?: 'reactant' | 'reagent' | 'catalyst' | 'product' | 'intermediate'
+  smiles?: string
+  svg_type?: string
+  display_formula?: string
+  formula?: string
+  shorthand?: string
+}
+
+export interface ChemistryReactionPathway {
+  diagram?: string
+  compounds?: ChemistryCompound[]
+}
+
+export interface ChemistryMechanismStep {
+  step_num?: number
+  title?: string
+  subtitle?: string
+  description?: string
+  molecules?: ChemistryCompound[]
+  conditions?: string
+  mechanism_type?: string
+  mechanism_explanation?: string
+}
+
 export interface ChemistryTutorSolution {
   answer?: string
   is_conversion?: boolean
@@ -88,6 +127,14 @@ export interface ChemistryTutorSolution {
   equations?: string[]
   diagram_caption?: string
   resonance?: ChemistryResonance | null
+  // New fields from backend response format
+  overview?: ChemistryOverview
+  tags?: string[]
+  metadata?: ChemistryMetadata
+  reaction_pathway?: ChemistryReactionPathway
+  steps?: ChemistryMechanismStep[]
+  related_concepts?: string[]
+  warning_or_tip?: string
 }
 
 export interface Message {

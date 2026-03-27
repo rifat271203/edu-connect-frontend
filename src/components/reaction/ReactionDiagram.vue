@@ -1,42 +1,42 @@
 <template>
-  <div class="reaction-diagram rounded-2xl border p-4 md:p-6" :class="surfaceClasses">
+  <div class="reaction-diagram rounded-2xl border p-6 md:p-8" :class="surfaceClasses">
     <ClientOnly>
-      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)_minmax(0,1fr)] gap-6 items-center">
-        <div class="flex flex-wrap items-start justify-center gap-3 md:gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)_minmax(0,1fr)] gap-8 items-center">
+        <div class="flex flex-wrap items-start justify-center gap-4 md:gap-5">
           <template v-for="(reactant, index) in reactantsWithTargets" :key="reactant.renderId">
             <MoleculeCard
               :item="reactant"
               :theme="renderTheme"
               :svg="renderTargetMarkup(reactant.renderId)"
             />
-            <div v-if="index < reactantsWithTargets.length - 1" class="self-center text-xl font-semibold" :class="mutedTextClasses">+</div>
+            <div v-if="index < reactantsWithTargets.length - 1" class="self-center text-2xl font-semibold" :class="mutedTextClasses">+</div>
           </template>
         </div>
 
-        <div class="relative flex flex-col items-center justify-center min-h-[170px] px-2">
-          <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-full max-w-[320px] flex flex-wrap justify-center gap-2">
+        <div class="relative flex flex-col items-center justify-center min-h-[200px] px-4">
+          <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-full max-w-[360px] flex flex-wrap justify-center gap-2">
             <span
               v-for="(reagent, index) in diagram.reagents"
               :key="`reagent-${index}-${reagent.smiles}`"
-              class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+              class="inline-flex items-center rounded-full border px-4 py-1.5 text-xs font-medium"
               :class="chipClasses"
             >
               {{ reagent.name }}
             </span>
           </div>
 
-          <div class="w-full flex items-center justify-center pt-5">
-            <div class="w-full max-w-[260px] border-t-2 relative" :class="arrowClasses">
-              <div class="absolute right-0 -top-[7px] h-0 w-0 border-y-[7px] border-y-transparent border-l-[12px]" :class="arrowHeadClasses"></div>
+          <div class="w-full flex items-center justify-center pt-6">
+            <div class="w-full max-w-[300px] border-t-2 relative" :class="arrowClasses">
+              <div class="absolute right-0 -top-[8px] h-0 w-0 border-y-[8px] border-y-transparent border-l-[14px]" :class="arrowHeadClasses"></div>
             </div>
           </div>
 
-          <p v-if="conditionsText" class="mt-4 text-center text-xs leading-relaxed max-w-[280px]" :class="mutedTextClasses">
+          <p v-if="conditionsText" class="mt-5 text-center text-sm leading-relaxed max-w-[320px]" :class="mutedTextClasses">
             {{ conditionsText }}
           </p>
         </div>
 
-        <div class="flex flex-wrap items-start justify-center gap-3 md:gap-4">
+        <div class="flex flex-wrap items-start justify-center gap-4 md:gap-5">
           <template v-for="(product, index) in productsWithTargets" :key="product.renderId">
             <MoleculeCard
               :item="product"
@@ -45,13 +45,13 @@
             >
               <span
                 v-if="productBadge(product.type)"
-                class="mt-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                class="mt-2 inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide"
                 :class="badgeClasses(productBadge(product.type)!)"
               >
                 {{ productBadge(product.type) }}
               </span>
             </MoleculeCard>
-            <div v-if="index < productsWithTargets.length - 1" class="self-center text-xl font-semibold" :class="mutedTextClasses">+</div>
+            <div v-if="index < productsWithTargets.length - 1" class="self-center text-2xl font-semibold" :class="mutedTextClasses">+</div>
           </template>
         </div>
       </div>
@@ -188,9 +188,9 @@ const renderSmiles = async (smiles: string, targetEl: HTMLElement): Promise<void
     targetEl.innerHTML = ''
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-    svg.setAttribute('width', '170')
-    svg.setAttribute('height', '110')
-    svg.setAttribute('viewBox', '0 0 170 110')
+    svg.setAttribute('width', '200')
+    svg.setAttribute('height', '140')
+    svg.setAttribute('viewBox', '0 0 200 140')
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet')
     targetEl.appendChild(svg)
 
@@ -199,10 +199,10 @@ const renderSmiles = async (smiles: string, targetEl: HTMLElement): Promise<void
     }
 
     const svgDrawer = new SmilesDrawer.SvgDrawer({
-      width: 170,
-      height: 110,
+      width: 200,
+      height: 140,
       compactDrawing: true,
-      padding: 16,
+      padding: 20,
     })
     svgDrawer.draw(tree, svg, renderTheme.value, null, false)
 
@@ -307,4 +307,3 @@ const badgeClasses = (kind: ReactionRole) => {
   height: auto;
 }
 </style>
-

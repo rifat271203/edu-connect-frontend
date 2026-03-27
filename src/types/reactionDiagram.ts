@@ -4,6 +4,7 @@ export interface ReactionItem {
   name: string
   smiles: string
   type?: ReactionRole | string
+  role?: string
 }
 
 export interface ReactionDiagramData {
@@ -19,4 +20,3 @@ export interface MechanismStep {
   desc: string
   structures: ReactionItem[]
 }
-

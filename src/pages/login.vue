@@ -73,37 +73,37 @@
           <div class="feat-grid">
             <div v-reveal class="fc rv d1">
               <div class="fc-num">01</div>
-              <div class="fc-img"><img src="/images/aipoint.jpeg" alt="AI Tutor" /></div>
-              <h3>AI Tutor Here, 24/7</h3>
+              <div class="fc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
+              <h3>AI Tutor, 24/7</h3>
               <p>Instant personalized explanations, step-by-step problem solving, and adaptive paths — available any hour of the day.</p>
             </div>
             <div v-reveal class="fc rv d2">
               <div class="fc-num">02</div>
-              <div class="fc-img"><img src="/images/socialmediaview.jpeg" alt="Social Learning" /></div>
+              <div class="fc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 11a3 3 0 100-6 3 3 0 000 6zM16 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM3.5 18.5c0-2.5 2.1-4.5 4.7-4.5h.6c2.6 0 4.7 2 4.7 4.5M13 18.5c.2-1.8 1.7-3.3 3.6-3.3h.3c2 0 3.6 1.5 3.6 3.3" /></svg></div>
               <h3>Social Learning Feed</h3>
               <p>Trending discussions, course updates, and peer collaboration — a smart, education-focused community in real time.</p>
             </div>
             <div v-reveal class="fc rv d3">
               <div class="fc-num">03</div>
-              <div class="fc-img"><img src="/images/classroom.jpeg" alt="Interactive Classrooms" /></div>
+              <div class="fc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>
               <h3>Interactive Classrooms</h3>
               <p>Private teacher-managed spaces for notes, live sessions, exams, and assignments — structured and simple.</p>
             </div>
             <div v-reveal class="fc rv d4">
               <div class="fc-num">04</div>
-              <div class="fc-img"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop" alt="Progress Analytics" /></div>
+              <div class="fc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
               <h3>Progress Analytics</h3>
               <p>Rich dashboards for both students and teachers — track scores, completion, attendance, and learning streaks.</p>
             </div>
             <div v-reveal class="fc rv d5">
               <div class="fc-num">05</div>
-              <div class="fc-img"><img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=300&fit=crop" alt="Secure & Private" /></div>
+              <div class="fc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg></div>
               <h3>Secure & Private</h3>
               <p>Role-based access control, encrypted data, and academic integrity built into every feature.</p>
             </div>
             <div v-reveal class="fc rv d6">
               <div class="fc-num">06</div>
-              <div class="fc-img"><img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop" alt="Any Device" /></div>
+              <div class="fc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 18h.01M8 21h8a2 2 0 002-2v-1a2 2 0 00-2-2H8a2 2 0 00-2 2v1a2 2 0 002 2zM12 3v4M3 12h18" /></svg></div>
               <h3>Any Device</h3>
               <p>Fully responsive from phone to desktop. Offline-ready for key content — learn anywhere, anytime.</p>
             </div>
@@ -1353,8 +1353,6 @@ section { position: relative; }
 .fc { padding: 36px 32px; background: var(--ink2); }
 .fc-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--t3); margin-bottom: 20px; }
 .fc-icon { width: 42px; height: 42px; border-radius: 11px; border: 1px solid rgba(196, 164, 100, 0.2); background: rgba(196, 164, 100, 0.07); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
-.fc-img { width: 100%; height: 180px; border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
-.fc-img img { width: 100%; height: 100%; object-fit: cover; }
 .fc h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
 .fc p { font-size: 13.5px; font-weight: 300; line-height: 1.72; color: var(--t2); }
 
