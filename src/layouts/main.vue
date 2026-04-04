@@ -213,7 +213,7 @@ const authCookie = useCookie<string | null>('educonnect_auth')
 const tokenCookie = useCookie<string | null>('educonnect_token')
 const hasCookieSession = computed(() => authCookie.value === 'true' && Boolean(tokenCookie.value))
 const isGuest = computed(() => !(userStore.isAuthenticated || hasCookieSession.value))
-const guestAllowedPaths = new Set(['/login', '/home', '/ai-tutor'])
+const guestAllowedPaths = new Set(['/login', '/loginV2', '/home', '/ai-tutor'])
 const isProtectedRoute = computed(() => !guestAllowedPaths.has(route.path))
 const showDesktopSidebar = computed(() => {
   if (isProtectedRoute.value) return true

@@ -1,1484 +1,982 @@
 <template>
-  <div class="edu-page">
-    <div class="ambient ambient-1"></div>
-    <div class="ambient ambient-2"></div>
-    <div class="grid-overlay"></div>
-    <div class="noise-overlay"></div>
+  <div class="login-v2-page">
+    <div class="bg-mesh" aria-hidden="true"></div>
 
-    <header class="nav" :class="{ shadow: isScrolled }">
-      <div class="container nav-inner">
-        <a href="#hero" class="brand">
-          <span class="brand-mark">EC</span>
-          <span class="brand-name">EduConnect</span>
-        </a>
-
-        <nav class="desktop-links">
-          <a href="#features">Features</a>
-          <a href="#journey">How it works</a>
-          <a href="#about">About</a>
-          <a href="#reviews">Reviews</a>
-          <a href="#contact">Contact</a>
-          <a href="#signup" class="cta-link">Get Started</a>
-        </nav>
-
-        <button class="mobile-toggle" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-
-      <div class="mobile-menu" :class="{ open: mobileOpen }">
-        <a href="#features" @click="mobileOpen = false">Features</a>
-        <a href="#journey" @click="mobileOpen = false">How it works</a>
-        <a href="#about" @click="mobileOpen = false">About</a>
-        <a href="#reviews" @click="mobileOpen = false">Reviews</a>
-        <a href="#contact" @click="mobileOpen = false">Contact</a>
-        <a href="#signup" @click="mobileOpen = false">Get Started</a>
-      </div>
-    </header>
-
-    <main>
-      <section id="hero" class="hero container">
-        <div class="hero-copy reveal">
-          <div class="eyebrow">
-            <span class="eyebrow-dot"></span>
-            Bangladesh-born learning platform
-          </div>
-
-          <h1>
-            Learn smarter.<br />
-            <span>Connect deeper.</span><br />
-            Grow globally.
-          </h1>
-
-          <p class="hero-text">
-            A premium dark-mode education platform for students and teachers — with AI tutoring,
-            live classrooms, a social learning feed, analytics, and a global vision that starts from Bangladesh.
-          </p>
-
-          <div class="hero-actions">
-            <a href="#signup" class="btn btn-primary">Start for free</a>
-            <a href="#features" class="btn btn-secondary">Explore features</a>
-          </div>
-
-          <div class="hero-metrics">
-            <div class="metric-card">
-              <strong>12K+</strong>
-              <span>active learners</span>
+    <div class="page-wrap">
+      <main class="login-shell">
+        <section class="brand-panel" aria-label="EduConnect brand">
+          <div class="brand-content">
+            <div class="brand-row">
+              <div class="brand-icon">EC</div>
+              <span class="brand-name">EduConnect</span>
             </div>
-            <div class="metric-card">
-              <strong>850+</strong>
-              <span>teachers onboard</span>
-            </div>
-            <div class="metric-card">
-              <strong>🇧🇩</strong>
-              <span>Bangladesh highlighted</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="hero-visual reveal reveal-delay-1">
-          <div class="visual-shell">
-            <canvas ref="heroCanvas" class="globe-canvas"></canvas>
-            <div class="orbital-card orbital-card-1">
-              <span class="card-label">Focus</span>
-              <strong>Dhaka → Global</strong>
-              <small>Bangladesh highlighted on the globe</small>
-            </div>
-            <div class="orbital-card orbital-card-2">
-              <span class="card-label">AI sessions today</span>
-              <strong>3,291</strong>
-              <small>live adaptive tutoring</small>
-            </div>
-            <div class="orbital-card orbital-card-3">
-              <span class="card-label">Average score boost</span>
-              <strong>+34%</strong>
-              <small>after 30 days</small>
-            </div>
-          </div>
-        </div>
-      </section>
+            <span class="feature-pill">Academic Excellence</span>
 
-      <section class="ticker-wrap">
-        <div class="ticker-track">
-          <span v-for="(item, index) in repeatedTicker" :key="`${item}-${index}`" class="ticker-item">
-            {{ item }}
-          </span>
-        </div>
-      </section>
+            <h1>Ready to<br /><em>get started?</em></h1>
 
-      <section id="features" class="section container">
-        <div class="section-head reveal">
-          <div>
-            <div class="chip">Platform features</div>
-            <h2>Designed for the <span>future of education</span></h2>
-          </div>
-          <p>
-            Everything students and teachers need in one polished, premium interface — built to feel modern,
-            fast, and focused.
-          </p>
-        </div>
-
-        <div class="feature-grid">
-          <article v-for="(feature, index) in features" :key="feature.title" class="feature-card reveal" :style="delayStyle(index)">
-            <div class="feature-index">{{ String(index + 1).padStart(2, '0') }}</div>
-            <div class="feature-icon">{{ feature.icon }}</div>
-            <h3>{{ feature.title }}</h3>
-            <p>{{ feature.text }}</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="journey" class="section muted-section">
-        <div class="container journey-grid">
-          <div class="journey-copy reveal">
-            <div class="chip">How it works</div>
-            <h2>From signup to live learning in <span>minutes</span></h2>
-            <div class="step-list">
-              <div v-for="(step, index) in steps" :key="step.title" class="step-item">
-                <div class="step-no">{{ String(index + 1).padStart(2, '0') }}</div>
-                <div>
-                  <h4>{{ step.title }}</h4>
-                  <p>{{ step.text }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="journey-visual reveal reveal-delay-1">
-            <div class="visual-panel">
-              <div class="mini-window">
-                <div class="mini-topbar">
-                  <span></span><span></span><span></span>
-                </div>
-                <div class="mini-content">
-                  <div class="mini-sidebar">
-                    <div></div><div></div><div></div><div></div>
-                  </div>
-                  <div class="mini-main">
-                    <div class="mini-row large"></div>
-                    <div class="mini-row"></div>
-                    <div class="mini-row"></div>
-                    <div class="mini-cards">
-                      <div></div><div></div><div></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="journey-badge">Private classrooms • AI tutor • Live sessions</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="about" class="section container">
-        <div class="about-grid">
-          <div class="about-copy reveal">
-            <div class="chip">About EduConnect</div>
-            <h2>Built in <span>Bangladesh</span>, designed for everywhere</h2>
             <p>
-              This version leans into a darker, more premium visual system with better contrast, softer glow,
-              stronger hierarchy, and a globe that makes Bangladesh the focal point instead of just another point on Earth.
-            </p>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <strong>12K+</strong>
-                <span>students</span>
-              </div>
-              <div class="stat-card">
-                <strong>98%</strong>
-                <span>satisfaction</span>
-              </div>
-              <div class="stat-card">
-                <strong>15+</strong>
-                <span>institutions</span>
-              </div>
-              <div class="stat-card accent-card">
-                <strong>BD</strong>
-                <span>spotlight region</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="about-visual reveal reveal-delay-1">
-            <div class="about-orb-shell">
-              <canvas ref="aboutCanvas" class="about-canvas"></canvas>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="reviews" class="section muted-section">
-        <div class="container">
-          <div class="section-head reveal">
-            <div>
-              <div class="chip">Reviews</div>
-              <h2>Why people <span>love</span> the platform</h2>
-            </div>
-            <p>Students and teachers get one focused workspace instead of fragmented tools and confusing dashboards.</p>
-          </div>
-
-          <div class="review-grid">
-            <article v-for="(review, index) in reviews" :key="review.name" class="review-card reveal" :style="delayStyle(index)">
-              <div class="stars">★★★★★</div>
-              <p>{{ review.text }}</p>
-              <div class="review-user">
-                <div class="avatar">{{ review.initials }}</div>
-                <div>
-                  <strong>{{ review.name }}</strong>
-                  <span>{{ review.role }}</span>
-                </div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" class="section container">
-        <div class="contact-grid">
-          <div class="contact-copy reveal">
-            <div class="chip">Contact</div>
-            <h2>Ready to launch your <span>next-gen classroom</span>?</h2>
-            <p>
-              This Vue version keeps the strong presentation feel but is much easier to maintain, theme, and extend.
+              Join thousands of students and teachers unlocking their full potential through our world-class
+              educational ecosystem.
             </p>
 
-            <div class="contact-list">
-              <div class="contact-item">
-                <strong>Email</strong>
-                <span>hello@educonnect.io</span>
-              </div>
-              <div class="contact-item">
-                <strong>Location</strong>
-                <span>Dhaka, Bangladesh</span>
-              </div>
-              <div class="contact-item">
-                <strong>Support</strong>
-                <span>Mon–Fri • 9am–6pm</span>
-              </div>
-            </div>
+            <ul class="perks" role="list">
+              <li><div class="perk-icon c1">✦</div>Free to join</li>
+              <li><div class="perk-icon c2">🔒</div>End-to-end encrypted</li>
+              <li><div class="perk-icon c3">⬡</div>Classroom ready</li>
+              <li><div class="perk-icon c4">◎</div>AI Tutor</li>
+              <li><div class="perk-icon c5">▣</div>Works on any device</li>
+            </ul>
           </div>
 
-          <div id="signup" class="signup-card reveal reveal-delay-1">
-            <div class="signup-top">
-              <span class="signup-chip">Secure access</span>
-              <h3>Create your account</h3>
-              <p>Dark-themed, premium auth card ready for your Vue project.</p>
+          <div class="stats-row" role="list">
+            <div class="stat-item" role="listitem">
+              <strong>48K+</strong>
+              <span>Active Students</span>
+            </div>
+            <div class="stat-item" role="listitem">
+              <strong>3K+</strong>
+              <span>Expert Tutors</span>
+            </div>
+            <div class="stat-item" role="listitem">
+              <strong>99%</strong>
+              <span>Satisfaction</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-panel" aria-label="Sign in form">
+          <div class="mobile-brand" aria-hidden="true">
+            <div class="brand-icon">EC</div>
+            <span class="brand-name">EduConnect</span>
+          </div>
+
+          <div class="auth-card" role="main">
+            <div class="auth-head">
+              <h2>Welcome back</h2>
+              <p>Please enter your details to access your account.</p>
             </div>
 
-            <form class="signup-form" @submit.prevent>
-              <div class="field-grid">
-                <label>
-                  <span>Full name</span>
-                  <input type="text" placeholder="Tanjid Rifat" />
-                </label>
-                <label>
-                  <span>Role</span>
-                  <select>
-                    <option>Student</option>
-                    <option>Teacher</option>
-                    <option>Institution Admin</option>
+            <form class="auth-form" @submit.prevent="handleLogin" novalidate>
+              <div class="field-group">
+                <label class="field-label" for="accountType">Account Type</label>
+                <div class="select-wrap">
+                  <select id="accountType" v-model="loginRole" name="role" aria-label="Account type">
+                    <option value="student">Student</option>
+                    <option value="teacher">Faculty / Teacher</option>
                   </select>
-                </label>
+                </div>
               </div>
 
-              <label>
-                <span>Email</span>
-                <input type="email" placeholder="you@institution.edu" />
+              <div class="field-group">
+                <label class="field-label" for="loginEmail">Email Address</label>
+                <div class="input-wrap">
+                  <input
+                    id="loginEmail"
+                    v-model.trim="loginEmail"
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    placeholder="name@educonnect.com"
+                    :class="{ 'is-error': Boolean(loginErrors.email) }"
+                    aria-describedby="emailError"
+                    required
+                    @input="clearFieldError('email')"
+                  />
+                </div>
+                <span v-if="loginErrors.email" id="emailError" class="field-error" role="alert">{{ loginErrors.email }}</span>
+              </div>
+
+              <div class="field-group">
+                <div class="field-label">
+                  <label for="loginPassword">Password</label>
+                  <button type="button" class="inline" @click="void 0">Forgot password?</button>
+                </div>
+                <div class="input-wrap">
+                  <input
+                    id="loginPassword"
+                    v-model="loginPassword"
+                    :type="showPassword ? 'text' : 'password'"
+                    name="password"
+                    class="pw-input"
+                    autocomplete="current-password"
+                    placeholder="Enter your password"
+                    :class="{ 'is-error': Boolean(loginErrors.password) }"
+                    aria-describedby="passwordError"
+                    required
+                    @input="clearFieldError('password')"
+                  />
+                  <button type="button" class="pw-toggle" :aria-label="showPassword ? 'Hide password' : 'Show password'" @click="showPassword = !showPassword">
+                    {{ showPassword ? 'Hide' : 'Show' }}
+                  </button>
+                </div>
+                <span
+                  v-if="loginErrors.password"
+                  id="passwordError"
+                  class="field-error"
+                  role="alert"
+                >{{ loginErrors.password }}</span>
+              </div>
+
+              <label class="remember-row" for="rememberMe">
+                <input id="rememberMe" v-model="rememberMe" type="checkbox" name="remember" />
+                <div class="custom-check" aria-hidden="true"></div>
+                <span class="remember-label">Stay signed in for 30 days</span>
               </label>
 
-              <label>
-                <span>Password</span>
-                <input type="password" placeholder="Create a strong password" />
-              </label>
+              <button type="submit" class="signin-btn" :disabled="isLoading">{{ isLoading ? 'Signing in...' : 'Sign In' }}</button>
 
-              <button class="btn btn-primary btn-block" type="submit">Get started</button>
+              <div v-if="errorMessage" class="error-banner" role="alert">{{ errorMessage }}</div>
+
+              <div class="divider">or continue with</div>
+
+              <div class="social-row">
+                <button type="button" class="social-btn" aria-label="Continue with Google">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  Google
+                </button>
+                <button type="button" class="social-btn" aria-label="Continue with Microsoft">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.5 2h-9v9h9V2z" fill="#F25022"/>
+                    <path d="M21.5 2h-9v9h9V2z" fill="#7FBA00"/>
+                    <path d="M11.5 13h-9v9h9v-9z" fill="#00A4EF"/>
+                    <path d="M21.5 13h-9v9h9v-9z" fill="#FFB900"/>
+                  </svg>
+                  Microsoft
+                </button>
+              </div>
+
+              <p class="register-text">New here? <button type="button">Create account</button></p>
             </form>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+
+      <footer class="login-footer">
+        <span>© 2026 EduConnect. Empowering the next generation of scholars.</span>
+        <nav aria-label="Footer links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Support</a>
+        </nav>
+      </footer>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import * as THREE from 'three'
+<script setup lang="ts">
+import { reactive, ref } from 'vue'
+import type { UserRole } from '~/services/api/auth'
+import { useUserStore } from '~/stores/user'
 
-const mobileOpen = ref(false)
-const isScrolled = ref(false)
-const heroCanvas = ref(null)
-const aboutCanvas = ref(null)
+definePageMeta({ layout: 'blank' })
 
-const features = [
-  {
-    icon: '✦',
-    title: 'AI Tutor 24/7',
-    text: 'Instant step-by-step explanations, personalized help, and adaptive support whenever students need it.',
-  },
-  {
-    icon: '◉',
-    title: 'Social Learning Feed',
-    text: 'A focused educational community where students discuss lessons, courses, and questions in real time.',
-  },
-  {
-    icon: '▣',
-    title: 'Private Classrooms',
-    text: 'Teacher-managed spaces for notes, live sessions, notices, assignments, and course discussions.',
-  },
-  {
-    icon: '⬈',
-    title: 'Progress Analytics',
-    text: 'Track engagement, streaks, attendance, and performance across the entire learning journey.',
-  },
-  {
-    icon: '⟡',
-    title: 'Secure by Design',
-    text: 'Role-aware access and clean architecture that is easier to connect with your backend later.',
-  },
-  {
-    icon: '◎',
-    title: 'Responsive Experience',
-    text: 'A polished layout that feels premium on desktop while still adapting well for smaller screens.',
-  },
-]
+type LoginField = 'email' | 'password'
 
-const steps = [
-  {
-    title: 'Create an account',
-    text: 'Students and teachers can join quickly with a clean, focused authentication flow.',
-  },
-  {
-    title: 'Build or join a classroom',
-    text: 'Teachers open private rooms, students enroll, and each course gets its own dedicated space.',
-  },
-  {
-    title: 'Learn and collaborate',
-    text: 'Use AI tutoring, community discussion, notices, and live sessions without leaving the platform.',
-  },
-  {
-    title: 'Measure real progress',
-    text: 'Analytics and outcomes stay visible so learners and teachers can keep improving together.',
-  },
-]
+const userStore = useUserStore()
 
-const reviews = [
-  {
-    initials: 'RI',
-    name: 'Ranya Islam',
-    role: 'CSE Student, Dhaka',
-    text: 'The interface feels premium and calm. The dark design makes long study sessions much easier on the eyes.',
-  },
-  {
-    initials: 'FH',
-    name: 'Farhan Hossain',
-    role: 'Lecturer, BUET',
-    text: 'The classroom structure is clearer, and the platform finally feels like one product instead of many disconnected tools.',
-  },
-  {
-    initials: 'TA',
-    name: 'Tasnim Akter',
-    role: 'Physics Teacher',
-    text: 'The Bangladesh-first identity with a global look gives the whole landing page a much stronger presence.',
-  },
-]
+const loginRole = ref<UserRole>('student')
+const loginEmail = ref('')
+const loginPassword = ref('')
+const rememberMe = ref(true)
+const showPassword = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
 
-const tickerItems = [
-  'AI tutor 24/7',
-  'Social learning feed',
-  'Live classrooms',
-  'Progress analytics',
-  'Secure & private',
-  'Responsive design',
-  'Bangladesh spotlight',
-]
-
-const repeatedTicker = computed(() => [...tickerItems, ...tickerItems, ...tickerItems])
-
-const cleanups = []
-
-const delayStyle = (index) => ({ '--delay': `${index * 90}ms` })
-
-function latLngToVector3(lat, lng, radius) {
-  const phi = (90 - lat) * (Math.PI / 180)
-  const theta = (lng + 180) * (Math.PI / 180)
-
-  const x = -(radius * Math.sin(phi) * Math.cos(theta))
-  const z = radius * Math.sin(phi) * Math.sin(theta)
-  const y = radius * Math.cos(phi)
-
-  return new THREE.Vector3(x, y, z)
-}
-
-function createBangladeshHighlight(radius = 1.01) {
-  const group = new THREE.Group()
-
-  const bangladeshLat = 23.685
-  const bangladeshLng = 90.3563
-  const position = latLngToVector3(bangladeshLat, bangladeshLng, radius)
-
-  const marker = new THREE.Mesh(
-    new THREE.SphereGeometry(0.035, 20, 20),
-    new THREE.MeshBasicMaterial({ color: 0x49e6ff })
-  )
-  marker.position.copy(position)
-  group.add(marker)
-
-  const ring = new THREE.Mesh(
-    new THREE.RingGeometry(0.06, 0.105, 48),
-    new THREE.MeshBasicMaterial({
-      color: 0x7c5cff,
-      transparent: true,
-      opacity: 0.9,
-      side: THREE.DoubleSide,
-    })
-  )
-  ring.position.copy(position.clone().multiplyScalar(1.001))
-  ring.lookAt(position.clone().multiplyScalar(2))
-  group.add(ring)
-
-  const glow = new THREE.Mesh(
-    new THREE.SphereGeometry(0.09, 24, 24),
-    new THREE.MeshBasicMaterial({
-      color: 0x00d9ff,
-      transparent: true,
-      opacity: 0.15,
-    })
-  )
-  glow.position.copy(position)
-  group.add(glow)
-
-  const arcMaterial = new THREE.LineBasicMaterial({ color: 0x49e6ff, transparent: true, opacity: 0.75 })
-  const destinations = [
-    { lat: 51.5072, lng: -0.1276 },
-    { lat: 40.7128, lng: -74.006 },
-    { lat: 35.6762, lng: 139.6503 },
-  ]
-
-  for (const destination of destinations) {
-    const start = latLngToVector3(bangladeshLat, bangladeshLng, radius)
-    const end = latLngToVector3(destination.lat, destination.lng, radius)
-    const mid = start.clone().add(end).multiplyScalar(0.5).normalize().multiplyScalar(radius * 1.45)
-    const curve = new THREE.QuadraticBezierCurve3(start, mid, end)
-    const points = curve.getPoints(90)
-    const geometry = new THREE.BufferGeometry().setFromPoints(points)
-    const line = new THREE.Line(geometry, arcMaterial)
-    group.add(line)
-  }
-
-  return group
-}
-
-function createSimpleEarth({ canvas, radius = 1, autoRotateSpeed = 0.0035, particleCount = 800, cameraZ = 3.2 }) {
-  if (!canvas) return () => {}
-
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false)
-
-  const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(42, canvas.clientWidth / canvas.clientHeight, 0.1, 100)
-  camera.position.set(0, 0.1, cameraZ)
-
-  const globeGroup = new THREE.Group()
-  scene.add(globeGroup)
-
-  const ambient = new THREE.AmbientLight(0xffffff, 0.9)
-  scene.add(ambient)
-
-  const point = new THREE.PointLight(0x61a8ff, 5.2, 20)
-  point.position.set(4, 3, 4)
-  scene.add(point)
-
-  const rim = new THREE.PointLight(0x8b5cf6, 3.8, 20)
-  rim.position.set(-4, -2, -2)
-  scene.add(rim)
-
-  const globe = new THREE.Mesh(
-    new THREE.SphereGeometry(radius, 72, 72),
-    new THREE.MeshPhysicalMaterial({
-      color: 0x0b1220,
-      metalness: 0.18,
-      roughness: 0.26,
-      transmission: 0.02,
-      clearcoat: 0.75,
-      clearcoatRoughness: 0.3,
-      emissive: 0x10213c,
-      emissiveIntensity: 0.45,
-    })
-  )
-  globeGroup.add(globe)
-
-  const wire = new THREE.Mesh(
-    new THREE.SphereGeometry(radius * 1.003, 30, 30),
-    new THREE.MeshBasicMaterial({
-      color: 0x3b82f6,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.12,
-    })
-  )
-  globeGroup.add(wire)
-
-  const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(radius * 1.12, 72, 72),
-    new THREE.MeshBasicMaterial({
-      color: 0x3b82f6,
-      transparent: true,
-      opacity: 0.08,
-      side: THREE.BackSide,
-    })
-  )
-  globeGroup.add(atmosphere)
-
-  const starsGeometry = new THREE.BufferGeometry()
-  const starPositions = new Float32Array(particleCount * 3)
-  for (let i = 0; i < particleCount * 3; i += 3) {
-    const r = 8 + Math.random() * 7
-    const theta = Math.random() * Math.PI * 2
-    const phi = Math.acos(2 * Math.random() - 1)
-    starPositions[i] = r * Math.sin(phi) * Math.cos(theta)
-    starPositions[i + 1] = r * Math.cos(phi)
-    starPositions[i + 2] = r * Math.sin(phi) * Math.sin(theta)
-  }
-  starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3))
-
-  const stars = new THREE.Points(
-    starsGeometry,
-    new THREE.PointsMaterial({
-      color: 0xb8d4ff,
-      size: 0.03,
-      transparent: true,
-      opacity: 0.7,
-    })
-  )
-  scene.add(stars)
-
-  const highlight = createBangladeshHighlight(radius * 1.015)
-  globeGroup.add(highlight)
-
-  let rafId = 0
-  const clock = new THREE.Clock()
-
-  const onResize = () => {
-    const width = canvas.clientWidth
-    const height = canvas.clientHeight
-    if (!width || !height) return
-    renderer.setSize(width, height, false)
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-  }
-
-  const animate = () => {
-    rafId = requestAnimationFrame(animate)
-    const elapsed = clock.getElapsedTime()
-
-    globeGroup.rotation.y += autoRotateSpeed
-    globeGroup.rotation.x = Math.sin(elapsed * 0.6) * 0.06
-    stars.rotation.y -= autoRotateSpeed * 0.15
-
-    const pulse = 1 + Math.sin(elapsed * 2.3) * 0.08
-    highlight.children[1].scale.setScalar(pulse)
-    highlight.children[2].scale.setScalar(1 + Math.sin(elapsed * 2.1) * 0.12)
-
-    renderer.render(scene, camera)
-  }
-
-  onResize()
-  animate()
-  window.addEventListener('resize', onResize)
-
-  return () => {
-    cancelAnimationFrame(rafId)
-    window.removeEventListener('resize', onResize)
-    renderer.dispose()
-    globe.geometry.dispose()
-    globe.material.dispose()
-    wire.geometry.dispose()
-    wire.material.dispose()
-    atmosphere.geometry.dispose()
-    atmosphere.material.dispose()
-    stars.geometry.dispose()
-    stars.material.dispose()
-    highlight.traverse((obj) => {
-      if (obj.geometry) obj.geometry.dispose()
-      if (obj.material) {
-        if (Array.isArray(obj.material)) obj.material.forEach((m) => m.dispose())
-        else obj.material.dispose()
-      }
-    })
-  }
-}
-
-function setupReveal() {
-  const elements = document.querySelectorAll('.reveal')
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add('is-visible')
-      })
-    },
-    { threshold: 0.14 }
-  )
-
-  elements.forEach((el) => observer.observe(el))
-  return () => observer.disconnect()
-}
-
-function handleScroll() {
-  isScrolled.value = window.scrollY > 18
-}
-
-onMounted(async () => {
-  await nextTick()
-  handleScroll()
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  cleanups.push(() => window.removeEventListener('scroll', handleScroll))
-
-  cleanups.push(setupReveal())
-  cleanups.push(
-    createSimpleEarth({ canvas: heroCanvas.value, radius: 1.08, autoRotateSpeed: 0.0037, particleCount: 1000, cameraZ: 3.4 })
-  )
-  cleanups.push(
-    createSimpleEarth({ canvas: aboutCanvas.value, radius: 0.92, autoRotateSpeed: 0.0026, particleCount: 520, cameraZ: 3.0 })
-  )
+const loginErrors = reactive<Record<LoginField, string>>({
+  email: '',
+  password: '',
 })
 
-onBeforeUnmount(() => {
-  while (cleanups.length) {
-    const cleanup = cleanups.pop()
-    if (typeof cleanup === 'function') cleanup()
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const clearFieldError = (field: LoginField): void => {
+  loginErrors[field] = ''
+  errorMessage.value = ''
+}
+
+const validate = (): boolean => {
+  let valid = true
+
+  if (!loginEmail.value.trim()) {
+    loginErrors.email = 'Email is required.'
+    valid = false
+  } else if (!emailRegex.test(loginEmail.value.trim())) {
+    loginErrors.email = 'Please enter a valid email address.'
+    valid = false
   }
-})
+
+  if (!loginPassword.value) {
+    loginErrors.password = 'Password is required.'
+    valid = false
+  } else if (loginPassword.value.length < 6) {
+    loginErrors.password = 'Password must be at least 6 characters.'
+    valid = false
+  }
+
+  return valid
+}
+
+const handleLogin = async (): Promise<void> => {
+  errorMessage.value = ''
+  loginErrors.email = ''
+  loginErrors.password = ''
+
+  if (!validate()) return
+
+  isLoading.value = true
+  const response = await userStore.login(loginEmail.value.trim(), loginPassword.value, loginRole.value)
+  isLoading.value = false
+
+  if (!response.success) {
+    errorMessage.value = response.message || 'Invalid credentials. Please check your email and password.'
+    return
+  }
+
+  if (!rememberMe.value && process.client) {
+    localStorage.removeItem('educonnect_token')
+    localStorage.removeItem('educonnect_user')
+    localStorage.removeItem('educonnect_auth')
+    sessionStorage.setItem('educonnect_auth', 'true')
+  }
+
+  await navigateTo('/home')
+}
 </script>
 
 <style scoped>
-:global(body) {
-  margin: 0;
-  background:
-    radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 28%),
-    linear-gradient(180deg, #060816 0%, #070b14 35%, #05070f 100%);
-  color: #eef4ff;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Syne:wght@600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cyan: #81ecff;
+  --cyan-dim: rgba(129,236,255,0.18);
+  --cyan-glow: rgba(129,236,255,0.28);
+  --purple: #9093ff;
+  --bg: #0b0e14;
+  --card-bg: rgba(17,25,40,0.82);
+  --border: rgba(255,255,255,0.10);
+  --text: #ecedf6;
+  --muted: rgba(236,237,246,0.60);
+  --error: #ff908d;
+  --radius-pill: 999px;
+  --radius-card: 20px;
+  --transition: 0.22s cubic-bezier(.4,0,.2,1);
 }
 
-:global(html) {
-  scroll-behavior: smooth;
-}
+html, body { height: 100%; }
 
-* {
-  box-sizing: border-box;
-}
-
-.edu-page {
-  position: relative;
+.login-v2-page {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
-  min-width: 0;
-  width: 100%;
-  overflow-x: hidden;
-  color: #e8eefc;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.ambient,
-.grid-overlay,
-.noise-overlay {
+.login-v2-page::before {
+  content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.35;
 }
 
-.ambient-1 {
-  background: radial-gradient(circle at 16% 18%, rgba(0, 209, 255, 0.12), transparent 24%);
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 5% 8%, rgba(0,227,253,0.13) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 95% 5%, rgba(144,147,255,0.15) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 60% at 90% 95%, rgba(236,99,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 10% 90%, rgba(0,227,253,0.06) 0%, transparent 50%);
 }
 
-.ambient-2 {
-  background: radial-gradient(circle at 82% 20%, rgba(124, 92, 255, 0.16), transparent 28%);
-}
-
-.grid-overlay {
-  opacity: 0.08;
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(circle at center, black 48%, transparent 100%);
-}
-
-.noise-overlay {
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.05' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
-}
-
-.container {
-  width: min(1180px, calc(100% - 40px));
-  margin: 0 auto;
-}
-
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  backdrop-filter: blur(18px);
-  background: rgba(5, 9, 19, 0.7);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-  transition: box-shadow 0.25s ease, background 0.25s ease;
-}
-
-.nav.shadow {
-  box-shadow: 0 10px 40px rgba(2, 6, 23, 0.34);
-  background: rgba(4, 8, 17, 0.84);
-}
-
-.nav-inner {
-  min-height: 72px;
+.page-wrap {
+  position: relative;
+  z-index: 1;
+  flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-}
-
-.brand-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: white;
-  background: linear-gradient(135deg, #38bdf8, #4f46e5 68%, #8b5cf6);
-  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
-}
-
-.brand-name {
-  color: #f8fbff;
-  font-weight: 800;
-  font-size: 1.05rem;
-  letter-spacing: -0.04em;
-}
-
-.desktop-links {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-
-.desktop-links a,
-.mobile-menu a {
-  color: #b7c4df;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.desktop-links a:hover,
-.mobile-menu a:hover {
-  color: #ffffff;
-}
-
-.cta-link {
-  padding: 10px 16px;
-  border-radius: 999px;
-  color: white !important;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(124, 92, 255, 0.95));
-  box-shadow: 0 10px 28px rgba(59, 130, 246, 0.24);
-}
-
-.mobile-toggle {
-  display: none;
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  padding: 0;
-  cursor: pointer;
-}
-
-.mobile-toggle span {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: white;
-  margin: 4px auto;
-  border-radius: 999px;
-}
-
-.mobile-menu {
-  display: none;
   flex-direction: column;
-  gap: 18px;
-  padding: 0 20px 20px;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
-  max-height: 0;
+}
+
+.login-shell {
+  flex: 1;
+  display: flex;
+}
+
+.brand-panel {
+  width: 52%;
+  padding: 52px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
   overflow: hidden;
-  opacity: 0;
-  transition: all 0.25s ease;
 }
 
-.mobile-menu.open {
-  max-height: 320px;
-  opacity: 1;
-  padding-top: 18px;
+.brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(129,236,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129,236,255,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 40% 40%, black 40%, transparent 100%);
 }
 
-.hero {
-  display: grid;
-  grid-template-columns: 1.02fr 0.98fr;
-  gap: 42px;
-  align-items: center;
-  padding: 64px 0 88px;
+.brand-panel::after {
+  content: '';
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  top: -120px;
+  right: -160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(144,147,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.hero-copy,
-.hero-visual,
-.section,
-.muted-section {
+.brand-content {
   position: relative;
   z-index: 1;
 }
 
-.eyebrow,
-.chip,
-.signup-chip {
-  display: inline-flex;
+.brand-row {
+  display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: #97c8ff;
-  background: rgba(10, 17, 30, 0.68);
-  border: 1px solid rgba(82, 145, 255, 0.22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  gap: 11px;
+  animation: fadeUp 0.6s both;
 }
 
-.eyebrow-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #45d7ff;
-  box-shadow: 0 0 0 6px rgba(69, 215, 255, 0.11);
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #003840;
+  box-shadow: 0 0 20px var(--cyan-glow);
 }
 
-.hero h1,
-.section-head h2,
-.journey-copy h2,
-.about-copy h2,
-.contact-copy h2 {
-  margin: 20px 0 0;
-  font-size: clamp(2.75rem, 5vw, 5.4rem);
-  line-height: 0.96;
-  letter-spacing: -0.06em;
-  color: #f6f9ff;
-}
-
-.section-head h2,
-.journey-copy h2,
-.about-copy h2,
-.contact-copy h2 {
-  font-size: clamp(2rem, 3.8vw, 3.4rem);
-  line-height: 1.02;
-}
-
-.hero h1 span,
-.section-head h2 span,
-.journey-copy h2 span,
-.about-copy h2 span,
-.contact-copy h2 span {
-  background: linear-gradient(90deg, #38bdf8 0%, #7c5cff 48%, #9ae6ff 100%);
+.brand-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, var(--cyan) 20%, var(--purple));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-.hero-text,
-.section-head p,
-.journey-copy p,
-.about-copy p,
-.contact-copy p,
-.signup-top p,
-.review-card p {
-  color: #a9b6d0;
-  line-height: 1.78;
-  font-size: 1rem;
-}
-
-.hero-text {
-  max-width: 60ch;
-  margin-top: 22px;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin-top: 34px;
-}
-
-.btn {
+.feature-pill {
+  margin-top: 36px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: 50px;
-  padding: 0 22px;
-  border-radius: 14px;
-  border: 1px solid transparent;
-  text-decoration: none;
-  font-weight: 700;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-}
-
-.btn-primary {
-  color: white;
-  background: linear-gradient(135deg, #2563eb, #7c5cff);
-  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.28);
-}
-
-.btn-secondary {
-  color: #dbe8ff;
-  background: rgba(11, 18, 32, 0.7);
-  border-color: rgba(148, 163, 184, 0.18);
-}
-
-.btn-block {
-  width: 100%;
-}
-
-.hero-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 34px;
-}
-
-.metric-card,
-.feature-card,
-.review-card,
-.contact-item,
-.stat-card,
-.signup-card,
-.visual-shell,
-.visual-panel,
-.about-orb-shell {
-  background: linear-gradient(180deg, rgba(11, 18, 32, 0.88), rgba(8, 13, 24, 0.88));
-  border: 1px solid rgba(148, 163, 184, 0.13);
-  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-.metric-card {
-  border-radius: 18px;
-  padding: 16px;
-}
-
-.metric-card strong,
-.stat-card strong {
-  display: block;
-  font-size: 1.3rem;
-  letter-spacing: -0.05em;
-  color: white;
-}
-
-.metric-card span,
-.stat-card span {
-  display: block;
-  margin-top: 6px;
-  color: #8fa3c8;
-  font-size: 0.92rem;
-}
-
-.visual-shell {
-  position: relative;
-  min-height: 620px;
-  border-radius: 32px;
-  overflow: hidden;
-}
-
-.globe-canvas,
-.about-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.orbital-card {
-  position: absolute;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(6, 10, 18, 0.72);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.28);
-  animation: floaty 5s ease-in-out infinite;
-}
-
-.orbital-card-1 { top: 10%; right: 8%; }
-.orbital-card-2 { bottom: 12%; left: 7%; animation-delay: 1s; }
-.orbital-card-3 { top: 56%; right: 6%; animation-delay: 1.8s; }
-
-.card-label {
-  display: block;
-  color: #8cbcff;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 6px;
-}
-
-.orbital-card strong {
-  display: block;
-  color: white;
-  font-size: 1rem;
-}
-
-.orbital-card small {
-  color: #97a9c9;
-}
-
-.ticker-wrap {
-  overflow: hidden;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-  background: linear-gradient(90deg, rgba(10, 16, 28, 0.9), rgba(10, 16, 28, 0.55), rgba(10, 16, 28, 0.9));
-}
-
-.ticker-track {
-  display: flex;
-  width: max-content;
-  animation: ticker 30s linear infinite;
-}
-
-.ticker-item {
-  padding: 18px 28px;
-  color: #cddcff;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.82rem;
-}
-
-.section,
-.muted-section {
-  padding: 100px 0;
-}
-
-.muted-section {
-  background: linear-gradient(180deg, rgba(9, 13, 24, 0.78), rgba(7, 11, 20, 0.88));
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
-}
-
-.section-head {
-  display: grid;
-  grid-template-columns: 1fr 0.8fr;
-  gap: 26px;
-  align-items: end;
-  margin-bottom: 34px;
-}
-
-.feature-grid,
-.review-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.feature-card,
-.review-card {
-  border-radius: 24px;
-  padding: 24px;
-}
-
-.feature-index {
-  color: #7588aa;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.feature-icon {
-  width: 52px;
-  height: 52px;
-  margin: 18px 0 14px;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  font-size: 1.15rem;
-  color: #87dbff;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(124, 92, 255, 0.18));
-  border: 1px solid rgba(85, 145, 255, 0.18);
-}
-
-.feature-card h3,
-.review-user strong,
-.step-item h4,
-.signup-top h3 {
-  margin: 0;
-  color: white;
-  letter-spacing: -0.04em;
-}
-
-.feature-card h3 {
-  font-size: 1.18rem;
-}
-
-.feature-card p {
-  margin: 10px 0 0;
-  color: #9eb0ce;
-  line-height: 1.7;
-}
-
-.journey-grid,
-.about-grid,
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  align-items: center;
-}
-
-.step-list {
-  margin-top: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.step-item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 16px;
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-}
-
-.step-no {
-  color: #7ebeff;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding-top: 3px;
-}
-
-.step-item p {
-  margin: 6px 0 0;
-  color: #9fb0cb;
-}
-
-.visual-panel,
-.about-orb-shell {
-  border-radius: 28px;
-  padding: 22px;
-}
-
-.mini-window {
-  border-radius: 22px;
-  overflow: hidden;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  background: rgba(7, 12, 21, 0.95);
-}
-
-.mini-topbar {
-  display: flex;
   gap: 8px;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-}
-
-.mini-topbar span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(148, 163, 184, 0.24);
-}
-
-.mini-content {
-  display: grid;
-  grid-template-columns: 82px 1fr;
-  min-height: 340px;
-}
-
-.mini-sidebar {
-  padding: 16px;
-  border-right: 1px solid rgba(148, 163, 184, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.mini-sidebar div,
-.mini-row,
-.mini-cards div {
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.18), rgba(124, 92, 255, 0.12));
-  border: 1px solid rgba(90, 149, 255, 0.1);
-}
-
-.mini-sidebar div {
-  height: 38px;
-  border-radius: 12px;
-}
-
-.mini-main {
-  padding: 18px;
-}
-
-.mini-row {
-  height: 52px;
-  border-radius: 16px;
-  margin-bottom: 14px;
-}
-
-.mini-row.large {
-  height: 82px;
-}
-
-.mini-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.mini-cards div {
-  height: 110px;
-  border-radius: 18px;
-}
-
-.journey-badge {
-  margin-top: 18px;
-  color: #8fc4ff;
-  letter-spacing: 0.12em;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 28px;
-}
-
-.stat-card {
-  border-radius: 22px;
-  padding: 20px;
-}
-
-.accent-card {
-  background: linear-gradient(135deg, rgba(24, 40, 75, 0.95), rgba(24, 20, 62, 0.95));
-  border-color: rgba(93, 152, 255, 0.24);
-}
-
-.about-orb-shell {
-  height: 420px;
-}
-
-.stars {
-  color: #7dc6ff;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(15,19,28,0.80);
+  border: 1px solid rgba(0,212,236,0.25);
+  color: #00d4ec;
+  font-size: 10px;
   letter-spacing: 0.18em;
-  margin-bottom: 16px;
+  text-transform: uppercase;
+  font-weight: 700;
+  animation: fadeUp 0.6s 0.1s both;
 }
 
-.review-user {
+.feature-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00d4ec;
+  box-shadow: 0 0 8px #00d4ec;
+}
+
+.brand-content h1 {
+  margin: 22px 0 18px;
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(46px, 5.5vw, 82px);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  animation: fadeUp 0.6s 0.15s both;
+}
+
+.brand-content h1 em {
+  font-style: normal;
+  color: var(--cyan);
+}
+
+.brand-content p {
+  max-width: 420px;
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 15px;
+  animation: fadeUp 0.6s 0.2s both;
+}
+
+.perks {
+  list-style: none;
+  margin-top: 32px;
+  display: grid;
+  gap: 13px;
+  animation: fadeUp 0.6s 0.25s both;
+}
+
+.perks li {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 18px;
+  font-size: 14px;
+  color: rgba(236,237,246,0.85);
 }
 
-.review-user span {
-  display: block;
-  margin-top: 4px;
-  color: #90a4c5;
-  font-size: 0.92rem;
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+.perk-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  color: white;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.perk-icon.c1 { background: rgba(0,212,236,0.12); color: #00d4ec; border: 1px solid rgba(0,212,236,0.2); }
+.perk-icon.c2 { background: rgba(144,147,255,0.12); color: #9093ff; border: 1px solid rgba(144,147,255,0.2); }
+.perk-icon.c3 { background: rgba(236,99,255,0.10); color: #ec63ff; border: 1px solid rgba(236,99,255,0.18); }
+.perk-icon.c4 { background: rgba(129,236,255,0.12); color: var(--cyan); border: 1px solid var(--cyan-dim); }
+.perk-icon.c5 { background: rgba(144,147,255,0.12); color: #a5a8ff; border: 1px solid rgba(144,147,255,0.2); }
+
+.stats-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 0;
+  padding-top: 30px;
+  border-top: 1px solid rgba(69,72,79,0.28);
+  animation: fadeUp 0.6s 0.3s both;
+}
+
+.stat-item {
+  flex: 1;
+  padding-right: 24px;
+  border-right: 1px solid rgba(69,72,79,0.22);
+}
+
+.stat-item:last-child {
+  border-right: none;
+  padding-right: 0;
+  padding-left: 24px;
+}
+
+.stat-item:nth-child(2) {
+  padding-left: 24px;
+}
+
+.stat-item strong {
+  display: block;
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
   font-weight: 800;
-  background: linear-gradient(135deg, #2563eb, #7c5cff);
+  letter-spacing: -0.04em;
+  color: #fff;
 }
 
-.contact-list {
+.stat-item span {
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+  display: block;
+}
+
+.form-panel {
+  width: 48%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 40px;
+  position: relative;
+}
+
+.form-panel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(129,236,255,0.2) 40%, rgba(129,236,255,0.2) 60%, transparent);
+}
+
+.auth-card {
+  width: min(460px, 100%);
+  border-radius: var(--radius-card);
+  padding: 40px 38px;
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(129,236,255,0.04) inset,
+    0 1px 0 rgba(255,255,255,0.08) inset;
+  animation: fadeUp 0.5s 0.05s both;
+}
+
+.auth-head {
+  margin-bottom: 28px;
+}
+
+.auth-head h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.auth-head p {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.auth-form {
   display: grid;
-  gap: 14px;
-  margin-top: 26px;
+  gap: 16px;
 }
 
-.contact-item {
-  padding: 18px 20px;
-  border-radius: 18px;
-}
-
-.contact-item strong {
-  display: block;
-  color: white;
-}
-
-.contact-item span {
-  display: block;
-  margin-top: 6px;
-  color: #95a9c8;
-}
-
-.signup-card {
-  border-radius: 30px;
-  padding: 28px;
-}
-
-.signup-top h3 {
-  font-size: 2rem;
-  margin-top: 16px;
-}
-
-.signup-form {
-  margin-top: 22px;
-}
-
-.field-grid {
+.field-group {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 7px;
 }
 
-.signup-form label {
-  display: block;
-  margin-bottom: 14px;
+.field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(236,237,246,0.65);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
-.signup-form span {
-  display: block;
-  margin-bottom: 8px;
-  color: #9cb0cf;
-  font-size: 0.88rem;
+.field-label a,
+.field-label button.inline {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cyan);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  font-weight: 500;
+  transition: opacity var(--transition);
 }
 
-.signup-form input,
-.signup-form select {
+.field-label a:hover,
+.field-label button.inline:hover {
+  opacity: 0.75;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap input,
+.auth-form select {
   width: 100%;
-  min-height: 48px;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  height: 50px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-pill);
+  padding: 0 18px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
   outline: none;
-  background: rgba(6, 10, 18, 0.85);
-  color: #eef4ff;
-  padding: 0 14px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.signup-form input:focus,
-.signup-form select:focus {
-  border-color: rgba(96, 165, 250, 0.65);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+.input-wrap input::placeholder {
+  color: rgba(236,237,246,0.30);
 }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-  transition-delay: var(--delay, 0ms);
+.input-wrap input:hover,
+.auth-form select:hover {
+  border-color: rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.55);
 }
 
-.reveal.reveal-delay-1 {
-  --delay: 110ms;
+.input-wrap input:focus,
+.auth-form select:focus {
+  border-color: rgba(129,236,255,0.65);
+  box-shadow: 0 0 0 3px rgba(129,236,255,0.12);
+  background: rgba(0,0,0,0.60);
 }
 
-.reveal.is-visible {
-  opacity: 1;
+.input-wrap input.is-error {
+  border-color: rgba(255,113,108,0.7);
+}
+
+.input-wrap input.is-error:focus {
+  box-shadow: 0 0 0 3px rgba(255,113,108,0.14);
+}
+
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap select {
+  appearance: none;
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+.select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 17px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--cyan);
+  pointer-events: none;
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--cyan-dim);
+  border: none;
+  border-radius: var(--radius-pill);
+  color: var(--cyan);
+  font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background var(--transition);
+  letter-spacing: 0.02em;
+}
+
+.pw-toggle:hover {
+  background: rgba(129,236,255,0.28);
+}
+
+.pw-input {
+  padding-right: 78px !important;
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 11px;
+  padding-left: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.field-error::before {
+  content: '!';
+  font-weight: 700;
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.custom-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.4);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.remember-row input[type=checkbox] {
+  display: none;
+}
+
+.remember-row input[type=checkbox]:checked + .custom-check {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.remember-row input[type=checkbox]:checked + .custom-check::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid #003840;
+  border-bottom: 2px solid #003840;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.remember-label {
+  color: var(--muted);
+  font-size: 13px;
+  user-select: none;
+}
+
+.signin-btn {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--cyan) 0%, #50d8ef 100%);
+  color: #003840;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  box-shadow: 0 0 28px rgba(129,236,255,0.28), 0 4px 14px rgba(0,0,0,0.3);
+}
+
+.signin-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 55%);
+}
+
+.signin-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 38px rgba(129,236,255,0.42), 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.signin-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to { transform: translateX(-33.333%); }
+.signin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-@keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+.error-banner {
+  background: rgba(255,113,108,0.10);
+  border: 1px solid rgba(255,113,108,0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--error);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(236,237,246,0.35);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+}
+
+.social-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.social-btn {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.04);
+  color: rgba(236,237,246,0.88);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.social-btn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.16);
+  transform: translateY(-1px);
+}
+
+.social-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.register-text {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.register-text button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cyan);
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity var(--transition);
+}
+
+.register-text button:hover {
+  opacity: 0.75;
+}
+
+.login-footer {
+  position: relative;
+  z-index: 1;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(69,72,79,0.22);
+  background: rgba(0,0,0,0.3);
+  color: rgba(236,237,246,0.45);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.login-footer nav {
+  display: flex;
+  gap: 20px;
+}
+
+.login-footer a {
+  color: rgba(236,237,246,0.5);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.login-footer a:hover {
+  color: var(--cyan);
+}
+
+.mobile-brand {
+  display: none;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 1080px) {
-  .hero,
-  .journey-grid,
-  .about-grid,
-  .contact-grid,
-  .section-head {
-    grid-template-columns: 1fr;
+  .login-shell {
+    flex-direction: column;
   }
 
-  .feature-grid,
-  .review-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .brand-panel,
+  .form-panel {
+    width: 100%;
   }
 
-  .hero {
-    padding-top: 42px;
+  .brand-panel {
+    min-height: 44vh;
+    padding: 36px 28px;
   }
 
-  .visual-shell {
-    min-height: 540px;
+  .form-panel {
+    padding: 24px 20px;
   }
-}
 
-@media (max-width: 820px) {
-  .desktop-links {
+  .form-panel::before {
     display: none;
   }
 
-  .mobile-toggle,
-  .mobile-menu {
+  .auth-card {
+    padding: 28px 24px;
+  }
+
+  .auth-head h2 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 720px) {
+  .brand-panel {
+    display: none;
+  }
+
+  .mobile-brand {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 16px;
   }
 
-  .hero h1 {
-    font-size: clamp(2.5rem, 10vw, 4rem);
+  .form-panel {
+    padding-top: 44px;
+    align-items: flex-start;
   }
 
-  .hero-metrics,
-  .feature-grid,
-  .review-grid,
-  .field-grid,
-  .stats-grid {
-    grid-template-columns: 1fr;
+  .auth-card {
+    width: 100%;
   }
 
-  .orbital-card {
-    position: static;
-    margin-top: 12px;
-  }
-
-  .visual-shell {
-    padding: 0 0 16px;
-  }
-
-  .globe-canvas {
-    min-height: 400px;
-  }
-
-  .about-orb-shell {
-    height: 340px;
-  }
-
-  .ticker-item {
-    padding-inline: 18px;
+  .login-footer {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
   }
 }
 </style>

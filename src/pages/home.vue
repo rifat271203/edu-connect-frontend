@@ -74,7 +74,7 @@
 
     <UiCard v-else class="mb-6 !p-5 text-sm text-[var(--t2)]">
       You are browsing the Educational Social Feed as a guest. Log in to create posts, like, comment, and enroll in courses.
-      <NuxtLink to="/login" class="ml-1 font-semibold text-[var(--gold)] hover:text-[var(--gold2)]">Log in</NuxtLink>
+      <NuxtLink to="/loginV2" class="ml-1 font-semibold text-[var(--gold)] hover:text-[var(--gold2)]">Log in</NuxtLink>
     </UiCard>
 
     <p v-if="displayError" class="mb-4 text-sm text-[rgba(239,68,68,0.9)]">{{ displayError }}</p>
@@ -140,7 +140,7 @@
               <div class="mt-3">
                 <NuxtLink
                   v-if="isGuest"
-                  to="/login"
+                  to="/loginV2"
                   class="inline-flex h-9 items-center justify-center rounded-[8px] border border-[var(--line)] bg-[var(--surface2)] px-3 text-[13px] font-semibold text-[var(--t1)] transition-colors hover:border-[var(--line2)]"
                 >
                   Log in to enroll

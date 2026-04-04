@@ -9,6 +9,6 @@ definePageMeta({
 
 // Redirect to login
 onMounted(() => {
-  navigateTo('/login')
+  navigateTo('/loginV2')
 })
 </script>

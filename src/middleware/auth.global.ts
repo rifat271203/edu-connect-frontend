@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  const guestAllowedPaths = new Set(['/login', '/home', '/ai-tutor'])
+  const guestAllowedPaths = new Set(['/login', '/loginV2', '/home', '/ai-tutor'])
 
   // Initialize user store to load user data from localStorage
   const userStore = useUserStore()
@@ -23,12 +23,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // If not authenticated, redirect to login
   if (!token || isAuth !== 'true') {
-    return navigateTo('/login')
+    return navigateTo('/loginV2')
   }
 
   await userStore.syncCurrentUser()
 
   if (!userStore.isAuthenticated) {
-    return navigateTo('/login')
+    return navigateTo('/loginV2')
   }
 })

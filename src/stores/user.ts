@@ -322,7 +322,7 @@ export const useUserStore = defineStore('user', {
       
       logout().catch(console.error)
       
-      navigateTo('/login')
+      navigateTo('/loginV2')
     },
     
     // Check for persisted session
