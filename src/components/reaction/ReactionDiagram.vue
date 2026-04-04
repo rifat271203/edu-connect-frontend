@@ -22,7 +22,7 @@
               :class="chipClasses"
             >
               {{ reagent.name }}
-            </span>
+            </span>lo
           </div>
 
           <div class="w-full flex items-center justify-center pt-6">
