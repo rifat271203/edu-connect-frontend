@@ -38,7 +38,7 @@ export default defineNuxtConfig({
         { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css' }
       ]
     },
-    pageTransition: { name: 'fade', mode: 'out-in' }
+    pageTransition: { name: 'fade' }
   },
 
   routeRules: {
@@ -55,11 +55,11 @@ export default defineNuxtConfig({
       turnPass: process.env.NUXT_PUBLIC_TURN_PASS,
       backendUrl:
         process.env.NUXT_PUBLIC_BACKEND_URL ||
-        'https://sincere-spontaneity-production-ab4e.up.railway.app',
+        'http://localhost:3001',
       socketUrl:
         process.env.NUXT_PUBLIC_SOCKET_URL ||
         process.env.NUXT_PUBLIC_BACKEND_URL ||
-        'https://sincere-spontaneity-production-ab4e.up.railway.app',
+        'http://localhost:3001',
       iceServers:
         process.env.NUXT_PUBLIC_ICE_SERVERS ||
         '[{"urls":"stun:stun.l.google.com:19302"},{"urls":"stun:stun1.l.google.com:19302"}]',

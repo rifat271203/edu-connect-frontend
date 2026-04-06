@@ -70,11 +70,11 @@
 
         <div class="w-full max-w-sm">
           <div class="mb-10 text-center lg:text-left">
-            <h2 class="text-3xl font-extrabold tracking-tight text-[var(--text)] mb-2">Welcome back</h2>
-            <p class="text-[var(--text2)] text-sm font-light">Please enter your details to access your account.</p>
+            <h2 class="text-3xl font-extrabold tracking-tight text-[var(--text)] mb-2">Create account</h2>
+            <p class="text-[var(--text2)] text-sm font-light">Set up your profile to start learning and teaching.</p>
           </div>
 
-          <form class="space-y-5" @submit.prevent="handleLogin">
+          <form class="space-y-5" @submit.prevent="handleSignup">
             <div class="space-y-2">
               <label class="block text-[11px] font-medium uppercase tracking-widest text-[var(--label)] ml-1">Account type</label>
               <div class="relative">
@@ -87,54 +87,83 @@
             </div>
 
             <div class="space-y-2">
-              <label class="block text-[11px] font-medium uppercase tracking-widest text-[var(--label)] ml-1" for="loginEmail">Email address</label>
+              <label class="block text-[11px] font-medium uppercase tracking-widest text-[var(--label)] ml-1" for="signupName">Full name</label>
               <input
-                id="loginEmail"
-                v-model.trim="loginEmail"
+                id="signupName"
+                v-model.trim="signupName"
+                class="w-full h-11 px-4 input-base rounded-lg text-sm font-medium ring-0 focus:ring-0 transition-all placeholder:text-[var(--text3)]"
+                placeholder="Jane Doe"
+                type="text"
+                autocomplete="name"
+                :class="{ 'is-error': Boolean(signupErrors.name) }"
+                @input="clearFieldError('name')"
+              />
+              <span v-if="signupErrors.name" class="field-error">{{ signupErrors.name }}</span>
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-[11px] font-medium uppercase tracking-widest text-[var(--label)] ml-1" for="signupEmail">Email address</label>
+              <input
+                id="signupEmail"
+                v-model.trim="signupEmail"
                 class="w-full h-11 px-4 input-base rounded-lg text-sm font-medium ring-0 focus:ring-0 transition-all placeholder:text-[var(--text3)]"
                 placeholder="name@academia.elite"
                 type="email"
                 autocomplete="email"
-                :class="{ 'is-error': Boolean(loginErrors.email) }"
+                :class="{ 'is-error': Boolean(signupErrors.email) }"
                 @input="clearFieldError('email')"
               />
-              <span v-if="loginErrors.email" class="field-error">{{ loginErrors.email }}</span>
+              <span v-if="signupErrors.email" class="field-error">{{ signupErrors.email }}</span>
             </div>
 
             <div class="space-y-2">
-              <div class="flex justify-between items-center px-1">
-                <label class="text-[11px] font-medium uppercase tracking-widest text-[var(--label)]" for="loginPassword">Password</label>
-                <a class="text-[12px] font-medium text-[var(--accent)] hover:opacity-100 opacity-80 transition-opacity" href="#">Forgot password?</a>
-              </div>
+              <label class="text-[11px] font-medium uppercase tracking-widest text-[var(--label)] px-1" for="signupPassword">Password</label>
               <div class="relative">
                 <input
-                  id="loginPassword"
-                  v-model="loginPassword"
+                  id="signupPassword"
+                  v-model="signupPassword"
                   class="w-full h-11 pl-4 pr-12 input-base rounded-lg text-sm font-medium ring-0 focus:ring-0 transition-all placeholder:text-[var(--text3)]"
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
-                  autocomplete="current-password"
-                  :class="{ 'is-error': Boolean(loginErrors.password) }"
+                  autocomplete="new-password"
+                  :class="{ 'is-error': Boolean(signupErrors.password) }"
                   @input="clearFieldError('password')"
                 />
                 <button class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text3)] hover:text-[var(--text)]" type="button" @click="showPassword = !showPassword">
                   <span class="material-symbols-outlined text-lg">{{ showPassword ? 'visibility' : 'visibility_off' }}</span>
                 </button>
               </div>
-              <span v-if="loginErrors.password" class="field-error">{{ loginErrors.password }}</span>
+              <span v-if="signupErrors.password" class="field-error">{{ signupErrors.password }}</span>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-medium uppercase tracking-widest text-[var(--label)] px-1" for="signupConfirmPassword">Confirm password</label>
+              <input
+                id="signupConfirmPassword"
+                v-model="confirmPassword"
+                class="w-full h-11 px-4 input-base rounded-lg text-sm font-medium ring-0 focus:ring-0 transition-all placeholder:text-[var(--text3)]"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                :class="{ 'is-error': Boolean(signupErrors.confirmPassword) }"
+                @input="clearFieldError('confirmPassword')"
+              />
+              <span v-if="signupErrors.confirmPassword" class="field-error">{{ signupErrors.confirmPassword }}</span>
             </div>
 
             <label class="flex items-center gap-3 cursor-pointer group w-fit">
               <input
-                v-model="rememberMe"
+                v-model="acceptTerms"
                 class="w-4 h-4 rounded border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--accent)] focus:ring-[var(--accent)] focus:ring-offset-[var(--bg)] transition-all"
                 type="checkbox"
+                @change="clearFieldError('terms')"
               />
-              <span class="text-sm font-light text-[var(--text2)] group-hover:text-[var(--text)]">Stay signed in for 30 days</span>
+              <span class="text-sm font-light text-[var(--text2)] group-hover:text-[var(--text)]">I agree to the terms and privacy policy</span>
             </label>
+            <span v-if="signupErrors.terms" class="field-error">{{ signupErrors.terms }}</span>
 
             <button class="w-full h-12 mt-2 btn-primary font-medium text-sm rounded-lg shadow-lg" type="submit" :disabled="isLoading">
-              {{ isLoading ? 'Signing in...' : 'Sign in' }}
+              {{ isLoading ? 'Creating account...' : 'Create account' }}
             </button>
 
             <div v-if="errorMessage" class="error-banner">{{ errorMessage }}</div>
@@ -170,8 +199,8 @@
 
           <div class="mt-8 text-center">
             <p class="text-sm font-light text-[var(--text2)]">
-              New here?
-              <NuxtLink class="text-[var(--accent)] font-medium hover:underline ml-1" to="/signup">Create account</NuxtLink>
+              Already have an account?
+              <NuxtLink class="text-[var(--accent)] font-medium hover:underline ml-1" to="/loginV2">Sign in</NuxtLink>
             </p>
           </div>
         </div>
@@ -207,7 +236,7 @@ useHead({
   ],
 })
 
-type LoginField = 'email' | 'password'
+type SignupField = 'name' | 'email' | 'password' | 'confirmPassword' | 'terms'
 type AccountType = 'student' | 'teacher'
 const AUTH_THEME_STORAGE_KEY = 'educonnect_auth_page_theme'
 
@@ -215,16 +244,21 @@ const userStore = useUserStore()
 
 const theme = ref<'dark' | 'light'>('dark')
 const accountType = ref<AccountType>('student')
-const loginEmail = ref('')
-const loginPassword = ref('')
-const rememberMe = ref(true)
+const signupName = ref('')
+const signupEmail = ref('')
+const signupPassword = ref('')
+const confirmPassword = ref('')
+const acceptTerms = ref(false)
 const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-const loginErrors = reactive<Record<LoginField, string>>({
+const signupErrors = reactive<Record<SignupField, string>>({
+  name: '',
   email: '',
   password: '',
+  confirmPassword: '',
+  terms: '',
 })
 
 const themeIcon = computed(() => (theme.value === 'dark' ? 'dark_mode' : 'light_mode'))
@@ -247,27 +281,48 @@ onMounted(() => {
   }
 })
 
-const clearFieldError = (field: LoginField): void => {
-  loginErrors[field] = ''
+const clearFieldError = (field: SignupField): void => {
+  signupErrors[field] = ''
   errorMessage.value = ''
 }
 
 const validate = (): boolean => {
   let valid = true
 
-  if (!loginEmail.value.trim()) {
-    loginErrors.email = 'Email is required.'
+  if (!signupName.value.trim()) {
+    signupErrors.name = 'Full name is required.'
     valid = false
-  } else if (!emailRegex.test(loginEmail.value.trim())) {
-    loginErrors.email = 'Please enter a valid email address.'
+  } else if (signupName.value.trim().length < 2) {
+    signupErrors.name = 'Full name must be at least 2 characters.'
     valid = false
   }
 
-  if (!loginPassword.value) {
-    loginErrors.password = 'Password is required.'
+  if (!signupEmail.value.trim()) {
+    signupErrors.email = 'Email is required.'
     valid = false
-  } else if (loginPassword.value.length < 6) {
-    loginErrors.password = 'Password must be at least 6 characters.'
+  } else if (!emailRegex.test(signupEmail.value.trim())) {
+    signupErrors.email = 'Please enter a valid email address.'
+    valid = false
+  }
+
+  if (!signupPassword.value) {
+    signupErrors.password = 'Password is required.'
+    valid = false
+  } else if (signupPassword.value.length < 6) {
+    signupErrors.password = 'Password must be at least 6 characters.'
+    valid = false
+  }
+
+  if (!confirmPassword.value) {
+    signupErrors.confirmPassword = 'Please confirm your password.'
+    valid = false
+  } else if (confirmPassword.value !== signupPassword.value) {
+    signupErrors.confirmPassword = 'Passwords do not match.'
+    valid = false
+  }
+
+  if (!acceptTerms.value) {
+    signupErrors.terms = 'You need to accept terms to continue.'
     valid = false
   }
 
@@ -278,27 +333,28 @@ const mapAccountTypeToRole = (value: AccountType): UserRole => {
   return value === 'student' ? 'student' : 'teacher'
 }
 
-const handleLogin = async (): Promise<void> => {
+const handleSignup = async (): Promise<void> => {
   errorMessage.value = ''
-  loginErrors.email = ''
-  loginErrors.password = ''
+  signupErrors.name = ''
+  signupErrors.email = ''
+  signupErrors.password = ''
+  signupErrors.confirmPassword = ''
+  signupErrors.terms = ''
 
   if (!validate()) return
 
   isLoading.value = true
-  const response = await userStore.login(loginEmail.value.trim(), loginPassword.value, mapAccountTypeToRole(accountType.value))
+  const response = await userStore.registerUser(
+    signupName.value.trim(),
+    signupEmail.value.trim(),
+    signupPassword.value,
+    mapAccountTypeToRole(accountType.value)
+  )
   isLoading.value = false
 
   if (!response.success) {
-    errorMessage.value = response.message || 'Invalid credentials. Please check your email and password.'
+    errorMessage.value = response.message || 'Registration failed. Please check your details and try again.'
     return
-  }
-
-  if (!rememberMe.value && process.client) {
-    localStorage.removeItem('educonnect_token')
-    localStorage.removeItem('educonnect_user')
-    localStorage.removeItem('educonnect_auth')
-    sessionStorage.setItem('educonnect_auth', 'true')
   }
 
   await navigateTo('/home')

@@ -3,11 +3,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: 'blank',
-})
+definePageMeta({ layout: 'blank' })
 
-onMounted(() => {
-  navigateTo('/loginV2')
-})
+await navigateTo('/loginV2', { replace: true })
 </script>

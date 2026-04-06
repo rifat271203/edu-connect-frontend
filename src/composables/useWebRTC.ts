@@ -1,5 +1,5 @@
 // src/composables/useWebRTC.ts
-import type { ClassroomRole, IceConfig } from '~/types/classroom'
+import type { ClassroomRole } from '~/types/classroom'
 
 interface StartSessionContext {
   roomId: string
@@ -27,8 +27,9 @@ interface UseWebRTCReturn {
   endSession: () => void
 }
 
-const localStream = ref<MediaStream | null>(null)
-const remoteStreams = ref<Map<string, MediaStream>>(new Map())
+// Use shallowRef for MediaStream to avoid Vue reactivity breaking native browser objects
+const localStream = shallowRef<MediaStream | null>(null)
+const remoteStreams = shallowRef<Map<string, MediaStream>>(new Map())
 const peerConnections = new Map<string, RTCPeerConnection>()
 const pendingCandidates = new Map<string, RTCIceCandidateInit[]>()
 
@@ -87,7 +88,7 @@ const useClassroomToast = () => {
   return { error: fallback }
 }
 
-const readIceConfig = (): IceConfig => {
+const readIceConfig = (): RTCIceServer[] => {
   const config = useRuntimeConfig()
   const iceServers: RTCIceServer[] = []
 
@@ -107,7 +108,7 @@ const readIceConfig = (): IceConfig => {
     iceServers.push({ urls: 'stun:stun.l.google.com:19302' })
   }
 
-  return { iceServers }
+  return iceServers
 }
 
 const syncTrackFlags = () => {
@@ -182,8 +183,8 @@ const ensurePeer = (socketId: string): RTCPeerConnection => {
   if (existing) return existing
 
   const signaling = useSignaling()
-  const iceConfig = readIceConfig()
-  const pc = new RTCPeerConnection({ iceServers: iceConfig.iceServers })
+  const iceServers = readIceConfig()
+  const pc = new RTCPeerConnection({ iceServers })
   peerConnections.set(socketId, pc)
 
   attachLocalTracks(pc)
@@ -201,16 +202,18 @@ const ensurePeer = (socketId: string): RTCPeerConnection => {
 
   pc.ontrack = (event) => {
     const stream = event.streams[0] || new MediaStream([event.track])
-    remoteStreams.value.set(socketId, stream)
-    remoteStreams.value = new Map(remoteStreams.value)
+    const currentStreams = new Map(remoteStreams.value)
+    currentStreams.set(socketId, stream)
+    remoteStreams.value = currentStreams
   }
 
   pc.onconnectionstatechange = () => {
     if (pc.connectionState === 'closed' || pc.connectionState === 'failed') {
       const stream = remoteStreams.value.get(socketId)
       stream?.getTracks().forEach((track) => track.stop())
-      remoteStreams.value.delete(socketId)
-      remoteStreams.value = new Map(remoteStreams.value)
+      const currentStreams = new Map(remoteStreams.value)
+      currentStreams.delete(socketId)
+      remoteStreams.value = currentStreams
       peerConnections.delete(socketId)
       pendingCandidates.delete(socketId)
     }
@@ -374,8 +377,9 @@ const removePeer = (socketId: string) => {
 
   const stream = remoteStreams.value.get(socketId)
   stream?.getTracks().forEach((track) => track.stop())
-  remoteStreams.value.delete(socketId)
-  remoteStreams.value = new Map(remoteStreams.value)
+  const currentStreams = new Map(remoteStreams.value)
+  currentStreams.delete(socketId)
+  remoteStreams.value = currentStreams
 }
 
 const replaceTrack = async (newTrack: MediaStreamTrack) => {

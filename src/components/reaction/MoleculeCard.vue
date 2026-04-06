@@ -1,6 +1,6 @@
 <template>
-  <div class="molecule-card rounded-xl border p-3" :class="containerClasses">
-    <div class="mx-auto flex h-full min-h-[110px] w-full items-center justify-center rounded-lg" :class="viewerClasses">
+  <div class="molecule-card rounded-xl border p-4" :class="[containerClasses, compact ? 'compact' : '']">
+    <div class="mx-auto flex h-full min-h-[140px] w-full items-center justify-center rounded-lg" :class="[viewerClasses, compact ? 'compact-viewer' : '']">
       <div
         v-if="resolvedSvg"
         class="molecule-svg"
@@ -10,9 +10,18 @@
       <p v-else class="text-center text-xs" :class="mutedClasses">Rendering...</p>
     </div>
 
-    <p class="mt-2 text-center text-xs font-medium leading-snug" :class="nameClasses">
+    <p class="mt-3 text-center text-sm font-medium leading-snug" :class="nameClasses">
       {{ item.name }}
     </p>
+
+    <div v-if="roleLabel" class="mt-2 flex justify-center">
+      <span
+        class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+        :class="roleBadgeClasses"
+      >
+        {{ roleLabel }}
+      </span>
+    </div>
 
     <div class="flex justify-center">
       <slot />
@@ -31,6 +40,7 @@ const props = defineProps<{
   theme: SmilesTheme
   svg?: string
   errorMessage?: string
+  compact?: boolean
 }>()
 
 const localSvg = ref('')
@@ -57,6 +67,35 @@ const mutedClasses = computed(() => (isDark.value ? 'text-dark-400' : 'text-slat
 const resolvedSvg = computed(() => props.svg || localSvg.value)
 const resolvedError = computed(() => props.errorMessage || localError.value)
 
+const roleLabel = computed(() => {
+  const role = props.item.role?.toLowerCase()
+  if (role === 'reactant') return 'Reactant'
+  if (role === 'intermediate') return 'Intermediate'
+  if (role === 'product') return 'Product'
+  if (role === 'reagent') return 'Reagent'
+  if (role === 'catalyst') return 'Catalyst'
+  return null
+})
+
+const roleBadgeClasses = computed(() => {
+  const role = props.item.role?.toLowerCase()
+  if (isDark.value) {
+    if (role === 'reactant') return 'bg-blue-500/20 text-blue-300 border border-blue-400/40'
+    if (role === 'intermediate') return 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+    if (role === 'product') return 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40'
+    if (role === 'reagent') return 'bg-purple-500/20 text-purple-300 border border-purple-400/40'
+    if (role === 'catalyst') return 'bg-rose-500/20 text-rose-300 border border-rose-400/40'
+    return 'bg-dark-700/50 text-dark-300 border border-dark-600/50'
+  } else {
+    if (role === 'reactant') return 'bg-blue-100 text-blue-700 border border-blue-200'
+    if (role === 'intermediate') return 'bg-amber-100 text-amber-700 border border-amber-200'
+    if (role === 'product') return 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+    if (role === 'reagent') return 'bg-purple-100 text-purple-700 border border-purple-200'
+    if (role === 'catalyst') return 'bg-rose-100 text-rose-700 border border-rose-200'
+    return 'bg-slate-100 text-slate-600 border border-slate-200'
+  }
+})
+
 const renderLocally = async () => {
   if (!process.client) return
   if (props.svg) {
@@ -73,9 +112,11 @@ const renderLocally = async () => {
   }
 
   try {
+    const width = props.compact ? 80 : 200
+    const height = props.compact ? 70 : 140
     localSvg.value = await renderSmilesToSvg(smiles, {
-      width: 170,
-      height: 110,
+      width,
+      height,
       theme: props.theme,
     })
     localError.value = ''
@@ -86,7 +127,7 @@ const renderLocally = async () => {
 }
 
 watch(
-  () => [props.item.smiles, props.theme, props.svg],
+  () => [props.item.smiles, props.theme, props.svg, props.compact],
   () => {
     renderLocally()
   },
@@ -96,7 +137,16 @@ watch(
 
 <style scoped>
 .molecule-card {
-  width: 180px;
+  width: 220px;
+}
+
+.molecule-card.compact {
+  width: 100%;
+  padding: 8px;
+}
+
+.molecule-card.compact .compact-viewer {
+  min-height: 60px;
 }
 
 .molecule-svg {
@@ -110,4 +160,3 @@ watch(
   height: auto;
 }
 </style>
-
