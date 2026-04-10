@@ -51,53 +51,9 @@
     </nav>
 
     <div class="flex min-h-screen pt-[92px] md:pt-24">
-      <aside class="hidden h-[calc(100vh-64px)] w-64 flex-col border-r border-slate-200 bg-white transition-colors dark:border-slate-900 dark:bg-slate-950 md:fixed md:left-0 md:top-16 md:flex">
-        <div class="flex items-center gap-3 px-4 py-7">
-          <div class="h-10 w-10 overflow-hidden rounded-lg border border-emerald-500/20 bg-emerald-500/10">
-            <img :src="profileAvatar" :alt="profileName" class="h-full w-full object-cover" />
-          </div>
-          <div>
-            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ profileName }}</p>
-            <p class="mt-1 text-[9px] font-extrabold tracking-[0.18em] text-emerald-600 dark:text-emerald-400">{{ profileRoleLabel }}</p>
-          </div>
-        </div>
+      <LayoutSidebar class="hidden lg:flex" />
 
-        <nav class="flex flex-col gap-1">
-          <NuxtLink class="group flex items-center gap-3 border-l-4 border-emerald-500 bg-emerald-500/5 px-6 py-3.5 text-[13px] font-semibold text-emerald-600 dark:text-emerald-400" to="/home">
-            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">home</span>
-            Home
-          </NuxtLink>
-          <NuxtLink class="group flex items-center gap-3 border-l-4 border-transparent px-6 py-3.5 text-[13px] font-semibold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200" to="/classroom">
-            <span class="material-symbols-outlined text-[20px]">school</span>
-            Classroom
-          </NuxtLink>
-          <NuxtLink class="group flex items-center gap-3 border-l-4 border-transparent px-6 py-3.5 text-[13px] font-semibold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200" to="/ai-tutor">
-            <span class="material-symbols-outlined text-[20px]">smart_toy</span>
-            AI Tutor
-          </NuxtLink>
-          <NuxtLink class="group flex items-center gap-3 border-l-4 border-transparent px-6 py-3.5 text-[13px] font-semibold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200" to="/messages">
-            <span class="material-symbols-outlined text-[20px]">forum</span>
-            Messages
-          </NuxtLink>
-          <NuxtLink class="group flex items-center gap-3 border-l-4 border-transparent px-6 py-3.5 text-[13px] font-semibold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200" to="/settings">
-            <span class="material-symbols-outlined text-[20px]">settings</span>
-            Settings
-          </NuxtLink>
-        </nav>
-
-        <div class="mt-7 px-4">
-          <button
-            type="button"
-            class="w-full rounded-lg bg-emerald-500 py-3 text-[13px] font-bold tracking-wide text-white shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400 dark:text-slate-950"
-            :disabled="isGuest"
-            @click="scrollToComposer"
-          >
-            New Post
-          </button>
-        </div>
-      </aside>
-
-      <main class="w-full p-4 pt-14 md:ml-64 md:p-8 md:pt-14 lg:mr-80">
+      <main class="w-full p-4 pt-14 md:p-8 md:pt-14 lg:ml-[240px] lg:mr-80">
         <div class="mx-auto max-w-3xl space-y-7 pb-24">
           <section class="flex items-center gap-4 overflow-x-auto pb-2 pt-10 md:pt-12">
             <div class="shrink-0 text-center">
@@ -358,27 +314,7 @@
       </aside>
     </div>
 
-    <nav class="fixed bottom-0 left-0 z-50 flex h-16 w-full items-center justify-around border-t border-slate-200 bg-white/90 backdrop-blur-xl transition-colors dark:border-slate-800 dark:bg-slate-950/90 md:hidden">
-      <NuxtLink to="/home" class="flex flex-col items-center gap-1 text-emerald-600 dark:text-emerald-400">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
-        <span class="text-[8px] font-bold">Home</span>
-      </NuxtLink>
-      <NuxtLink to="/classroom" class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
-        <span class="material-symbols-outlined">school</span>
-        <span class="text-[8px] font-bold">Classroom</span>
-      </NuxtLink>
-      <button type="button" class="relative -top-6 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 dark:text-slate-950" @click="scrollToComposer">
-        <span class="material-symbols-outlined">add</span>
-      </button>
-      <NuxtLink to="/messages" class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
-        <span class="material-symbols-outlined">forum</span>
-        <span class="text-[8px] font-bold">Messages</span>
-      </NuxtLink>
-      <NuxtLink to="/profile" class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
-        <span class="material-symbols-outlined">account_circle</span>
-        <span class="text-[8px] font-bold">Profile</span>
-      </NuxtLink>
-    </nav>
+    <LayoutMobileNav />
   </div>
 </template>
 
@@ -428,9 +364,7 @@ const { themePreference, resolvedTheme, setThemePreference, initTheme } = useThe
 const isGuest = computed(() => !userStore.isAuthenticated)
 const isDarkTheme = computed(() => resolvedTheme.value === 'dark')
 const themeToggleIcon = computed(() => (isDarkTheme.value ? 'light_mode' : 'dark_mode'))
-const profileName = computed(() => userStore.user?.displayName || userStore.user?.name || 'Alex Rivera')
 const profileAvatar = computed(() => userStore.user?.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDwMf6dhDv9v9KjnW_S7rljQDjBOZmA6xkP8QGyBXlwiddh1UfuatBEqNP8f4vOp_bMYXFTs0kwP5raMJo5gsAZnREt1X0IRHW0Jh77dKkXp69yEoC2fHn7N879pofiwnVYZWkiIHzRgwOFrvrPkyGLxd13qCTvyaXpdB09w_T9vp9tchhuAvx5tUuh41X9YUx-ovoQ9hcxoM-ae9CLIBMhoTXcPFtf9LMmBDPhy-MFioJdHiJBYdkBvUO3wGD0pPj5t8_H-cf9wKzH')
-const profileRoleLabel = computed(() => (userStore.user?.role || 'student').toUpperCase())
 
 const composerRef = ref<HTMLElement | null>(null)
 const notificationsCount = ref(0)
