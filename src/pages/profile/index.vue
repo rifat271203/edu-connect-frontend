@@ -227,6 +227,7 @@
         </div>
       </UiCard>
     </div>
+    <div>hellow world </div>
   </div>
 </template>
 
@@ -446,3 +447,4 @@ onMounted(async () => {
 
 const skills = ['JavaScript', 'Python', 'Vue.js', 'Machine Learning', 'Data Structures', 'React', 'Node.js']
 </script>
+<style scoped></style>
