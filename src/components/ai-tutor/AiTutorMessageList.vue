@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="flex-1 min-h-0 overflow-y-auto px-4 lg:px-10 py-6 lg:py-8 space-y-5 lg:space-y-7 pb-6 thin-scrollbar" :style="{ background: 'var(--bg)' }">
+  <div ref="container" class="flex-1 min-h-0 overflow-y-auto px-4 lg:px-10 py-6 lg:py-8 space-y-5 lg:space-y-7 pb-6 thin-scrollbar bg-white dark:bg-[#0f1115]">
     <div
       v-for="(message, index) in messages"
       :key="index"
@@ -10,22 +10,19 @@
       <!-- AI Message -->
       <div v-if="message.role === 'assistant'" class="flex gap-4 max-w-2xl">
         <!-- AI Icon -->
-        <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" :style="{ 
-          background: 'linear-gradient(135deg, var(--gold-dim), rgba(212,168,67,0.2))',
-          border: '1px solid rgba(212,168,67,0.3)'
-        }">
-          <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: 'var(--gold)'">
+        <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center border border-brand-primary/30 bg-brand-primary/10 dark:border-brand-primary/40 dark:bg-brand-primary/20">
+          <svg class="w-4.5 h-4.5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-3.636 6.364l-.707-.707M9 12a3 3 0 106 0 3 3 0 00-6 0z" />
           </svg>
         </div>
 
         <div class="min-w-0 flex-1">
           <!-- Label -->
-          <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5" style="color: 'var(--text3)', fontFamily: 'DM Mono'">AI Tutor</p>
+          <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5 font-mono text-slate-400 dark:text-slate-500">AI Tutor</p>
 
           <!-- Content -->
-          <div v-if="message.isStreaming" class="px-5 py-3.5 rounded-3xl rounded-tl-md" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line2)' }">
-            <p class="text-sm leading-relaxed" style="color: 'var(--text)', fontFamily: 'DM Sans'">{{ message.content }}</p>
+          <div v-if="message.isStreaming" class="px-5 py-3.5 rounded-3xl rounded-tl-md border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
+            <p class="text-sm leading-relaxed text-slate-800 dark:text-slate-200">{{ message.content }}</p>
           </div>
 
           <AiTutorChemistryMessage
@@ -54,10 +51,8 @@
 
           <div
             v-else
-            class="px-5 py-3.5 rounded-3xl rounded-tl-md"
-            :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line2)' }"
+            class="px-5 py-3.5 rounded-3xl rounded-tl-md border border-slate-200 bg-slate-50 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 text-sm leading-[1.8]"
             v-html="renderMarkdown(message.content)"
-            style="color: var(--text); fontFamily: 'DM Sans'; fontSize: '14px'; lineHeight: 1.8"
           ></div>
         </div>
       </div>
@@ -66,11 +61,11 @@
       <div v-else class="flex gap-4 max-w-xs">
         <div class="min-w-0 flex-1">
           <!-- Label -->
-          <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5 text-right" style="color: 'var(--text3)', fontFamily: 'DM Mono'">You</p>
+          <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5 font-mono text-slate-400 dark:text-slate-500 text-right">You</p>
 
           <!-- Bubble -->
-          <div class="px-5 py-3.5 rounded-3xl rounded-br-md" :style="{ background: 'var(--gold)', border: '1px solid', borderColor: 'var(--gold)' }">
-            <p class="text-sm leading-relaxed" style="color: '#080c14', fontFamily: 'DM Sans'">{{ message.content }}</p>
+          <div class="px-5 py-3.5 rounded-3xl rounded-br-md border border-brand-primary bg-brand-primary text-white dark:border-brand-primary dark:bg-brand-primary dark:text-slate-900">
+            <p class="text-sm leading-relaxed">{{ message.content }}</p>
           </div>
         </div>
       </div>
@@ -79,21 +74,18 @@
     <!-- Loading State -->
     <div v-if="isTyping" class="flex justify-start animate-fadeUp">
       <div class="flex gap-4 max-w-2xl">
-        <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" :style="{ 
-          background: 'linear-gradient(135deg, var(--gold-dim), rgba(212,168,67,0.2))',
-          border: '1px solid rgba(212,168,67,0.3)'
-        }">
-          <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: 'var(--gold)'">
+        <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center border border-brand-primary/30 bg-brand-primary/10 dark:border-brand-primary/40 dark:bg-brand-primary/20">
+          <svg class="w-4.5 h-4.5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-3.636 6.364l-.707-.707M9 12a3 3 0 106 0 3 3 0 00-6 0z" />
           </svg>
         </div>
 
         <div>
-          <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5" style="color: 'var(--text3)', fontFamily: 'DM Mono'">AI Tutor</p>
-          <div class="px-5 py-3.5 rounded-3xl rounded-tl-md flex gap-1.5 items-center" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line2)' }">
-            <span class="w-2 h-2 bg-[var(--gold)] rounded-full animate-bounce" style="animationDelay: '0ms'"></span>
-            <span class="w-2 h-2 bg-[var(--gold)] rounded-full animate-bounce" style="animationDelay: '150ms'"></span>
-            <span class="w-2 h-2 bg-[var(--gold)] rounded-full animate-bounce" style="animationDelay: '300ms'"></span>
+          <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5 font-mono text-slate-400 dark:text-slate-500">AI Tutor</p>
+          <div class="px-5 py-3.5 rounded-3xl rounded-tl-md flex gap-1.5 items-center border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
+            <span class="w-2 h-2 bg-brand-primary rounded-full animate-bounce" style="animationDelay: '0ms'"></span>
+            <span class="w-2 h-2 bg-brand-primary rounded-full animate-bounce" style="animationDelay: '150ms'"></span>
+            <span class="w-2 h-2 bg-brand-primary rounded-full animate-bounce" style="animationDelay: '300ms'"></span>
           </div>
         </div>
       </div>

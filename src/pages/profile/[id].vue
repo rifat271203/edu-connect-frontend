@@ -16,11 +16,12 @@
       <template v-if="publicProfile">
         <div class="mb-6 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6">
           <div class="flex flex-col md:flex-row md:items-end gap-4">
-            <div class="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-[var(--line2)] bg-[var(--surface2)]">
-              <img
+            <div class="relative">
+              <UiAvatar
                 :src="publicProfile.profile.profilePicUrl"
-                :alt="publicProfile.profile.name"
-                class="w-full h-full object-cover"
+                :name="publicProfile.profile.name"
+                size="2xl"
+                class="rounded-2xl border border-[var(--line2)] bg-[var(--surface2)]"
               />
             </div>
 

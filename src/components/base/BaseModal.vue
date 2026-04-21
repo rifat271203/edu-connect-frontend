@@ -44,7 +44,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
+  'update:modelValue': [value: boolean],
+  'close': []
 }>()
 
 const maxWidthClass = computed(() => {
@@ -60,6 +61,7 @@ const maxWidthClass = computed(() => {
 
 const handleClose = () => {
   emit('update:modelValue', false)
+  emit('close')
 }
 </script>
 

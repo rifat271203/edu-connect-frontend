@@ -1,21 +1,5 @@
 <template>
-  <div class="h-screen min-h-0 flex flex-col lg:flex-row overflow-hidden" :style="{
-    '--bg': '#080c14',
-    '--bg2': '#0e1520',
-    '--bg3': '#141d2e',
-    '--bg4': '#1a2438',
-    '--line': 'rgba(255,255,255,0.07)',
-    '--line2': 'rgba(255,255,255,0.12)',
-    '--gold': '#d4a843',
-    '--gold2': '#f0c46a',
-    '--gold-dim': 'rgba(212,168,67,0.12)',
-    '--gold-glow': 'rgba(212,168,67,0.25)',
-    '--teal': '#2dd4bf',
-    '--teal-dim': 'rgba(45,212,191,0.1)',
-    '--text': '#e8eaf0',
-    '--text2': '#8a93a8',
-    '--text3': '#545e72'
-  }" as any>
+  <div class="flex h-screen min-h-0 flex-col overflow-hidden bg-slate-50 lg:flex-row dark:bg-[#09090b]">
     <!-- Desktop Sidebar -->
     <AiTutorSidebar
       :chat-history="chatHistory"
@@ -31,11 +15,11 @@
     />
 
     <!-- Main Content -->
-    <div class="flex-1 min-w-0 min-h-0 flex flex-col bg-[var(--bg)]" style="background-image: repeating-linear-gradient(0deg, rgba(212,168,67,0.03) 0px, rgba(212,168,67,0.03) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(90deg, rgba(212,168,67,0.03) 0px, rgba(212,168,67,0.03) 1px, transparent 1px, transparent 48px);">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-white dark:bg-[#0f1115]">
       <!-- Mobile Header -->
-      <div class="lg:hidden h-14 border-b flex items-center px-3 gap-2 flex-shrink-0" :style="{ borderColor: 'var(--line)' }">
+      <div class="flex h-14 flex-shrink-0 items-center border-b border-slate-200 px-3 gap-2 lg:hidden dark:border-white/10">
         <!-- Back Button -->
-        <button @click="handleMobileBack" class="w-9 h-9 flex items-center justify-center rounded-[8px] flex-shrink-0" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text)' }">
+        <button @click="handleMobileBack" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[8px] border border-slate-200 bg-slate-50 text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
@@ -60,39 +44,39 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <button @click="isMobileSidebarOpen = !isMobileSidebarOpen" class="w-9 h-9 flex items-center justify-center rounded-[8px] flex-shrink-0" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text)' }">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button @click="isMobileSidebarOpen = !isMobileSidebarOpen" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[8px] border border-slate-200 bg-slate-50 text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
       </div>
 
       <!-- Desktop Topbar -->
-      <div class="hidden lg:flex h-16 border-b items-center px-7 gap-4 flex-shrink-0" :style="{ borderColor: 'var(--line)' }">
+      <div class="hidden h-16 flex-shrink-0 items-center border-b border-slate-200 px-7 gap-4 lg:flex dark:border-white/10">
         <!-- Subject Badge -->
-        <div v-if="selectedCategory" class="flex items-center gap-3 px-3.5 py-2" style="background: var(--bg3); borderRadius: '30px'; border: '1px solid'; borderColor: 'var(--line2)'; gap: '12px'">
-          <div class="w-6 h-6 flex items-center justify-center rounded" :style="{ background: 'var(--gold-dim)', borderRadius: '6px' }">
+        <div v-if="selectedCategory" class="flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 dark:border-white/10 dark:bg-white/5">
+          <div class="flex h-6 w-6 items-center justify-center rounded-md bg-brand-primary/10 dark:bg-brand-primary/20">
             <span class="text-lg">{{ getCategoryEmoji(selectedCategory) }}</span>
           </div>
-          <span class="text-[11px] uppercase tracking-[0.3px]" style="color: 'var(--text3)'">Tutor mode ·</span>
-          <strong class="text-xs font-medium" style="color: 'var(--gold2)', fontFamily: 'DM Mono'">{{ selectedCategoryLabel }}</strong>
+          <span class="text-[11px] uppercase tracking-[0.3px] text-slate-500 dark:text-slate-400">Tutor mode ·</span>
+          <strong class="font-mono text-xs font-medium text-brand-primary">{{ selectedCategoryLabel }}</strong>
         </div>
 
         <!-- Center Info -->
-        <div v-if="selectedCategory" class="text-xs ml-auto mr-auto" style="color: 'var(--text3)', fontFamily: 'DM Mono'">
+        <div v-if="selectedCategory" class="mr-auto ml-auto font-mono text-xs text-slate-500 dark:text-slate-400">
           {{ messages.length }} messages · LaTeX on
         </div>
 
         <!-- Action Buttons -->
         <div class="ml-auto flex gap-2">
-          <button class="w-9 h-9 flex items-center justify-center rounded-[10px]" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text3)' }" title="Save">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8H3m9 0h9" /></svg>
+          <button class="flex h-9 w-9 items-center justify-center rounded-[10px] border border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white" title="Save">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8H3m9 0h9" /></svg>
           </button>
-          <button class="w-9 h-9 flex items-center justify-center rounded-[10px]" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text3)' }" title="Copy">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          <button class="flex h-9 w-9 items-center justify-center rounded-[10px] border border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white" title="Copy">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
           </button>
-          <button @click="clearChat" class="w-9 h-9 flex items-center justify-center rounded-[10px]" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text3)' }" title="Delete">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          <button @click="clearChat" class="flex h-9 w-9 items-center justify-center rounded-[10px] border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40" title="Delete">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </button>
         </div>
       </div>
@@ -117,10 +101,10 @@
 
       <div v-else class="flex-1 flex items-center justify-center px-4 lg:px-7 py-12">
         <div class="text-center">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" :style="{ background: 'var(--gold-dim)', border: '1px solid', borderColor: 'rgba(212,168,67,0.25)' }">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: 'var(--gold)'"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-3.636 6.364l-.707.707M9 19.071A9.003 9.003 0 0012 20.07m0 0a9.003 9.003 0 003 -.07" /></svg>
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 border border-brand-primary/30 bg-brand-primary/10 dark:border-brand-primary/40 dark:bg-brand-primary/20">
+            <svg class="w-6 h-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-3.636 6.364l-.707.707M9 19.071A9.003 9.003 0 0012 20.07m0 0a9.003 9.003 0 003 -.07" /></svg>
           </div>
-          <p class="text-sm font-medium" style="color: 'var(--text)'; fontFamily: 'DM Sans'">Select a subject to start</p>
+          <p class="text-sm font-medium text-slate-900 dark:text-white">Select a subject to start</p>
         </div>
       </div>
 
@@ -142,34 +126,27 @@
         @click="isMobileSidebarOpen = false"
       />
       <!-- Drawer -->
-      <div class="fixed inset-y-0 left-0 w-64 flex flex-col z-50 lg:hidden border-r" :style="{ background: 'var(--bg2)', borderColor: 'var(--line)' }">
+      <div class="fixed inset-y-0 left-0 w-64 flex flex-col z-50 lg:hidden border-r border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-[#0f1115]">
         <!-- Close Button -->
-        <div class="flex items-center justify-between px-5 py-4 border-b" :style="{ borderColor: 'var(--line)' }">
-          <h2 class="text-base font-bold text-white" style="fontFamily: 'Syne, sans-serif'">AI Tutor</h2>
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-white/10">
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">AI Tutor</h2>
           <button
             @click="isMobileSidebarOpen = false"
-            class="w-8 h-8 flex items-center justify-center rounded-[8px]"
-            :style="{ background: 'var(--bg3)', color: 'var(--text)' }"
+            class="flex h-8 w-8 items-center justify-center rounded-[8px] bg-slate-100 text-slate-900 dark:bg-white/5 dark:text-white"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         <!-- New Session Button -->
-        <div class="px-5 py-3 border-b" :style="{ borderColor: 'var(--line)' }">
+        <div class="px-5 py-3 border-b border-slate-200 dark:border-white/10">
           <button
             @click="startNewChat; isMobileSidebarOpen = false"
-            class="w-full px-3 py-2.5 rounded-[10px] text-sm font-medium flex items-center justify-center gap-2 transition-all duration-150"
-            :style="{ 
-              background: 'var(--gold-dim)',
-              border: '1px solid rgba(212,168,67,0.25)',
-              color: 'var(--gold2)',
-              fontFamily: 'DM Sans'
-            }"
+            class="flex w-full items-center justify-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-all duration-150 bg-brand-primary/10 text-brand-primary border border-brand-primary/20 hover:bg-brand-primary/20"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             New session
@@ -177,33 +154,33 @@
         </div>
 
         <!-- History List -->
-        <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 thin-scrollbar" style="scrollbarWidth: 'thin'">
+        <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 thin-scrollbar">
           <!-- Group Label -->
-          <div v-if="chatHistory.length > 0" class="px-2 py-3 text-[10px] uppercase font-medium tracking-[1px]" style="color: 'var(--text3)', fontFamily: 'DM Mono'">
+          <div v-if="chatHistory.length > 0" class="px-2 py-3 font-mono text-[10px] font-medium uppercase tracking-[1px] text-slate-500 dark:text-slate-400">
             Recent
           </div>
 
           <!-- History Items -->
-          <div v-for="(chat, index) in chatHistory" :key="index" class="group">
+          <div v-for="(chat, index) in chatHistory" :key="index" class="group relative">
             <button
               @click="loadChat(index); isMobileSidebarOpen = false"
               class="w-full text-left px-2.5 py-2.5 rounded-[10px] transition-all duration-150 border"
-              :style="{
-                background: currentChatIndex === index ? 'var(--bg4)' : 'transparent',
-                borderColor: currentChatIndex === index ? 'var(--line2)' : 'transparent'
-              }"
+              :class="[
+                currentChatIndex === index
+                  ? 'border-slate-300 bg-slate-200 dark:border-white/20 dark:bg-white/10'
+                  : 'border-transparent hover:bg-slate-100 dark:hover:bg-white/5'
+              ]"
             >
-              <p class="text-sm font-medium truncate" style="color: 'var(--text)', fontFamily: 'DM Sans'">{{ chat.title || 'New Chat' }}</p>
-              <div class="flex items-center gap-1.5 mt-1">
-                <div class="w-2 h-2 rounded-full flex-shrink-0" :style="{ background: getSubjectColor(chat.category) }"></div>
-                <p class="text-[11px] truncate" style="color: 'var(--text3)', fontFamily: 'DM Mono'">{{ chat.category }} · {{ formatDate(chat.timestamp) }}</p>
+              <p class="truncate text-sm font-medium text-slate-900 dark:text-white">{{ chat.title || 'New Chat' }}</p>
+              <div class="mt-1 flex items-center gap-1.5">
+                <div class="h-2 w-2 shrink-0 rounded-full" :style="{ background: getSubjectColor(chat.category) }"></div>
+                <p class="truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">{{ chat.category }} · {{ formatDate(chat.timestamp) }}</p>
               </div>
             </button>
             <!-- Delete Button for Mobile -->
             <button
               @click.stop="deleteChat(index)"
-              class="ml-auto mt-1 mr-2 px-2 py-1 rounded text-[10px]"
-              :style="{ background: 'rgba(255,0,0,0.1)', color: 'rgba(255,100,100,0.8)', border: '1px solid rgba(255,100,100,0.2)' }"
+              class="absolute right-2 top-2 rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] text-red-500 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400"
               title="Delete chat"
             >
               Delete
@@ -211,23 +188,17 @@
           </div>
 
           <!-- Empty State -->
-          <div v-if="chatHistory.length === 0" class="text-center py-8 px-2">
-            <p class="text-xs font-medium" style="color: 'var(--text2)', fontFamily: 'DM Sans'">No history yet</p>
-            <p class="text-[11px] mt-1" style="color: 'var(--text3)', fontFamily: 'DM Mono'">Start a new session to begin</p>
+          <div v-if="chatHistory.length === 0" class="py-8 px-2 text-center">
+            <p class="text-xs font-medium text-slate-600 dark:text-slate-300">No history yet</p>
+            <p class="mt-1 font-mono text-[11px] text-slate-500 dark:text-slate-400">Start a new session to begin</p>
           </div>
         </div>
 
         <!-- Footer Button -->
-        <div class="px-3 py-4 border-t" :style="{ borderColor: 'var(--line)' }">
+        <div class="px-3 py-4 border-t border-slate-200 dark:border-white/10">
           <button
             @click="clearAllChats; isMobileSidebarOpen = false"
-            class="w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors"
-            :style="{ 
-              background: 'rgba(255,255,255,0.05)',
-              color: 'var(--text3)',
-              border: '1px solid var(--line)',
-              fontFamily: 'DM Sans'
-            }"
+            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Clear all
           </button>

@@ -19,11 +19,14 @@
         :key="participant.socketId"
         class="flex items-center justify-between rounded-xl border border-dark-700/70 bg-dark-800/70 px-3 py-2"
       >
-        <div>
-          <p class="text-sm font-medium text-dark-100">{{ participant.name }}</p>
-          <div class="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-wide">
-            <span class="rounded-full bg-dark-700 px-2 py-0.5 text-dark-300">{{ participant.role }}</span>
-            <span v-if="participant.isMuted" class="rounded-full bg-red-500/80 px-2 py-0.5 text-white">Muted</span>
+        <div class="flex items-center gap-3">
+          <UiAvatar :src="participant.avatar" :name="participant.name" size="sm" />
+          <div>
+            <p class="text-sm font-medium text-dark-100">{{ participant.name }}</p>
+            <div class="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-wide">
+              <span class="rounded-full bg-dark-700 px-2 py-0.5 text-dark-300">{{ participant.role }}</span>
+              <span v-if="participant.isMuted" class="rounded-full bg-red-500/80 px-2 py-0.5 text-white">Muted</span>
+            </div>
           </div>
         </div>
 

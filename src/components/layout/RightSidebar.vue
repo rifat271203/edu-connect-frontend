@@ -1,248 +1,38 @@
 <template>
-  <aside class="w-[300px] shrink-0 border-l border-[var(--line)] bg-[var(--surface)]">
-    <div class="sticky top-0 h-screen overflow-y-auto p-6 space-y-8">
-      <!-- Friend Requests -->
-      <div v-if="friendRequests.length > 0">
-        <div class="mb-3 flex items-center justify-between">
-          <h3 class="section-label section-label-lined">Friend requests</h3>
-          <button class="text-[11px] font-medium text-[var(--gold)] hover:text-[var(--gold-hover)]">See all</button>
+  <aside class="hidden lg:flex flex-col w-80 fixed right-0 top-0 h-screen pt-20 p-6 space-y-10 dark:bg-[#09090b] bg-white border-l border-slate-200 dark:border-white/5 overflow-y-auto no-scrollbar">
+    <!-- Live Workshops -->
+    <div>
+      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-6">Live Workshops</p>
+      <div class="dark:bg-brand-primary/5 bg-brand-primary/5 rounded-[2rem] p-6 border border-brand-primary/20 relative overflow-hidden">
+        <div class="absolute top-4 right-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase flex items-center gap-1">
+          <span class="w-1 h-1 bg-white rounded-full animate-pulse"></span>
+          LIVE
         </div>
-        
-        <div class="space-y-2">
-          <div 
-            v-for="request in friendRequests" 
-            :key="request.id"
-            class="p-2.5 flex items-center gap-3 border-b border-[var(--line-soft)]"
-          >
-              <UiAvatar 
-                :src="request.avatar" 
-                :name="request.name" 
-                size="md"
-              />
-              <div class="flex-1 min-w-0">
-                <p class="text-[13px] font-semibold text-[var(--t1)] truncate">{{ request.name }}</p>
-                <p class="text-[12px] text-[var(--t2)]">{{ request.subtitle }}</p>
-              </div>
-              <div class="flex gap-2">
-                <UiButton size="sm" variant="primary" class="!px-3" @click="acceptFriendRequest(request.id)">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                </UiButton>
-                <UiButton size="sm" variant="ghost" class="!px-3" @click="rejectFriendRequest(request.id)">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </UiButton>
-            </div>
-          </div>
-        </div>
+        <h3 class="text-sm font-bold dark:text-white text-slate-900 mb-2 mt-2">Quantum Physics II</h3>
+        <p class="text-[11px] text-slate-500 mb-6">Prof. S. Haque • 420 Students</p>
+        <button class="w-full py-3 bg-brand-primary text-white font-bold text-xs uppercase rounded-xl shadow-lg shadow-brand-primary/20 hover:scale-[1.02] transition-all">
+          Join Room
+        </button>
       </div>
-      
-      <!-- Notifications -->
-      <div>
-        <div class="mb-3 flex items-center justify-between">
-          <h3 class="section-label section-label-lined">Recent activity</h3>
-          <button class="text-[11px] font-medium text-[var(--gold)] hover:text-[var(--gold-hover)]" @click="notificationsStore.markAllAsRead">Mark all read</button>
-        </div>
-        
-        <div class="space-y-2">
-          <div 
-            v-for="notification in notifications" 
-            :key="notification.id"
-            class="flex items-start gap-3 py-[10px] border-b border-[var(--line-soft)]"
-            :class="{ 'unread': !notification.read }"
-            role="button"
-            tabindex="0"
-            @click="handleNotificationClick(notification.id)"
-            @keydown.enter="handleNotificationClick(notification.id)"
-            @keydown.space.prevent="handleNotificationClick(notification.id)"
-          >
-            <UiAvatar 
-              :src="notification.avatar" 
-              :name="notification.name" 
-              size="sm"
-            />
-            <div class="flex-1 min-w-0">
-              <p class="text-[13px] text-[var(--t2)] leading-relaxed">
-                <span class="font-semibold text-[13px] text-[var(--t1)]">{{ notification.name }}</span>
-                {{ notification.action }}
-              </p>
-              <p class="text-[11px] text-[rgba(244,241,235,0.3)] mt-1">{{ formatTimestamp(notification.time) }}</p>
-            </div>
-          </div>
-        </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="mt-auto">
+      <div class="flex flex-wrap gap-4 mb-4">
+        <a href="#" class="text-[10px] font-bold text-slate-400 hover:text-brand-primary transition-colors">Privacy</a>
+        <a href="#" class="text-[10px] font-bold text-slate-400 hover:text-brand-primary transition-colors">Safety</a>
+        <a href="#" class="text-[10px] font-bold text-slate-400 hover:text-brand-primary transition-colors">Feedback</a>
       </div>
-      
-      <!-- Popular Courses -->
-      <div>
-        <div class="mb-3 flex items-center justify-between gap-2">
-          <h3 class="section-label section-label-lined">Popular courses</h3>
-          <button
-            class="text-[11px] font-medium text-[var(--gold)] hover:text-[var(--gold-hover)]"
-            :disabled="coursesLoading"
-            @click="loadPopularCourses"
-          >
-            Refresh
-          </button>
-        </div>
-        
-        <div class="space-y-2">
-          <div v-if="coursesLoading" class="space-y-2 p-2">
-            <UiSkeleton v-for="idx in 3" :key="`popular-course-skeleton-${idx}`" variant="text" class="h-5 w-full" />
-          </div>
-
-          <p v-else-if="coursesError" class="px-2 py-3 text-xs text-red-400">{{ coursesError }}</p>
-
-          <p v-else-if="popularCourses.length === 0" class="px-2 py-3 text-xs text-[var(--text-3)]">
-            No active courses available.
-          </p>
-
-          <NuxtLink
-            v-for="course in popularCourses"
-            v-else
-            :key="`popular-course-${course.id}`"
-            to="/classroom"
-            class="py-[10px] border-b border-[var(--line-soft)] flex items-start gap-3 transition-all duration-150 hover:translate-x-[1px]"
-          >
-            <img
-              v-if="course.coursePicUrl"
-              :src="course.coursePicUrl"
-              :alt="`${course.title} cover`"
-              class="h-10 w-10 rounded-lg object-cover border border-[var(--border)]"
-              loading="lazy"
-            />
-            <UiAvatar
-              v-else
-              :src="course.instructor.avatar"
-              :name="course.title"
-              size="sm"
-            />
-
-            <div class="min-w-0 flex-1">
-              <p class="text-[13px] font-semibold text-[var(--t1)] truncate">{{ course.title }}</p>
-              <p class="text-[11px] text-[var(--t3)] truncate mt-0.5">
-                {{ course.code || 'No code' }} · {{ course.instructor.displayName }}
-              </p>
-              <p class="text-[11px] text-[var(--t3)] mt-1">{{ course.memberCount }} members</p>
-            </div>
-
-            <UiBadge :variant="course.status === 'archived' ? 'warning' : 'accent'">
-              {{ course.status }}
-            </UiBadge>
-          </NuxtLink>
-        </div>
-      </div>
-      
-      <!-- Footer -->
-      <div class="pt-4 border-t border-[var(--line)]">
-        <p class="text-[11px] text-[var(--t3)] uppercase tracking-[0.1em] font-semibold">
-          © 2024 EduConnect · Privacy · Terms
-        </p>
-      </div>
+      <p class="text-[11px] text-slate-500 font-medium">© 2024 EduConnect BD Team</p>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { getClassroomCourses, type ClassroomCourse } from '~/services/api/classroom'
-import { useNotificationsStore } from '~/stores/notifications'
-
-const notificationsStore = useNotificationsStore()
-const { notifications: rawNotifications, pendingFriendRequests } = storeToRefs(notificationsStore)
-const popularCourses = ref<ClassroomCourse[]>([])
-const coursesLoading = ref(false)
-const coursesError = ref('')
-
-const formatTimestamp = (value: string): string => {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
-
-  const diffMs = Date.now() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-
-  if (diffSec < 60) return 'Just now'
-  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`
-  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`
-  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`
-
-  return new Intl.DateTimeFormat('en-BD', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(date)
-}
-
-const friendRequests = computed(() =>
-  pendingFriendRequests.value.map((request) => ({
-    id: request.id,
-    name: request.fromUser.displayName,
-    avatar: request.fromUser.avatar,
-    subtitle: 'Incoming friend request',
-  }))
-)
-
-const notifications = computed(() =>
-  rawNotifications.value.map((item) => ({
-    id: item.id,
-    name: item.user?.displayName || 'System',
-    avatar: item.user?.avatar || '',
-    action: item.message,
-    time: item.timestamp,
-    read: item.read,
-  }))
-)
-
-const acceptFriendRequest = async (requestId: string) => {
-  await notificationsStore.acceptFriendRequest(requestId)
-}
-
-const rejectFriendRequest = async (requestId: string) => {
-  await notificationsStore.rejectFriendRequest(requestId)
-}
-
-const handleNotificationClick = async (notificationId: string) => {
-  await notificationsStore.markAsRead(notificationId)
-}
-
-const loadPopularCourses = async () => {
-  coursesLoading.value = true
-  coursesError.value = ''
-
-  const result = await getClassroomCourses({
-    page: 1,
-    limit: 20,
-    status: 'active',
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-  })
-
-  coursesLoading.value = false
-
-  if (!result.success || !result.data) {
-    popularCourses.value = []
-    coursesError.value = result.error || 'Failed to load popular courses'
-    return
-  }
-
-  popularCourses.value = [...result.data]
-    .sort((a, b) => {
-      if (b.memberCount !== a.memberCount) {
-        return b.memberCount - a.memberCount
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    })
-    .slice(0, 5)
-}
-
-onMounted(async () => {
-  await Promise.all([
-    notificationsStore.fetchNotifications(),
-    loadPopularCourses(),
-  ])
-})
 </script>
+
+<style scoped>
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+</style>

@@ -340,53 +340,53 @@ const saveResource = async () => {
     return
   }
 
-  const payload: ClassroomResource = {
-    id: `${courseId.value}-${Date.now()}`,
-    courseId: courseId.value,
+  const payload = {
     title: resourceForm.title.trim(),
     description: resourceForm.description.trim(),
     category: resourceForm.category as 'pdf' | 'video' | 'link' | 'document',
-    url: uploaded.fileUrl,
-    downloadCount: 0,
-    uploadedAt: new Date().toISOString(),
+    fileUrl: uploaded.fileUrl,
   }
 
-  materialStore.saveResource(payload)
-  resourceModalOpen.value = false
-  resetResourceForm()
-  toast.success('Resource uploaded')
+  const success = await materialStore.saveResource(courseId.value, payload)
+  if (success) {
+    resourceModalOpen.value = false
+    resetResourceForm()
+    toast.success('Resource uploaded')
+  } else {
+    toast.error('Failed to save resource info')
+  }
 }
 
-const createNote = () => {
-  const id = `${currentUserId.value}-note-${Date.now()}`
-  const note: PersonalNote = {
-    id,
-    userId: currentUserId.value,
+const createNote = async () => {
+  const payload = {
     title: 'Untitled note',
     content: '',
-    updatedAt: new Date().toISOString(),
   }
-  materialStore.saveNote(note)
-  openNoteEditor(id)
+  const success = await materialStore.saveNote(courseId.value, payload)
+  if (success) {
+    const newNote = materialStore.notesByCourse(courseId.value)[0]
+    if (newNote) openNoteEditor(newNote.id)
+  }
 }
 
 const openNoteEditor = (noteId: string) => {
   noteEditorId.value = noteId
-  const found = myNotes.value.find((item) => item.id === noteId)
+  const found = materialStore.personalNotes.find((item) => item.id === noteId)
   editingDraft.value = found ? { ...found } : null
   noteEditorOpen.value = true
   showMarkdownPreview.value = false
 }
 
-const saveNote = () => {
+const saveNote = async () => {
   if (!editingDraft.value) return
-  materialStore.saveNote({
-    ...editingDraft.value,
+  const success = await materialStore.saveNote(courseId.value, {
     title: editingDraft.value.title.trim() || 'Untitled note',
-    updatedAt: new Date().toISOString(),
+    content: editingDraft.value.content,
   })
-  noteEditorOpen.value = false
-  toast.success('Note saved')
+  if (success) {
+    noteEditorOpen.value = false
+    toast.success('Note saved')
+  }
 }
 
 const deleteNote = () => {

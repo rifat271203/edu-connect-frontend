@@ -21,4 +21,5 @@ export interface UserPreview {
   avatar: string
   profilePicUrl?: string
   isProfilePublic?: boolean
+  role?: string
 }

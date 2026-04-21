@@ -330,6 +330,10 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     avatar: profilePicUrl,
     profilePicUrl,
     isProfilePublic,
+    role: (typeof nested.role === 'string' && nested.role) ||
+          (typeof nested.author_role === 'string' && nested.author_role) ||
+          (typeof root.role === 'string' && root.role) ||
+          undefined
   }
 }
 
@@ -381,6 +385,8 @@ const normalizePost = (value: unknown): FeedPost => {
           name: source.author_name || source.authorName,
           displayName: source.author_name || source.authorName,
           username: source.author_username || source.authorUsername,
+          role: source.role || source.author_role || source.authorRole,
+          author_role: source.author_role || source.authorRole,
           avatar:
             source.author_profile_pic_url ||
             source.authorProfilePicUrl ||
@@ -541,12 +547,14 @@ const normalizeNotification = (value: unknown): FeedNotification => {
 }
 
 const mapResponseList = <T>(payload: unknown, mapper: (item: unknown) => T): T[] => {
+  console.log('mapResponseList payload:', payload)
   if (Array.isArray(payload)) {
     return payload.map(mapper)
   }
 
   const root = asRecord(payload) || {}
   const candidate = root.items || root.results || root.posts || root.users || root.data
+  console.log('mapResponseList candidate found:', !!candidate)
   return asArray(candidate).map(mapper)
 }
 
@@ -778,11 +786,15 @@ export const getUnreadNotificationsCount = async (): Promise<ApiResponse<Notific
 
   const source = asRecord(result.data) || {}
   const unreadCount =
-    typeof source.unreadCount === 'number'
-      ? source.unreadCount
-      : typeof source.unread_count === 'number'
-        ? source.unread_count
-        : 0
+    typeof source.count === 'number'
+      ? source.count
+      : typeof source.data === 'number'
+        ? source.data
+        : typeof source.unreadCount === 'number'
+          ? source.unreadCount
+          : typeof source.unread_count === 'number'
+            ? source.unread_count
+            : 0
 
   return {
     ...result,
@@ -793,11 +805,11 @@ export const getUnreadNotificationsCount = async (): Promise<ApiResponse<Notific
 }
 
 export const markNotificationAsRead = async (notificationId: string): Promise<ApiResponse<void>> => {
-  return await apiRequest<void>(`/api/social/notifications/${notificationId}/read`, 'PATCH', { isRead: true })
+  return await apiRequest<void>(`/api/social/notifications/${notificationId}/read`, 'PATCH')
 }
 
 export const markAllNotificationsAsRead = async (): Promise<ApiResponse<void>> => {
-  return await apiRequest<void>('/api/social/notifications/read-all', 'PATCH', { isRead: true })
+  return await apiRequest<void>('/api/social/notifications/read-all', 'PATCH')
 }
 
 export const getMyProfile = async (): Promise<ApiResponse<MyProfileSummary>> => {

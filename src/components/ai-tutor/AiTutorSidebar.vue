@@ -1,19 +1,13 @@
 <template>
-  <aside class="hidden lg:flex w-64 shrink-0 border-r flex-col" :style="{ background: 'var(--bg2)', borderColor: 'var(--line)' }">
+  <aside class="hidden lg:flex w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-[#0f1115]">
     <!-- Header -->
-    <div class="px-5 py-6 border-b flex-shrink-0" :style="{ borderColor: 'var(--line)' }">
-      <h2 class="text-base font-bold text-white mb-4" style="fontFamily: 'Syne, sans-serif'">AI Tutor</h2>
+    <div class="px-5 py-6 border-b border-slate-200 flex-shrink-0 dark:border-white/10">
+      <h2 class="text-base font-bold text-slate-900 mb-4 dark:text-white">AI Tutor</h2>
       
       <!-- New Session Button -->
       <button
         @click="emit('new-chat')"
-        class="w-full px-3 py-2.5 rounded-[10px] text-sm font-medium flex items-center justify-center gap-2 transition-all duration-150"
-        :style="{ 
-          background: 'var(--gold-dim)',
-          border: '1px solid rgba(212,168,67,0.25)',
-          color: 'var(--gold2)',
-          fontFamily: 'DM Sans'
-        }"
+        class="flex w-full items-center justify-center gap-2 rounded-[10px] bg-brand-primary/10 px-3 py-2.5 text-sm font-medium text-brand-primary transition-all duration-150 border border-brand-primary/20 hover:bg-brand-primary/20"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -45,61 +39,54 @@
     </div>
 
     <!-- History List -->
-    <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 thin-scrollbar" style="scrollbarWidth: 'thin'">
+    <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 thin-scrollbar">
       <!-- Group Label -->
-      <div v-if="chatHistory.length > 0" class="px-2 py-3 text-[10px] uppercase font-medium tracking-[1px]" style="color: 'var(--text3)', fontFamily: 'DM Mono'">
+      <div v-if="chatHistory.length > 0" class="px-2 py-3 font-mono text-[10px] font-medium uppercase tracking-[1px] text-slate-500 dark:text-slate-400">
         Recent
       </div>
 
       <!-- History Items -->
-      <div v-for="(chat, index) in chatHistory" :key="index" class="group">
+      <div v-for="(chat, index) in chatHistory" :key="index" class="group relative">
         <button
           @click="emit('load-chat', index)"
           class="w-full text-left px-2.5 py-2.5 rounded-[10px] transition-all duration-150 border"
-          :style="{
-            background: currentChatIndex === index ? 'var(--bg4)' : 'transparent',
-            borderColor: currentChatIndex === index ? 'var(--line2)' : 'transparent',
-            hover: 'all 0.15s'
-          }"
+          :class="[
+            currentChatIndex === index 
+              ? 'border-slate-300 bg-slate-200 dark:border-white/20 dark:bg-white/10' 
+              : 'border-transparent hover:bg-slate-100 dark:hover:bg-white/5'
+          ]"
         >
-          <p class="text-sm font-medium truncate" style="color: 'var(--text)', fontFamily: 'DM Sans'">{{ chat.title || 'New Chat' }}</p>
-          <div class="flex items-center gap-1.5 mt-1">
-            <div class="w-2 h-2 rounded-full flex-shrink-0" :style="{ background: getSubjectColor(chat.category) }"></div>
-            <p class="text-[11px] truncate" style="color: 'var(--text3)', fontFamily: 'DM Mono'">{{ chat.category }} · {{ formatDate(chat.timestamp) }}</p>
+          <p class="truncate text-sm font-medium text-slate-900 dark:text-white">{{ chat.title || 'New Chat' }}</p>
+          <div class="mt-1 flex items-center gap-1.5">
+            <div class="h-2 w-2 shrink-0 rounded-full" :style="{ background: getSubjectColor(chat.category) }"></div>
+            <p class="truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">{{ chat.category }} · {{ formatDate(chat.timestamp) }}</p>
           </div>
         </button>
 
         <!-- Delete Button -->
         <button
           @click.stop="emit('delete-chat', index)"
-          class="opacity-0 group-hover:opacity-100 absolute right-3 top-2 p-1 rounded transition-opacity"
-          :style="{ color: 'var(--text3)' }"
+          class="absolute right-3 top-2 hidden rounded p-1 text-slate-400 opacity-0 transition-opacity hover:text-red-500 group-hover:block group-hover:opacity-100"
           title="Delete chat"
         >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
       </div>
 
       <!-- Empty State -->
-      <div v-if="chatHistory.length === 0" class="text-center py-8 px-2">
-        <p class="text-xs font-medium" style="color: 'var(--text2)', fontFamily: 'DM Sans'">No history yet</p>
-        <p class="text-[11px] mt-1" style="color: 'var(--text3)', fontFamily: 'DM Mono'">Start a new session to begin</p>
+      <div v-if="chatHistory.length === 0" class="py-8 px-2 text-center">
+        <p class="text-xs font-medium text-slate-600 dark:text-slate-300">No history yet</p>
+        <p class="mt-1 font-mono text-[11px] text-slate-500 dark:text-slate-400">Start a new session to begin</p>
       </div>
     </div>
 
     <!-- Footer Button -->
-    <div class="px-3 py-4 border-t flex-shrink-0" :style="{ borderColor: 'var(--line)' }">
+    <div class="flex-shrink-0 border-t border-slate-200 px-3 py-4 dark:border-white/10">
       <button
         @click="emit('clear-all')"
-        class="w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors"
-        :style="{ 
-          background: 'rgba(255,255,255,0.05)',
-          color: 'var(--text3)',
-          border: '1px solid var(--line)',
-          fontFamily: 'DM Sans'
-        }"
+        class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
       >
         Clear all
       </button>

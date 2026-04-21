@@ -490,3 +490,95 @@ export const getMyClassroomEnrollments = async (): Promise<ApiResponse<Classroom
   }
 }
 
+// --- Notices ---
+
+export const getClassroomNotices = async (courseId: string): Promise<ApiResponse<any[]>> => {
+  return await apiRequest<any[]>(`/api/classroom/courses/${encodeURIComponent(courseId)}/notices`, 'GET')
+}
+
+export const createClassroomNotice = async (courseId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/notices`, 'POST', payload)
+}
+
+export const acknowledgeNotice = async (courseId: string, noticeId: string): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/notices/${encodeURIComponent(noticeId)}/acknowledge`, 'POST')
+}
+
+// --- Notes ---
+
+export const getSharedNotes = async (courseId: string): Promise<ApiResponse<any[]>> => {
+  return await apiRequest<any[]>(`/api/classroom/courses/${encodeURIComponent(courseId)}/notes/shared`, 'GET')
+}
+
+export const uploadSharedNote = async (courseId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/notes/shared`, 'POST', payload)
+}
+
+export const getPersonalNotes = async (courseId: string): Promise<ApiResponse<any[]>> => {
+  return await apiRequest<any[]>(`/api/classroom/courses/${encodeURIComponent(courseId)}/notes/personal`, 'GET')
+}
+
+export const createPersonalNote = async (courseId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/notes/personal`, 'POST', payload)
+}
+
+// --- Exams ---
+
+export const getClassroomExams = async (courseId: string): Promise<ApiResponse<any[]>> => {
+  return await apiRequest<any[]>(`/api/classroom/courses/${encodeURIComponent(courseId)}/exams`, 'GET')
+}
+
+export const createClassroomExam = async (courseId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/exams`, 'POST', payload)
+}
+
+export const startExam = async (courseId: string, examId: string): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/exams/${encodeURIComponent(examId)}/start`, 'GET')
+}
+
+export const submitExam = async (courseId: string, examId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/exams/${encodeURIComponent(examId)}/submit`, 'POST', payload)
+}
+
+export const getExamResult = async (courseId: string, examId: string): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/exams/${encodeURIComponent(examId)}/result`, 'GET')
+}
+
+// --- Assignments ---
+
+export const getClassroomAssignments = async (courseId: string): Promise<ApiResponse<any[]>> => {
+  return await apiRequest<any[]>(`/api/classroom/courses/${encodeURIComponent(courseId)}/assignments`, 'GET')
+}
+
+export const createClassroomAssignment = async (courseId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/assignments`, 'POST', payload)
+}
+
+export const getAssignmentDetails = async (courseId: string, assignmentId: string): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}`, 'GET')
+}
+
+export const submitAssignment = async (courseId: string, assignmentId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submit`, 'POST', payload)
+}
+
+// --- Schedule ---
+
+export const getClassroomSchedule = async (courseId: string): Promise<ApiResponse<any[]>> => {
+  return await apiRequest<any[]>(`/api/classroom/courses/${encodeURIComponent(courseId)}/schedule`, 'GET')
+}
+
+export const getUpcomingSessions = async (courseId: string): Promise<ApiResponse<any[]>> => {
+  return await apiRequest<any[]>(`/api/classroom/courses/${encodeURIComponent(courseId)}/schedule/upcoming`, 'GET')
+}
+
+export const createScheduleSession = async (courseId: string, payload: any): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/schedule`, 'POST', payload)
+}
+
+// --- Progress ---
+
+export const getMyProgress = async (courseId: string): Promise<ApiResponse<any>> => {
+  return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/progress/me`, 'GET')
+}
+

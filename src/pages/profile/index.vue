@@ -5,13 +5,12 @@
       <div class="flex flex-col md:flex-row md:items-end gap-4">
         <!-- Avatar -->
         <div class="relative">
-          <div class="w-20 h-20 md:w-20 md:h-20 rounded-full overflow-hidden border border-[var(--line2)] bg-[var(--surface2)]">
-            <img 
-              :src="userStore.user?.avatar" 
-              alt="Profile" 
-              class="w-full h-full object-cover"
-            />
-          </div>
+          <UiAvatar
+            :src="userStore.user?.avatar"
+            :name="userStore.user?.name"
+            size="2xl"
+            class="rounded-full border border-[var(--line2)] bg-[var(--surface2)]"
+          />
           <button
             type="button"
             class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[var(--gold)] text-[#07090f] flex items-center justify-center"

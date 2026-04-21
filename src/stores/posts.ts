@@ -44,10 +44,13 @@ export const usePostsStore = defineStore('posts', {
       this.error = null
 
       const offset = (this.page - 1) * this.limit
+      console.log('Fetching posts with offset:', offset, 'limit:', this.limit)
       const result = await getFeedPosts(this.limit, offset)
+      console.log('Fetch posts result:', result)
 
       if (result.success && result.data) {
         const incomingPosts = result.data
+        console.log('Incoming posts count:', incomingPosts.length)
 
         if (this.page === 1 || reset) {
           this.posts = incomingPosts

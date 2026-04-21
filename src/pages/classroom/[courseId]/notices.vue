@@ -215,9 +215,11 @@ const priorityBadge = (priority: string) => {
 const isAcknowledged = (notice: ClassroomNotice) =>
   notice.acknowledgedBy.includes(String(userStore.user?.id || 'student-1'))
 
-const acknowledge = (noticeId: string) => {
-  noticeStore.acknowledge(noticeId, String(userStore.user?.id || 'student-1'))
-  toast.success('Notice acknowledged')
+const acknowledge = async (noticeId: string) => {
+  const success = await noticeStore.acknowledge(courseId.value, noticeId, String(userStore.user?.id || 'student-1'))
+  if (success) {
+    toast.success('Notice acknowledged')
+  }
 }
 
 const resetForm = () => {

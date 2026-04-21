@@ -1,121 +1,198 @@
 <template>
-  <UiCard class="post-card !px-5 !py-[18px]">
-    <!-- Header -->
-    <div class="flex items-center gap-3 mb-4">
-      <NuxtLink :to="`/profile/${post.user.username}`" class="shrink-0">
-        <UiAvatar 
-          :src="post.user.profilePicUrl || post.user.avatar" 
-          :name="post.user.displayName" 
-          size="md"
-        />
-      </NuxtLink>
-      <div class="flex-1 min-w-0">
-        <NuxtLink 
-          :to="`/profile/${post.user.username}`"
-          class="text-[15px] font-semibold text-[var(--t1)] hover:text-[var(--t1)] transition-colors"
-        >
-          {{ post.user.displayName }}
-        </NuxtLink>
-        <p class="text-[12px] text-[rgba(244,241,235,0.35)]">@{{ post.user.username }} · {{ formattedTimestamp }}</p>
-      </div>
-      <button
-        v-if="allowDelete && isOwnPost"
-        class="btn-ghost !h-9 !w-9 !p-0 text-[var(--t3)] hover:!text-[rgba(239,68,68,0.9)]"
-        title="Delete post"
-        @click="$emit('delete', post.id)"
-      >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16" />
-        </svg>
-      </button>
-    </div>
-    
-    <!-- Content -->
-    <div class="mb-4">
-      <p class="text-[13.5px] text-[var(--t1)] whitespace-pre-wrap leading-relaxed">{{ post.content }}</p>
-    </div>
-    
-    <!-- Media -->
-    <div v-if="post.mediaUrl || post.image" class="mb-4 rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--surface2)]">
+  <article 
+    class="post-card overflow-hidden transition-all duration-300"
+    :class="[post.content && (post.mediaUrl || post.image) ? 'flex flex-row min-h-[320px]' : 'flex flex-col']"
+  >
+    <!-- Media Section -->
+    <div 
+      v-if="post.mediaUrl || post.image" 
+      class="relative bg-black overflow-hidden group/media flex-shrink-0"
+      :class="[
+        post.content ? 'w-[60%] border-r border-[var(--line)]' : 'w-full aspect-video'
+      ]"
+    >
       <video
         v-if="resolvedMediaType === 'video'"
+        ref="videoRef"
         :src="post.mediaUrl || post.image"
-        class="w-full h-auto bg-black/70"
-        controls
-        preload="metadata"
+        class="w-full h-full object-cover"
+        autoplay
+        muted
+        loop
+        playsinline
+        @click="togglePlay"
       />
       <img
         v-else
         :src="post.mediaUrl || post.image"
-        :alt="post.user.username + '\'s post'"
-        class="w-full h-auto object-cover"
+        class="w-full h-full object-cover transition-transform duration-700 group-hover/media:scale-105"
         loading="lazy"
       />
+
+      <!-- Custom Video UI -->
+      <template v-if="resolvedMediaType === 'video'">
+        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/media:opacity-100 transition-opacity pointer-events-none flex items-center justify-center">
+          <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
+            <span class="material-symbols-rounded text-white text-3xl">{{ isPlaying ? 'pause' : 'play_arrow' }}</span>
+          </div>
+        </div>
+        
+        <div class="absolute bottom-3 right-3 z-10 flex gap-2">
+          <button 
+            @click.stop="toggleMute"
+            class="w-8 h-8 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-black/60 transition-all"
+          >
+            <span class="material-symbols-rounded text-lg">{{ isMuted ? 'volume_off' : 'volume_up' }}</span>
+          </button>
+        </div>
+      </template>
+
+      <!-- Overlay Header for 100% Media (No Caption) -->
+      <div v-if="!post.content" class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+        <div class="flex items-center gap-3 pointer-events-auto">
+          <NuxtLink :to="`/profile/${post.user.username}`">
+            <UiAvatar 
+              :src="post.user.profilePicUrl || post.user.avatar" 
+              :name="post.user.displayName"
+              size="sm"
+              class="rounded-lg ring-2 ring-white/20"
+            />
+          </NuxtLink>
+          <div class="flex flex-col">
+            <NuxtLink :to="`/profile/${post.user.username}`" class="text-sm font-bold text-white leading-none">
+              {{ post.user.displayName }}
+            </NuxtLink>
+            <span class="text-[10px] text-white/70 font-medium mt-1 uppercase tracking-wider">{{ post.user.role || 'Scholar' }}</span>
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <!-- Tags -->
-    <div v-if="post.tags" class="flex flex-wrap gap-2 mb-4">
-      <span 
-        v-for="tag in post.tags" 
-        :key="tag"
-        class="text-[12px] font-medium text-[var(--t2)] hover:text-[var(--t1)] cursor-pointer"
-      >
-        {{ tag }}
-      </span>
-    </div>
-    
-    <!-- Actions -->
-    <div class="flex items-center justify-between pt-3 border-t border-[var(--line)]">
-      <!-- Like -->
-      <button 
-        @click="$emit('like', post.id)"
-        :disabled="isGuest"
-        class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200"
-        :class="[
-          isGuest
-            ? 'text-[var(--t3)] opacity-60 cursor-not-allowed'
-            : post.isLiked
-              ? 'text-[rgba(239,68,68,0.9)]'
-              : 'text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)]'
-        ]"
-      >
-        <svg 
-          class="w-5 h-5 transition-transform"
-          :class="{ 'scale-110': post.isLiked }"
-          :fill="post.isLiked ? 'currentColor' : 'none'" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
+
+    <!-- Content Side (Right side if horizontal, Bottom if vertical) -->
+    <div 
+      class="flex flex-col p-4 bg-[var(--surface)]"
+      :class="[
+        post.content && (post.mediaUrl || post.image) ? 'w-[40%] min-w-[280px]' : 'w-full',
+        !post.content ? 'py-3' : ''
+      ]"
+    >
+      <!-- Header (Shown if horizontal or if vertical and has content) -->
+      <div v-if="post.content" class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <NuxtLink :to="`/profile/${post.user.username}`">
+            <UiAvatar 
+              :src="post.user.profilePicUrl || post.user.avatar" 
+              :name="post.user.displayName"
+              size="md"
+              class="rounded-xl ring-2 ring-transparent hover:ring-brand-primary/30 transition-all"
+            />
+          </NuxtLink>
+          <div class="flex flex-col">
+            <NuxtLink 
+              :to="`/profile/${post.user.username}`"
+              class="text-[14px] font-bold text-[var(--t1)] hover:text-brand-primary transition-colors leading-none"
+            >
+              {{ post.user.displayName }}
+            </NuxtLink>
+            <div class="flex items-center gap-1.5 mt-1.5">
+              <span class="text-[9px] text-[var(--t2)] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--surface2)] border border-[var(--line)]">
+                {{ post.user.role || 'Scholar' }}
+              </span>
+              <span class="text-[10px] text-[var(--t3)] font-medium">• {{ formattedTimestamp }}</span>
+            </div>
+          </div>
+        </div>
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--surface2)] text-[var(--t3)] hover:text-[var(--t1)] transition-colors">
+          <span class="material-symbols-rounded text-xl">more_horiz</span>
+        </button>
+      </div>
+
+      <!-- Caption Section (Dynamic sizing) -->
+      <div v-if="post.content" class="flex-1 flex flex-col justify-center py-2 overflow-hidden">
+        <div 
+          class="whitespace-pre-wrap break-words transition-all duration-500"
+          :class="[
+            captionSizeClasses,
+            hasHighlights ? 'text-[var(--t1)]' : 'text-[var(--t2)] font-medium leading-relaxed'
+          ]"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-        <span class="text-[12px] font-medium">{{ post.likes }}</span>
-      </button>
-      
-      <!-- Comment -->
-      <button
-        @click="$emit('comment', post.id)"
-        :disabled="isGuest"
-        class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200"
-        :class="isGuest ? 'text-[var(--t3)] opacity-60 cursor-not-allowed' : 'text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)]'"
+          <span v-html="highlightedCaption"></span>
+        </div>
+      </div>
+
+      <!-- Actions (Bottom Right aligned) -->
+      <div 
+        class="flex items-center gap-4 mt-auto border-t border-[var(--line)] pt-3"
+        :class="[post.content ? 'justify-end' : 'justify-between']"
       >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-        <span class="text-[12px] font-medium">{{ post.comments }}</span>
-      </button>
-      
-      <!-- Share -->
-      <button class="flex items-center gap-2 px-2.5 py-1.5 text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface2)] rounded-lg transition-all duration-200">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-        </svg>
-        <span class="text-[12px] font-medium">{{ post.shares }}</span>
-      </button>
+        <div class="flex items-center gap-4">
+          <button 
+            @click="$emit('like', post.id)"
+            class="flex items-center gap-1.5 text-[var(--t2)] hover:text-brand-primary transition-colors font-bold text-[11px] group"
+            :class="{ 'text-brand-primary': post.isLiked }"
+          >
+            <span class="material-symbols-rounded text-lg" :class="{ 'fill-1': post.isLiked }">favorite</span>
+            <span>{{ post.likes }}</span>
+          </button>
+          
+          <button 
+            @click="$emit('comment', post.id)"
+            class="flex items-center gap-1.5 text-[var(--t2)] hover:text-brand-primary transition-colors font-bold text-[11px]"
+          >
+            <span class="material-symbols-rounded text-lg">chat_bubble</span>
+            <span>{{ post.comments }}</span>
+          </button>
+        </div>
+
+        <button class="text-[var(--t3)] hover:text-brand-primary transition-colors">
+          <span class="material-symbols-rounded text-lg">share</span>
+        </button>
+      </div>
     </div>
-  </UiCard>
+  </article>
 </template>
 
+<style scoped>
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.fill-1 {
+  font-variation-settings: 'FILL' 1;
+}
+
+.post-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+}
+
+.post-card:hover {
+  border-color: var(--line2);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+.post-content :deep(.highlight-primary) {
+  color: var(--primary, #10b981);
+  font-weight: 800;
+  padding: 0 2px;
+}
+
+.post-content :deep(.mention-tag) {
+  color: var(--primary, #10b981);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.post-content :deep(.mention-tag:hover) {
+  text-decoration: underline;
+}
+</style>
+
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+
 interface User {
   id: string
   username: string
@@ -123,12 +200,13 @@ interface User {
   avatar: string
   profilePicUrl?: string
   isProfilePublic?: boolean
+  role?: string
 }
 
 interface Post {
   id: string
   user: User
-  content: string
+  content?: string
   mediaUrl?: string
   mediaType?: 'image' | 'video'
   image?: string
@@ -153,32 +231,88 @@ const props = withDefaults(defineProps<Props>(), {
   allowDelete: false,
 })
 
+const videoRef = ref<HTMLVideoElement | null>(null)
+const isPlaying = ref(true)
+const isMuted = ref(true)
+
+const togglePlay = () => {
+  if (!videoRef.value) return
+  if (videoRef.value.paused) {
+    videoRef.value.play()
+    isPlaying.value = true
+  } else {
+    videoRef.value.pause()
+    isPlaying.value = false
+  }
+}
+
+const toggleMute = () => {
+  if (!videoRef.value) return
+  videoRef.value.muted = !videoRef.value.muted
+  isMuted.value = videoRef.value.muted
+}
+
 const isGuest = computed(() => props.isGuest)
 const isOwnPost = computed(() => !!props.currentUserId && String(props.post.user.id) === String(props.currentUserId))
 
 const formatTimestamp = (value: string): string => {
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
+  if (Number.isNaN(date.getTime())) return value
 
   const diffMs = Date.now() - date.getTime()
   const diffSec = Math.floor(diffMs / 1000)
 
-  if (diffSec < 60) return 'Just now'
-  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`
-  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`
-  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`
-
+  if (diffSec < 60) return 'now'
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m`
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h`
+  
   return new Intl.DateTimeFormat('en-BD', {
     month: 'short',
     day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
   }).format(date)
 }
 
 const formattedTimestamp = computed(() => formatTimestamp(props.post.timestamp))
+
+const hasHighlights = computed(() => {
+  const content = props.post.content || ''
+  return /[#@]\w+/.test(content) || /^\d+\./m.test(content)
+})
+
+const captionSizeClasses = computed(() => {
+  const content = props.post.content || ''
+  const charCount = content.length
+  const lineCount = content.split('\n').length
+
+  if (charCount < 50 && lineCount <= 2) {
+    return 'text-lg md:text-xl font-bold tracking-tight leading-tight'
+  }
+  
+  if (charCount < 120 && lineCount <= 5) {
+    return 'text-[16px] font-semibold leading-snug'
+  }
+
+  return 'text-[14px] leading-relaxed'
+})
+
+const highlightedCaption = computed(() => {
+  if (!props.post.content) return ''
+  
+  return props.post.content.split(/\r?\n/).map(line => {
+    let processed = line
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+    
+    processed = processed.replace(/(^|\s)([#@]\w+)/g, '$1<span class="mention-tag">$2</span>')
+
+    if (/^\d+\./.test(line.trim())) {
+      return `<span class="highlight-primary">${processed}</span>`
+    }
+    
+    return processed
+  }).join('\n')
+})
 
 const inferMediaTypeFromUrl = (url?: string): 'image' | 'video' => {
   if (!url) return 'image'
@@ -189,7 +323,6 @@ const resolvedMediaType = computed<'image' | 'video'>(() => {
   if (props.post.mediaType === 'video' || props.post.mediaType === 'image') {
     return props.post.mediaType
   }
-
   return inferMediaTypeFromUrl(props.post.mediaUrl || props.post.image)
 })
 

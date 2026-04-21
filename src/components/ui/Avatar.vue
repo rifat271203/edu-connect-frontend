@@ -38,7 +38,7 @@
 interface Props {
   src?: string
   alt?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   online?: boolean
   showOnline?: boolean
   showDot?: boolean
@@ -64,7 +64,8 @@ const sizeClasses = computed(() => {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
     lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
+    xl: 'w-16 h-16',
+    '2xl': 'w-24 h-24 md:w-32 md:h-32'
   }
   return sizes[props.size]
 })
@@ -75,7 +76,8 @@ const textSizeClasses = computed(() => {
     sm: 'text-xs',
     md: 'text-[13px]',
     lg: 'text-base',
-    xl: 'text-xl'
+    xl: 'text-xl',
+    '2xl': 'text-3xl'
   }
   return sizes[props.size]
 })
