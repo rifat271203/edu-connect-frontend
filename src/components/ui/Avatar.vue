@@ -1,20 +1,20 @@
 <template>
   <div 
-    class="relative inline-flex shrink-0" 
-    :class="[sizeClasses, { 'ring-2 ring-[rgba(255,255,255,0.14)]': hasRing }]"
+    class="relative inline-flex shrink-0 overflow-hidden" 
+    :class="[sizeClasses, rounded, { 'ring-2 ring-[rgba(255,255,255,0.14)]': hasRing }]"
   >
     <img
       v-if="src && !imageError"
       :src="src"
       :alt="alt"
-      class="rounded-full object-cover bg-dark-700"
-      :class="sizeClasses"
+      class="object-cover bg-dark-700 w-full h-full"
+      :class="rounded"
       @error="handleImageError"
     />
     <div
       v-else
-      class="rounded-full flex items-center justify-center text-white font-bold uppercase tracking-[0.02em] font-['DM_Sans']"
-      :class="sizeClasses"
+      class="flex items-center justify-center text-white font-bold uppercase tracking-[0.02em] font-['DM_Sans'] w-full h-full"
+      :class="[rounded]"
       :style="{ background: fallbackBackground }"
     >
       <span :class="textSizeClasses">{{ initials }}</span>
@@ -44,6 +44,7 @@ interface Props {
   showDot?: boolean
   hasRing?: boolean
   name?: string
+  rounded?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -53,7 +54,8 @@ const props = withDefaults(defineProps<Props>(), {
   showOnline: false,
   showDot: false,
   hasRing: false,
-  name: ''
+  name: '',
+  rounded: 'rounded-full'
 })
 
 const imageError = ref(false)
