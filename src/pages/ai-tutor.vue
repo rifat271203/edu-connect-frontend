@@ -1,60 +1,103 @@
 <template>
-  <div class="h-[100dvh] lg:h-screen min-h-0 flex overflow-hidden bg-[var(--ink)] text-[var(--t1)]">
-    <div class="flex-1 min-w-0 min-h-0 flex flex-col">
-      <AiTutorHeader
-        :message-count="messages.length"
-        :saved-chat-count="chatHistory.length"
-        @go-back="handleMobileBack"
-        @clear-chat="clearChat"
-      />
+  <div class="h-screen min-h-0 flex flex-col lg:flex-row overflow-hidden" :style="{
+    '--bg': '#080c14',
+    '--bg2': '#0e1520',
+    '--bg3': '#141d2e',
+    '--bg4': '#1a2438',
+    '--line': 'rgba(255,255,255,0.07)',
+    '--line2': 'rgba(255,255,255,0.12)',
+    '--gold': '#d4a843',
+    '--gold2': '#f0c46a',
+    '--gold-dim': 'rgba(212,168,67,0.12)',
+    '--gold-glow': 'rgba(212,168,67,0.25)',
+    '--teal': '#2dd4bf',
+    '--teal-dim': 'rgba(45,212,191,0.1)',
+    '--text': '#e8eaf0',
+    '--text2': '#8a93a8',
+    '--text3': '#545e72'
+  }" as any>
+    <!-- Desktop Sidebar -->
+    <AiTutorSidebar
+      :chat-history="chatHistory"
+      :current-chat-index="currentChatIndex"
+      :selected-category="selectedCategory"
+      :format-date="formatDate"
+      :get-chat-preview="getChatPreview"
+      @clear-all="clearAllChats"
+      @new-chat="startNewChat"
+      @load-chat="loadChat"
+      @delete-chat="deleteChat"
+      @set-category="setCategory"
+    />
 
-      <div class="px-4 lg:px-6 pt-4 shrink-0">
-        <transition name="fade-slide" mode="out-in">
-          <div
-            v-if="!selectedCategory"
-            key="category-picker"
-            class="max-w-4xl mx-auto rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 sm:p-5"
+    <!-- Main Content -->
+    <div class="flex-1 min-w-0 min-h-0 flex flex-col bg-[var(--bg)]" style="background-image: repeating-linear-gradient(0deg, rgba(212,168,67,0.03) 0px, rgba(212,168,67,0.03) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(90deg, rgba(212,168,67,0.03) 0px, rgba(212,168,67,0.03) 1px, transparent 1px, transparent 48px);">
+      <!-- Mobile Header -->
+      <div class="lg:hidden h-14 border-b flex items-center px-3 gap-2 flex-shrink-0" :style="{ borderColor: 'var(--line)' }">
+        <!-- Back Button -->
+        <button @click="handleMobileBack" class="w-9 h-9 flex items-center justify-center rounded-[8px] flex-shrink-0" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text)' }">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <!-- Mobile Subject Selector -->
+        <div class="flex gap-1.5 overflow-x-auto flex-1 min-w-0">
+          <button
+            v-for="subject in mobileSubjects"
+            :key="subject.value"
+            @click="setCategory(subject.value)"
+            class="px-2.5 py-1 rounded-full text-[10px] uppercase font-medium border transition-all duration-150 whitespace-nowrap flex-shrink-0"
+            :style="{
+              background: selectedCategory === subject.value ? subject.activeColor : subject.bgColor,
+              color: selectedCategory === subject.value ? subject.textColor : subject.textColor,
+              borderColor: selectedCategory === subject.value ? subject.borderColor : subject.borderColor,
+              fontFamily: 'DM Mono'
+            }"
           >
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-              <div>
-                <p class="text-[15px] font-semibold text-[var(--t1)]">Choose your tutor category first</p>
-                <p class="text-[12.5px] text-[rgba(244,241,235,0.5)] mt-1">Select Physics, Chemistry, or Math before asking any question.</p>
-              </div>
-              <div class="text-[12px] font-medium text-[var(--t3)]">
-                Current: <span class="font-semibold text-[var(--gold)]">{{ selectedCategoryLabel }}</span>
-              </div>
-            </div>
+            {{ subject.label }}
+          </button>
+        </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <button
-                v-for="option in categoryOptions"
-                :key="option.value"
-                @click="setCategory(option.value)"
-                class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] px-3 py-3 text-left transition-all duration-150 hover:border-[var(--line2)] hover:bg-[var(--surface3)]"
-                :class="selectedCategory === option.value ? 'border-[var(--gold)] bg-[var(--gold-dim)] ring-1 ring-[var(--line-gold)]' : ''"
-              >
-                <p class="text-[15px] font-bold text-[var(--t1)]">{{ option.label }}</p>
-                <p class="text-[12.5px] text-[rgba(244,241,235,0.5)] mt-1">{{ option.description }}</p>
-              </button>
-            </div>
-          </div>
-
-          <div v-else key="category-indicator" class="max-w-4xl mx-auto flex justify-end">
-            <div class="inline-flex items-center gap-2 rounded-full border border-[var(--line-gold)] bg-[var(--gold-dim)] px-3 py-2">
-              <span class="text-[10px] uppercase tracking-[0.1em] font-semibold text-[var(--gold)]">Tutor Mode</span>
-              <span class="h-1 w-1 rounded-full bg-[var(--gold)]"></span>
-              <span class="text-[12px] font-semibold text-[var(--gold)]">{{ selectedCategoryLabel }}</span>
-              <button
-                @click="selectedCategory = null"
-                class="ml-1 rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 text-[11px] font-medium text-[var(--t2)] transition-colors hover:border-[var(--line-gold)] hover:text-[var(--gold)]"
-              >
-                Change
-              </button>
-            </div>
-          </div>
-        </transition>
+        <!-- Mobile Menu Button -->
+        <button @click="isMobileSidebarOpen = !isMobileSidebarOpen" class="w-9 h-9 flex items-center justify-center rounded-[8px] flex-shrink-0" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text)' }">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
 
+      <!-- Desktop Topbar -->
+      <div class="hidden lg:flex h-16 border-b items-center px-7 gap-4 flex-shrink-0" :style="{ borderColor: 'var(--line)' }">
+        <!-- Subject Badge -->
+        <div v-if="selectedCategory" class="flex items-center gap-3 px-3.5 py-2" style="background: var(--bg3); borderRadius: '30px'; border: '1px solid'; borderColor: 'var(--line2)'; gap: '12px'">
+          <div class="w-6 h-6 flex items-center justify-center rounded" :style="{ background: 'var(--gold-dim)', borderRadius: '6px' }">
+            <span class="text-lg">{{ getCategoryEmoji(selectedCategory) }}</span>
+          </div>
+          <span class="text-[11px] uppercase tracking-[0.3px]" style="color: 'var(--text3)'">Tutor mode ·</span>
+          <strong class="text-xs font-medium" style="color: 'var(--gold2)', fontFamily: 'DM Mono'">{{ selectedCategoryLabel }}</strong>
+        </div>
+
+        <!-- Center Info -->
+        <div v-if="selectedCategory" class="text-xs ml-auto mr-auto" style="color: 'var(--text3)', fontFamily: 'DM Mono'">
+          {{ messages.length }} messages · LaTeX on
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="ml-auto flex gap-2">
+          <button class="w-9 h-9 flex items-center justify-center rounded-[10px]" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text3)' }" title="Save">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8H3m9 0h9" /></svg>
+          </button>
+          <button class="w-9 h-9 flex items-center justify-center rounded-[10px]" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text3)' }" title="Copy">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          </button>
+          <button @click="clearChat" class="w-9 h-9 flex items-center justify-center rounded-[10px]" :style="{ background: 'var(--bg3)', border: '1px solid', borderColor: 'var(--line)', color: 'var(--text3)' }" title="Delete">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Area -->
       <AiTutorEmptyState
         v-if="selectedCategory && messages.length === 0 && !isTyping"
         :prompts="quickPrompts"
@@ -72,12 +115,16 @@
         :render-markdown="renderMarkdown"
       />
 
-      <div v-else class="flex-1 px-4 lg:px-6 py-8">
-        <div class="max-w-4xl mx-auto rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6 text-[13.5px] text-[var(--t2)]">
-          Select one category above to activate AI Tutor.
+      <div v-else class="flex-1 flex items-center justify-center px-4 lg:px-7 py-12">
+        <div class="text-center">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" :style="{ background: 'var(--gold-dim)', border: '1px solid', borderColor: 'rgba(212,168,67,0.25)' }">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: 'var(--gold)'"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-3.636 6.364l-.707.707M9 19.071A9.003 9.003 0 0012 20.07m0 0a9.003 9.003 0 003 -.07" /></svg>
+          </div>
+          <p class="text-sm font-medium" style="color: 'var(--text)'; fontFamily: 'DM Sans'">Select a subject to start</p>
         </div>
       </div>
 
+      <!-- Input Composer -->
       <AiTutorComposer
         v-model="inputMessage"
         :disabled="isTyping || !selectedCategory"
@@ -87,16 +134,106 @@
       />
     </div>
 
-    <AiTutorSidebar
-      :chat-history="chatHistory"
-      :current-chat-index="currentChatIndex"
-      :format-date="formatDate"
-      :get-chat-preview="getChatPreview"
-      @clear-all="clearAllChats"
-      @new-chat="startNewChat"
-      @load-chat="loadChat"
-      @delete-chat="deleteChat"
-    />
+    <!-- Mobile Sidebar Drawer -->
+    <teleport v-if="isMobileSidebarOpen" to="body">
+      <!-- Overlay -->
+      <div
+        class="fixed inset-0 bg-black/60 z-40 lg:hidden"
+        @click="isMobileSidebarOpen = false"
+      />
+      <!-- Drawer -->
+      <div class="fixed inset-y-0 left-0 w-64 flex flex-col z-50 lg:hidden border-r" :style="{ background: 'var(--bg2)', borderColor: 'var(--line)' }">
+        <!-- Close Button -->
+        <div class="flex items-center justify-between px-5 py-4 border-b" :style="{ borderColor: 'var(--line)' }">
+          <h2 class="text-base font-bold text-white" style="fontFamily: 'Syne, sans-serif'">AI Tutor</h2>
+          <button
+            @click="isMobileSidebarOpen = false"
+            class="w-8 h-8 flex items-center justify-center rounded-[8px]"
+            :style="{ background: 'var(--bg3)', color: 'var(--text)' }"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- New Session Button -->
+        <div class="px-5 py-3 border-b" :style="{ borderColor: 'var(--line)' }">
+          <button
+            @click="startNewChat; isMobileSidebarOpen = false"
+            class="w-full px-3 py-2.5 rounded-[10px] text-sm font-medium flex items-center justify-center gap-2 transition-all duration-150"
+            :style="{ 
+              background: 'var(--gold-dim)',
+              border: '1px solid rgba(212,168,67,0.25)',
+              color: 'var(--gold2)',
+              fontFamily: 'DM Sans'
+            }"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            New session
+          </button>
+        </div>
+
+        <!-- History List -->
+        <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 thin-scrollbar" style="scrollbarWidth: 'thin'">
+          <!-- Group Label -->
+          <div v-if="chatHistory.length > 0" class="px-2 py-3 text-[10px] uppercase font-medium tracking-[1px]" style="color: 'var(--text3)', fontFamily: 'DM Mono'">
+            Recent
+          </div>
+
+          <!-- History Items -->
+          <div v-for="(chat, index) in chatHistory" :key="index" class="group">
+            <button
+              @click="loadChat(index); isMobileSidebarOpen = false"
+              class="w-full text-left px-2.5 py-2.5 rounded-[10px] transition-all duration-150 border"
+              :style="{
+                background: currentChatIndex === index ? 'var(--bg4)' : 'transparent',
+                borderColor: currentChatIndex === index ? 'var(--line2)' : 'transparent'
+              }"
+            >
+              <p class="text-sm font-medium truncate" style="color: 'var(--text)', fontFamily: 'DM Sans'">{{ chat.title || 'New Chat' }}</p>
+              <div class="flex items-center gap-1.5 mt-1">
+                <div class="w-2 h-2 rounded-full flex-shrink-0" :style="{ background: getSubjectColor(chat.category) }"></div>
+                <p class="text-[11px] truncate" style="color: 'var(--text3)', fontFamily: 'DM Mono'">{{ chat.category }} · {{ formatDate(chat.timestamp) }}</p>
+              </div>
+            </button>
+            <!-- Delete Button for Mobile -->
+            <button
+              @click.stop="deleteChat(index)"
+              class="ml-auto mt-1 mr-2 px-2 py-1 rounded text-[10px]"
+              :style="{ background: 'rgba(255,0,0,0.1)', color: 'rgba(255,100,100,0.8)', border: '1px solid rgba(255,100,100,0.2)' }"
+              title="Delete chat"
+            >
+              Delete
+            </button>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="chatHistory.length === 0" class="text-center py-8 px-2">
+            <p class="text-xs font-medium" style="color: 'var(--text2)', fontFamily: 'DM Sans'">No history yet</p>
+            <p class="text-[11px] mt-1" style="color: 'var(--text3)', fontFamily: 'DM Mono'">Start a new session to begin</p>
+          </div>
+        </div>
+
+        <!-- Footer Button -->
+        <div class="px-3 py-4 border-t" :style="{ borderColor: 'var(--line)' }">
+          <button
+            @click="clearAllChats; isMobileSidebarOpen = false"
+            class="w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors"
+            :style="{ 
+              background: 'rgba(255,255,255,0.05)',
+              color: 'var(--text3)',
+              border: '1px solid var(--line)',
+              fontFamily: 'DM Sans'
+            }"
+          >
+            Clear all
+          </button>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
@@ -140,6 +277,45 @@ type MessageListExpose = {
 const messageListRef = ref<MessageListExpose | null>(null)
 const inputMessage = ref('')
 const isTyping = ref(false)
+const isMobileSidebarOpen = ref(false)
+
+// Mobile subjects configuration
+const mobileSubjects = [
+  {
+    value: 'physics' as TutorCategory,
+    label: 'Physics',
+    bgColor: 'rgba(45,212,191,0.1)',
+    activeColor: 'rgba(45,212,191,0.25)',
+    textColor: '#2dd4bf',
+    borderColor: 'rgba(45,212,191,0.2)'
+  },
+  {
+    value: 'chemistry' as TutorCategory,
+    label: 'Chemistry',
+    bgColor: 'rgba(212,168,67,0.12)',
+    activeColor: 'rgba(212,168,67,0.25)',
+    textColor: '#f0c46a',
+    borderColor: 'rgba(212,168,67,0.25)'
+  },
+  {
+    value: 'math' as TutorCategory,
+    label: 'Math',
+    bgColor: 'rgba(139,92,246,0.1)',
+    activeColor: 'rgba(139,92,246,0.2)',
+    textColor: '#c4b5fd',
+    borderColor: 'rgba(139,92,246,0.2)'
+  }
+]
+
+const getSubjectColor = (category: TutorCategory | undefined): string => {
+  if (!category) return 'var(--text3)'
+  const colors: Record<TutorCategory, string> = {
+    physics: '#2dd4bf',
+    chemistry: '#d4a843',
+    math: '#c4b5fd'
+  }
+  return colors[category]
+}
 
 const logMathStepReveal = (event: string, payload?: Record<string, unknown>) => {
   if (!import.meta.dev) return
@@ -177,6 +353,16 @@ const composerPlaceholder = computed(() => {
 
 const setCategory = (category: TutorCategory) => {
   selectedCategory.value = category
+}
+
+const getCategoryEmoji = (category: TutorCategory | null): string => {
+  if (!category) return '🧪'
+  const emojis: Record<TutorCategory, string> = {
+    physics: '⚛️',
+    chemistry: '⚗️',
+    math: '∑'
+  }
+  return emojis[category]
 }
 
 const handleMobileBack = () => {
@@ -536,6 +722,14 @@ const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: Tut
     equations: toStringArray(responseData.equations),
     diagram_caption: typeof responseData.diagram_caption === 'string' ? responseData.diagram_caption : undefined,
     resonance: responseData.resonance,
+    // New fields from backend response format
+    overview: responseData.overview,
+    tags: toStringArray(responseData.tags),
+    metadata: responseData.metadata,
+    reaction_pathway: responseData.reaction_pathway,
+    steps: responseData.steps,
+    related_concepts: toStringArray(responseData.related_concepts),
+    warning_or_tip: typeof responseData.warning_or_tip === 'string' ? responseData.warning_or_tip : undefined,
   }
 
   if (nestedSolution) {
@@ -553,6 +747,20 @@ const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: Tut
     if (nestedSolution.resonance && typeof nestedSolution.resonance === 'object') {
       solution.resonance = nestedSolution.resonance as ChemistryTutorSolution['resonance']
     }
+    // New fields from nested solution
+    if (nestedSolution.overview && typeof nestedSolution.overview === 'object') {
+      solution.overview = nestedSolution.overview as ChemistryTutorSolution['overview']
+    }
+    if (Array.isArray(nestedSolution.tags)) solution.tags = toStringArray(nestedSolution.tags)
+    if (nestedSolution.metadata && typeof nestedSolution.metadata === 'object') {
+      solution.metadata = nestedSolution.metadata as ChemistryTutorSolution['metadata']
+    }
+    if (nestedSolution.reaction_pathway && typeof nestedSolution.reaction_pathway === 'object') {
+      solution.reaction_pathway = nestedSolution.reaction_pathway as ChemistryTutorSolution['reaction_pathway']
+    }
+    if (Array.isArray(nestedSolution.steps)) solution.steps = nestedSolution.steps as ChemistryTutorSolution['steps']
+    if (Array.isArray(nestedSolution.related_concepts)) solution.related_concepts = toStringArray(nestedSolution.related_concepts)
+    if (typeof nestedSolution.warning_or_tip === 'string') solution.warning_or_tip = nestedSolution.warning_or_tip
   }
 
   const hasChemistryContent = Boolean(
@@ -569,7 +777,14 @@ const parseChemistrySolution = (responseData: AIAskResponse, activeCategory: Tut
     solution.equations?.length ||
     solution.diagram_caption ||
     solution.resonance ||
-    solution.contextUsed !== undefined
+    solution.contextUsed !== undefined ||
+    solution.overview ||
+    solution.tags?.length ||
+    solution.metadata ||
+    solution.reaction_pathway?.compounds?.length ||
+    solution.steps?.length ||
+    solution.related_concepts?.length ||
+    solution.warning_or_tip
   )
 
   return hasChemistryContent ? solution : undefined
@@ -646,7 +861,9 @@ const sendMessage = async (text: string) => {
       physicsSolution ||
       mathSolution ||
       response.data.diagram ||
-      response.data.mechanism_steps?.length
+      response.data.mechanism_steps?.length ||
+      response.data.reaction_pathway?.compounds?.length ||
+      response.data.steps?.length
     )
 
     logMathStepReveal('before-render-assistant-message', {

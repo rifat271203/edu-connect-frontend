@@ -2,6 +2,8 @@
 // Export all API services from this file for easy importing
 
 export * from './client'
+export * from './providers'
+export * from './collections'
 export * from './auth'
 export * from './chat'
 export * from './meeting'

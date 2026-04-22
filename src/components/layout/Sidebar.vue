@@ -1,5 +1,5 @@
 <template>
-  <aside class="sidebar fixed left-0 top-0 bottom-0 w-[220px] z-30 flex flex-col">
+  <aside class="sidebar fixed left-0 top-0 bottom-0 w-[240px] z-30 flex flex-col">
     <!-- Logo -->
     <div class="h-[60px] px-4 border-b border-[var(--line)] flex items-center">
       <NuxtLink to="/home" class="flex items-center gap-3 group">
@@ -8,7 +8,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
           </svg>
         </div>
-        <span class="logo-wordmark text-[30px] leading-none text-[var(--t1)]">EduConnect</span>
+        <span class="logo-wordmark text-[24px] leading-none text-[var(--t1)]">EduConnect</span>
       </NuxtLink>
     </div>
 
@@ -81,7 +81,7 @@
     </nav>
     
     <!-- User Section -->
-    <div class="p-4 border-t border-[var(--line)] bg-[var(--ink2)]">
+    <div class="p-4 border-t border-[var(--line)] bg-[var(--surface)]">
       <div class="flex items-center gap-3">
         <UiAvatar 
           :src="userStore.user?.avatar"

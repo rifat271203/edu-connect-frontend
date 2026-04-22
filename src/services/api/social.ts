@@ -1,4 +1,4 @@
-import { API_BASE_URL, apiRequest, type ApiResponse } from './client'
+import { apiRequest, apiRequestForm, type ApiResponse } from './client'
 import type { Post as FeedPost, Comment as FeedComment } from '~/types/post'
 import type { UserPreview } from '~/types/user'
 import type { Notification as FeedNotification, NotificationType } from '~/types/notification'
@@ -154,44 +154,6 @@ const asRecord = (value: unknown): Record<string, unknown> | undefined =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : undefined
 
 const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
-
-const getUploadErrorMessage = (payload: unknown, fallbackStatus: number): string => {
-  if (typeof payload === 'string') {
-    return payload
-  }
-
-  const record = asRecord(payload)
-  if (record) {
-    if (typeof record.message === 'string') return record.message
-    if (typeof record.error === 'string') return record.error
-  }
-
-  return fallbackStatus
-    ? `Request failed with status ${fallbackStatus}`
-    : 'Unable to connect to server'
-}
-
-const readUploadPayload = async (response: Response): Promise<unknown> => {
-  if (response.status === 204) {
-    return undefined
-  }
-
-  const contentType = response.headers.get('content-type') || ''
-  if (contentType.includes('application/json')) {
-    return await response.json()
-  }
-
-  const text = await response.text()
-  return text ? { message: text } : undefined
-}
-
-const getAuthToken = (): string | null => {
-  if (!process.client) {
-    return null
-  }
-
-  return localStorage.getItem('educonnect_token')
-}
 
 const normalizeUploadResponse = (payload: unknown): UploadMediaResponse | null => {
   const root = asRecord(payload) || {}
@@ -705,104 +667,46 @@ export const createPost = async (payload: CreatePostRequest): Promise<ApiRespons
 }
 
 export const uploadPostMedia = async (file: File): Promise<ApiResponse<UploadMediaResponse>> => {
-  try {
-    const formData = new FormData()
-    formData.append('media', file)
+  const formData = new FormData()
+  formData.append('media', file)
 
-    const headers: HeadersInit = {}
-    const token = getAuthToken()
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
+  const result = await apiRequestForm<unknown>('/api/social/upload-media', formData, 'POST')
+  if (!result.success) return result as ApiResponse<UploadMediaResponse>
 
-    const response = await fetch(`${API_BASE_URL}/api/social/upload-media`, {
-      method: 'POST',
-      headers,
-      body: formData,
-    })
-
-    const payload = await readUploadPayload(response)
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: getUploadErrorMessage(payload, response.status),
-        status: response.status,
-      }
-    }
-
-    const data = normalizeUploadResponse(payload)
-    if (!data) {
-      return {
-        success: false,
-        error: 'Upload succeeded but media URL is missing in response',
-        status: response.status,
-      }
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    }
-  } catch (error) {
-    console.error('Upload media error:', error)
+  const data = normalizeUploadResponse(result.data)
+  if (!data) {
     return {
       success: false,
-      error: 'Unable to upload media',
-      status: 0,
+      error: 'Upload succeeded but media URL is missing in response',
+      status: result.status,
     }
+  }
+
+  return {
+    ...result,
+    data,
   }
 }
 
 export const uploadProfilePicture = async (file: File): Promise<ApiResponse<UploadProfilePicResponse>> => {
-  try {
-    const formData = new FormData()
-    formData.append('profilePic', file)
+  const formData = new FormData()
+  formData.append('profilePic', file)
 
-    const headers: HeadersInit = {}
-    const token = getAuthToken()
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
+  const result = await apiRequestForm<unknown>('/api/social/me/profile-pic', formData, 'POST')
+  if (!result.success) return result as ApiResponse<UploadProfilePicResponse>
 
-    const response = await fetch(`${API_BASE_URL}/api/social/me/profile-pic`, {
-      method: 'POST',
-      headers,
-      body: formData,
-    })
-
-    const payload = await readUploadPayload(response)
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: getUploadErrorMessage(payload, response.status),
-        status: response.status,
-      }
-    }
-
-    const data = normalizeProfilePicUploadResponse(payload)
-    if (!data) {
-      return {
-        success: false,
-        error: 'Upload succeeded but profile picture URL is missing in response',
-        status: response.status,
-      }
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    }
-  } catch (error) {
-    console.error('Upload profile picture error:', error)
+  const data = normalizeProfilePicUploadResponse(result.data)
+  if (!data) {
     return {
       success: false,
-      error: 'Unable to upload profile picture',
-      status: 0,
+      error: 'Upload succeeded but profile picture URL is missing in response',
+      status: result.status,
     }
+  }
+
+  return {
+    ...result,
+    data,
   }
 }
 
