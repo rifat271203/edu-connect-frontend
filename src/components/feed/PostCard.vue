@@ -52,7 +52,7 @@
     >
       <div v-if="post.content" class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
-          <NuxtLink :to="`/profile/${post.user.username}`">
+          <NuxtLink :to="`/profile/${post.user.id}`">
             <UiAvatar 
               :src="post.user.profilePicUrl || post.user.avatar" 
               :name="post.user.displayName"
@@ -62,7 +62,7 @@
           </NuxtLink>
           <div class="flex flex-col">
             <NuxtLink 
-              :to="`/profile/${post.user.username}`"
+              :to="`/profile/${post.user.id}`"
               class="text-[14px] font-bold text-[var(--t1)] hover:text-brand-primary transition-colors leading-none"
             >
               {{ post.user.displayName }}
@@ -172,7 +172,7 @@
 
       <div v-if="!post.content" class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
         <div class="flex items-center gap-3 pointer-events-auto">
-          <NuxtLink :to="`/profile/${post.user.username}`">
+          <NuxtLink :to="`/profile/${post.user.id}`">
             <UiAvatar 
               :src="post.user.profilePicUrl || post.user.avatar" 
               :name="post.user.displayName"
@@ -181,7 +181,7 @@
             />
           </NuxtLink>
           <div class="flex flex-col">
-            <NuxtLink :to="`/profile/${post.user.username}`" class="text-sm font-bold text-white leading-none">
+            <NuxtLink :to="`/profile/${post.user.id}`" class="text-sm font-bold text-white leading-none">
               {{ post.user.displayName }}
             </NuxtLink>
             <span class="text-[10px] text-white/70 font-medium mt-1 uppercase tracking-wider">{{ post.user.role || 'Scholar' }}</span>

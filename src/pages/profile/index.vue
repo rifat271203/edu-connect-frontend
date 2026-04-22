@@ -1,232 +1,324 @@
 <template>
-  <div class="max-w-4xl mx-auto p-4 pb-24 lg:pb-6">
-    <!-- Profile Header -->
-    <div class="mb-6 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-6">
-      <div class="flex flex-col md:flex-row md:items-end gap-4">
-        <!-- Avatar -->
-        <div class="relative">
-          <UiAvatar
-            :src="userStore.user?.avatar"
-            :name="userStore.user?.name"
-            size="2xl"
-            class="rounded-full border border-[var(--line2)] bg-[var(--surface2)]"
-          />
-          <button
-            type="button"
-            class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[var(--gold)] text-[#07090f] flex items-center justify-center"
-            :disabled="updatingProfilePic"
-            @click="openProfilePicPicker"
-          >
-            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
+  <div class="max-w-4xl mx-auto p-4 pb-24 lg:pb-12 animate-fadeInUp">
+    <!-- Header Navigation -->
+    <div class="mb-8 flex items-center justify-between">
+      <UiButton variant="ghost" class="group flex items-center gap-2 hover:bg-[var(--secondary)] transition-all" @click="navigateTo('/home')">
+        <span class="material-symbols-rounded text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        <span class="font-bold text-sm">Back to Home</span>
+      </UiButton>
+      
+      <div class="flex gap-3">
+        <UiButton
+          variant="secondary"
+          class="rounded-xl font-bold text-xs"
+          @click="openProfilePicPicker"
+          :loading="updatingProfilePic"
+        >
+          <span class="material-symbols-rounded text-sm mr-1.5">photo_camera</span>
+          Update Photo
+        </UiButton>
+        
+        <input
+          ref="profilePicInputRef"
+          type="file"
+          class="hidden"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          @change="handleProfilePicSelected"
+        />
 
-          <input
-            ref="profilePicInputRef"
-            type="file"
-            class="hidden"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            @change="handleProfilePicSelected"
-          />
-        </div>
-        
-        <!-- Name & Edit -->
-        <div class="flex-1">
-          <h1 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">{{ userStore.user?.name || 'User' }}</h1>
-          <p class="text-[13px] text-[rgba(244,241,235,0.4)] mt-1">@{{ userStore.user?.username || 'user' }}</p>
-          <p class="text-[13px] text-[rgba(244,241,235,0.5)] mt-1">
-            {{ myProfile?.department || 'Department' }} · {{ myProfile?.institution || 'Institution' }}
-          </p>
-          <label class="mt-3 inline-flex items-center gap-2 text-xs text-[var(--t2)] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-3 py-1.5">
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-[var(--gold)]"
-              :checked="isProfilePublic"
-              :disabled="visibilityLoading || visibilitySaving"
-              @change="handleVisibilityToggle"
-            >
-            <span>
-              {{ isProfilePublic ? 'Public profile' : 'Private profile' }}
-              <span v-if="visibilitySaving">(updating...)</span>
-            </span>
-          </label>
-          <p v-if="visibilityError" class="mt-1 text-xs text-[rgba(239,68,68,0.9)]">{{ visibilityError }}</p>
-        </div>
-        
-        <UiButton variant="ghost" class="w-full md:w-auto" @click="openProfilePicPicker">
-          {{ updatingProfilePic ? 'Updating...' : 'Update Photo' }}
+        <UiButton variant="secondary" size="sm" class="h-10 w-10 p-0 rounded-xl" @click="navigateTo('/settings')">
+          <span class="material-symbols-rounded text-lg">settings</span>
         </UiButton>
       </div>
     </div>
 
-    <p v-if="errorMessage" class="mb-4 text-sm text-[rgba(239,68,68,0.9)]">{{ errorMessage }}</p>
-    <p v-if="successMessage" class="mb-4 text-sm text-green-400">{{ successMessage }}</p>
-    
-    <!-- Bio -->
-    <UiCard class="mb-6 !p-4 rounded-[12px]">
-      <p class="text-[15px] leading-relaxed text-[rgba(244,241,235,0.7)] italic">
-        {{ userStore.user?.bio || 'Learning enthusiast | Building the future 🚀' }}
-      </p>
-    </UiCard>
-    
-    <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
-        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.postCount }}</div>
-        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Posts</div>
-      </div>
-      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
-        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.shareCount }}</div>
-        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Shares</div>
-      </div>
-      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
-        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.likeGivenCount }}</div>
-        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Likes Given</div>
-      </div>
-      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
-        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.commentCount }}</div>
-        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Comments</div>
-      </div>
-      <div class="text-center rounded-[12px] bg-[var(--surface)] border border-[var(--line)] p-3">
-        <div class="text-[20px] leading-6 font-bold text-[var(--t1)]">{{ myStats.friendCount }}</div>
-        <div class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Friends</div>
-      </div>
-    </div>
-    
-    <!-- Tabs -->
-    <div class="flex gap-4 border-b border-[var(--line)] mb-6">
-      <button 
-        v-for="tab in tabs" 
-        :key="tab"
-        @click="activeTab = tab"
-        class="pb-2 text-[14px] font-semibold transition-colors"
-        :class="activeTab === tab ? 'text-[var(--t1)] border-b-2 border-[var(--gold)]' : 'text-[rgba(244,241,235,0.45)] hover:text-[var(--t2)] border-b-2 border-transparent'"
-      >
-        {{ tab }}
-      </button>
-    </div>
-    
-    <!-- Posts -->
-    <div v-if="activeTab === 'Posts'" class="space-y-4">
-      <UiCard v-if="profileLoading" class="p-4">
-        <UiSkeleton variant="text" class="w-40 mb-2" />
-        <UiSkeleton variant="rectangular" class="h-40" />
-      </UiCard>
-
-      <UiCard v-else-if="myPosts.length === 0" class="p-4">
-        <p class="text-sm text-[var(--t2)]">No posts yet.</p>
-      </UiCard>
-
-      <FeedPostCard
-        v-for="post in myPosts"
-        :key="post.id"
-        :post="post"
-      />
-    </div>
-
-    <!-- Activity -->
-    <div v-if="activeTab === 'Activity'" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <UiCard class="p-4 text-center">
-        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myActivitySummary.likes }}</p>
-        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Liked Posts</p>
-      </UiCard>
-      <UiCard class="p-4 text-center">
-        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myActivitySummary.comments }}</p>
-        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Comments Made</p>
-      </UiCard>
-      <UiCard class="p-4 text-center">
-        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myActivitySummary.shares }}</p>
-        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Shares</p>
-      </UiCard>
-      <UiCard class="p-4 text-center">
-        <p class="text-[20px] font-bold text-[var(--t1)]">{{ myPosts.length }}</p>
-        <p class="text-[11px] uppercase tracking-[0.1em] text-[rgba(244,241,235,0.4)]">Own Posts</p>
-      </UiCard>
-    </div>
-
-    <!-- Friends -->
-    <div v-if="activeTab === 'Friends'" class="space-y-4">
-      <UiCard class="p-4">
-        <div class="mb-4 flex items-center justify-between gap-2">
-          <h3 class="font-semibold text-[var(--t1)]">Friends</h3>
-          <UiButton
-            v-if="myFriends.length > 8"
-            variant="ghost"
-            size="sm"
-            @click="showAllFriends = !showAllFriends"
-          >
-            {{ showAllFriends ? 'Show less' : 'See all friends' }}
-          </UiButton>
-        </div>
-
-        <p v-if="friendsError" class="text-sm text-[rgba(239,68,68,0.9)]">{{ friendsError }}</p>
-
-        <div v-else-if="friendsLoading" class="space-y-3">
-          <div
-            v-for="index in 4"
-            :key="`friend-skeleton-${index}`"
-            class="rounded-xl border border-surface-glass-border p-3"
-          >
-            <UiSkeleton variant="text" class="w-40 mb-2" />
-            <UiSkeleton variant="text" class="w-24" />
+    <!-- Loading State -->
+    <div v-if="profileLoading" class="space-y-8">
+      <div class="rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-8 shadow-[var(--shadow-md)]">
+        <div class="flex flex-col md:flex-row gap-8">
+          <div class="h-32 w-32 md:h-40 md:w-40 rounded-[2.2rem] skeleton shrink-0 mx-auto md:mx-0"></div>
+          <div class="flex-1 space-y-4 py-2">
+            <div class="w-1/3 h-10 rounded-lg skeleton"></div>
+            <div class="w-1/4 h-4 rounded-md skeleton"></div>
+            <div class="w-full h-24 rounded-2xl skeleton mt-6"></div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <p v-else-if="myFriends.length === 0" class="text-sm text-[var(--t2)]">No friends yet.</p>
+    <!-- Main Content -->
+    <template v-else>
+      <div class="space-y-8">
+        <!-- Error/Success Messages -->
+        <transition name="fade">
+          <div v-if="errorMessage || successMessage" class="mb-4">
+            <div v-if="errorMessage" class="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-red-500 text-xs font-bold">
+              <span class="material-symbols-rounded text-sm">error</span>
+              {{ errorMessage }}
+            </div>
+            <div v-if="successMessage" class="flex items-center gap-2 rounded-xl bg-[var(--accent-subtle)] border border-[var(--accent-border)] p-3 text-[var(--accent)] text-xs font-bold">
+              <span class="material-symbols-rounded text-sm">check_circle</span>
+              {{ successMessage }}
+            </div>
+          </div>
+        </transition>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <NuxtLink
-            v-for="friend in visibleFriends"
-            :key="`friend-${friend.id}`"
-            :to="`/profile/${friend.id}`"
-            class="rounded-xl border border-[var(--line)] bg-[var(--surface2)] p-3 hover:border-[var(--line2)] hover:bg-[var(--surface3)] transition-colors"
-          >
-            <div class="flex items-start gap-3">
-              <UiAvatar
-                :src="friend.profilePicUrl || friend.avatar"
-                :name="friend.name || friend.displayName"
-                size="md"
-              />
+        <!-- Profile Hero Section -->
+        <div class="relative overflow-hidden rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface)] p-8 md:p-10 shadow-[var(--shadow-lg)]">
+          <!-- Subtle Background Decoration -->
+          <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[var(--accent)] opacity-[0.03] blur-[100px]"></div>
+          <div class="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-[var(--accent)] opacity-[0.02] blur-[100px]"></div>
 
-              <div class="min-w-0">
-                <p class="text-sm font-medium text-[var(--t1)] truncate">{{ friend.name || friend.displayName }}</p>
-                <p class="text-xs text-[var(--t2)] truncate">{{ friend.email || `@${friend.username}` }}</p>
-                <p class="mt-1 text-[11px] mono-label text-[var(--t3)] truncate">
-                  {{ friend.role || 'member' }} · {{ friend.department || 'Department' }}
-                </p>
-                <p class="text-[11px] mono-label text-[var(--t3)] truncate">{{ friend.institution || 'Institution' }}</p>
-                <p v-if="friend.friendsSince" class="mt-1 text-[11px] mono-label text-[var(--t3)]">
-                  Friends since {{ new Date(friend.friendsSince).toLocaleDateString() }}
+          <div class="relative flex flex-col md:flex-row gap-10 lg:gap-14">
+            <!-- Left: Profile Picture -->
+            <div class="flex flex-col items-center shrink-0">
+              <div class="relative group">
+                <div class="absolute -inset-1.5 rounded-[2.8rem] bg-gradient-to-tr from-[var(--accent)] to-transparent blur-md opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                <UiAvatar
+                  :src="userStore.user?.avatar"
+                  :name="userStore.user?.name"
+                  class="h-32 w-32 md:h-44 md:w-44 rounded-[2.5rem] border-4 border-[var(--surface2)] shadow-[var(--shadow-md)]"
+                />
+                <button 
+                  @click="openProfilePicPicker"
+                  class="absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[var(--shadow-md)] border-4 border-[var(--surface)] hover:scale-110 transition-transform"
+                >
+                  <span class="material-symbols-rounded text-sm">edit</span>
+                </button>
+              </div>
+              
+              <div class="mt-8 flex flex-col items-center md:items-start w-full gap-2">
+                <div class="flex gap-3 w-full">
+                  <div class="flex-1 rounded-2xl bg-[var(--surface2)] border border-[var(--line)] p-4 text-center">
+                    <p class="text-[10px] font-bold text-[var(--t3)] uppercase tracking-widest mb-1">Posts</p>
+                    <p class="text-2xl font-black text-[var(--t1)]">{{ myStats.postCount }}</p>
+                  </div>
+                  <div class="flex-1 rounded-2xl bg-[var(--surface2)] border border-[var(--line)] p-4 text-center">
+                    <p class="text-[10px] font-bold text-[var(--t3)] uppercase tracking-widest mb-1">Bros</p>
+                    <p class="text-2xl font-black text-[var(--t1)]">{{ myStats.friendCount }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Details & Bio -->
+            <div class="flex-1 min-w-0 flex flex-col pt-2">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h1 class="text-3xl md:text-5xl font-black tracking-tight text-[var(--t1)] mb-2">
+                    {{ userStore.user?.name }}
+                  </h1>
+                  <div class="flex items-center gap-3">
+                    <span class="text-base font-bold text-[var(--accent)]">@{{ userStore.user?.username }}</span>
+                    <span class="badge badge-accent">
+                      {{ userStore.user?.role || 'Scholar' }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center">
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <div class="relative">
+                      <input
+                        type="checkbox"
+                        class="sr-only peer"
+                        :checked="isProfilePublic"
+                        :disabled="visibilityLoading || visibilitySaving"
+                        @change="handleVisibilityToggle"
+                      >
+                      <div class="w-12 h-6 bg-[var(--surface3)] rounded-full peer peer-checked:bg-[var(--accent-dim)] transition-all"></div>
+                      <div class="absolute left-1 top-1 w-4 h-4 bg-[var(--t3)] peer-checked:bg-[var(--accent)] rounded-full transition-all peer-checked:translate-x-6"></div>
+                    </div>
+                    <span class="text-xs font-bold text-[var(--t2)] group-hover:text-[var(--t1)] transition-colors">
+                      {{ isProfilePublic ? 'Public' : 'Private' }}
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Professional Meta Details -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                <div class="flex items-center gap-4 group">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--surface2)] border border-[var(--line)] text-[var(--accent)] group-hover:border-[var(--accent-border)] group-hover:bg-[var(--accent-subtle)] transition-all">
+                    <span class="material-symbols-rounded text-xl">apartment</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-[10px] font-bold text-[var(--t4)] uppercase tracking-[0.15em]">Institution</p>
+                    <p class="text-base font-bold text-[var(--t1)] truncate">{{ myProfile?.institution || userStore.user?.institution || 'EduConnect' }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 group">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--surface2)] border border-[var(--line)] text-[var(--accent)] group-hover:border-[var(--accent-border)] group-hover:bg-[var(--accent-subtle)] transition-all">
+                    <span class="material-symbols-rounded text-xl">school</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-[10px] font-bold text-[var(--t4)] uppercase tracking-[0.15em]">Department</p>
+                    <p class="text-base font-bold text-[var(--t1)] truncate">{{ myProfile?.department || userStore.user?.department || 'General Science' }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bio Section -->
+              <div class="mt-auto pt-8 border-t border-[var(--line)]">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-[11px] font-bold text-[var(--t4)] uppercase tracking-[0.25em]">Professional Bio</h3>
+                </div>
+                <p class="text-[15px] leading-relaxed text-[var(--t2)] font-medium italic">
+                  "{{ userStore.user?.bio || (userStore.user?.role === 'teacher' ? 'Experienced mentor specializing in academic excellence.' : 'Dedicated scholar passionate about collaborative learning.') }}"
                 </p>
               </div>
             </div>
-          </NuxtLink>
+          </div>
         </div>
-      </UiCard>
-    </div>
 
-    <!-- About -->
-    <div v-if="activeTab === 'About'" class="space-y-4">
-      <UiCard class="p-4">
-        <h3 class="font-semibold text-[var(--t1)] mb-3">Account</h3>
-        <div class="space-y-2 text-sm text-[var(--t2)]">
-          <p><span class="text-[var(--t3)]">Email:</span> {{ myProfile?.email || userStore.user?.email }}</p>
-          <p><span class="text-[var(--t3)]">Role:</span> {{ myProfile?.role || userStore.user?.role || 'student' }}</p>
-          <p><span class="text-[var(--t3)]">Department:</span> {{ myProfile?.department || userStore.user?.department || 'N/A' }}</p>
-          <p><span class="text-[var(--t3)]">Institution:</span> {{ myProfile?.institution || userStore.user?.institution || 'N/A' }}</p>
+        <!-- Tabs Navigation -->
+        <div class="mt-12 flex items-center justify-between border-b border-[var(--line)] px-4">
+          <div class="flex gap-10">
+            <button
+              v-for="tab in tabs"
+              :key="tab"
+              class="relative pb-5 text-sm font-bold transition-all"
+              :class="activeTab === tab ? 'text-[var(--accent)]' : 'text-[var(--t3)] hover:text-[var(--t1)]'"
+              @click="activeTab = tab"
+            >
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-rounded text-[20px]">{{ 
+                  tab === 'Posts' ? 'grid_view' : 
+                  tab === 'Activity' ? 'analytics' :
+                  tab === 'Friends' ? 'group' : 'info' 
+                }}</span>
+                {{ tab }}
+              </div>
+              <transition name="scale-in">
+                <div v-if="activeTab === tab" class="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-[var(--accent)] shadow-[0_-4px_12px_var(--accent-ring)]"></div>
+              </transition>
+            </button>
+          </div>
         </div>
-      </UiCard>
 
-      <UiCard class="p-4">
-        <h3 class="font-semibold text-[var(--t1)] mb-3">Skills</h3>
-        <div class="flex flex-wrap gap-2">
-          <UiBadge v-for="skill in skills" :key="skill" variant="accent">{{ skill }}</UiBadge>
+        <!-- Tab Content -->
+        <div class="py-8">
+          <transition name="fade-slide" mode="out-in">
+            <!-- Posts Tab -->
+            <div v-if="activeTab === 'Posts'" :key="'posts'" class="grid grid-cols-1 gap-8">
+              <FeedPostCard
+                v-for="post in myPosts"
+                :key="post.id"
+                :post="post"
+              />
+
+              <div v-if="myPosts.length === 0" class="flex flex-col items-center justify-center py-24 rounded-[2rem] border-2 border-dashed border-[var(--line)] bg-[var(--surface2)]">
+                <div class="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--surface)] text-[var(--t4)] mb-6 shadow-[var(--shadow-sm)]">
+                  <span class="material-symbols-rounded text-4xl">post_add</span>
+                </div>
+                <h3 class="text-base font-bold text-[var(--t2)]">You haven't posted anything yet</h3>
+                <p class="text-sm text-[var(--t3)] mt-2">Share your first update with your bros!</p>
+                <UiButton variant="primary" class="mt-6" @click="navigateTo('/home')">Create Post</UiButton>
+              </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div v-else-if="activeTab === 'Activity'" :key="'activity'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div v-for="(val, key) in myActivitySummary" :key="key" class="rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-8 shadow-[var(--shadow-sm)] hover:border-[var(--accent-border)] transition-all group">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--surface2)] text-[var(--t3)] mb-6 group-hover:bg-[var(--accent-subtle)] group-hover:text-[var(--accent)] transition-all">
+                  <span class="material-symbols-rounded text-2xl">{{ 
+                    key === 'likes' ? 'favorite' : 
+                    key === 'comments' ? 'chat_bubble' : 'share' 
+                  }}</span>
+                </div>
+                <p class="text-3xl font-black text-[var(--t1)] mb-1">{{ val }}</p>
+                <p class="text-[10px] font-bold text-[var(--t4)] uppercase tracking-[0.2em]">{{ key }}</p>
+              </div>
+            </div>
+
+            <!-- Friends Tab -->
+            <div v-else-if="activeTab === 'Friends'" :key="'friends'" class="space-y-6">
+              <div v-if="friendsLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div v-for="i in 4" :key="i" class="h-24 rounded-3xl skeleton"></div>
+              </div>
+              
+              <div v-else-if="myFriends.length === 0" class="flex flex-col items-center justify-center py-24 rounded-[2rem] border-2 border-dashed border-[var(--line)] bg-[var(--surface2)]">
+                <div class="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--surface)] text-[var(--t4)] mb-6 shadow-[var(--shadow-sm)]">
+                  <span class="material-symbols-rounded text-4xl">group_add</span>
+                </div>
+                <h3 class="text-base font-bold text-[var(--t2)]">No bros yet</h3>
+                <p class="text-sm text-[var(--t3)] mt-2">Start connecting with other scholars and mentors.</p>
+              </div>
+
+              <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <NuxtLink
+                  v-for="friend in visibleFriends"
+                  :key="`friend-${friend.id}`"
+                  :to="`/profile/${friend.id}`"
+                  class="group rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 hover:border-[var(--accent-border)] hover:bg-[var(--surface2)] transition-all shadow-[var(--shadow-sm)]"
+                >
+                  <div class="flex items-center gap-4">
+                    <UiAvatar
+                      :src="friend.profilePicUrl || friend.avatar"
+                      :name="friend.name || friend.displayName"
+                      size="lg"
+                      class="rounded-2xl border-2 border-transparent group-hover:border-[var(--accent-border)] transition-all"
+                    />
+                    <div class="min-w-0">
+                      <p class="text-base font-bold text-[var(--t1)] truncate">{{ friend.name || friend.displayName }}</p>
+                      <p class="text-xs text-[var(--t3)] truncate">{{ friend.role || 'Member' }} · {{ friend.institution || 'EduConnect' }}</p>
+                      <div class="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider">
+                        <span class="material-symbols-rounded text-xs">verified</span>
+                        Bros
+                      </div>
+                    </div>
+                  </div>
+                </NuxtLink>
+              </div>
+              
+              <div v-if="myFriends.length > 8" class="flex justify-center mt-8">
+                <UiButton variant="secondary" @click="showAllFriends = !showAllFriends">
+                  {{ showAllFriends ? 'Show Less' : `View All ${myFriends.length} Bros` }}
+                </UiButton>
+              </div>
+            </div>
+
+            <!-- About Tab -->
+            <div v-else-if="activeTab === 'About'" :key="'about'" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-8 shadow-[var(--shadow-sm)]">
+                <h3 class="text-[11px] font-bold text-[var(--t4)] uppercase tracking-[0.2em] mb-6">Account Information</h3>
+                <div class="space-y-6">
+                  <div v-for="(label, key) in { 
+                    'Email Address': myProfile?.email || userStore.user?.email, 
+                    'Professional Role': userStore.user?.role || 'Member', 
+                    'Member Since': formatDate(userStore.user?.createdAt) 
+                  }" :key="key">
+                    <p class="text-[10px] font-bold text-[var(--t4)] uppercase tracking-wider mb-2">{{ key }}</p>
+                    <p class="text-[15px] font-bold text-[var(--t1)]">{{ label }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-8 shadow-[var(--shadow-sm)]">
+                <h3 class="text-[11px] font-bold text-[var(--t4)] uppercase tracking-[0.2em] mb-6">Specializations</h3>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="skill in skills" 
+                    :key="skill"
+                    class="badge badge-accent px-4 py-2 text-xs"
+                  >
+                    {{ skill }}
+                  </span>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-[var(--line)]">
+                  <p class="text-[10px] font-bold text-[var(--t4)] uppercase tracking-wider mb-3">Profile Visibility</p>
+                  <p class="text-sm text-[var(--t3)] leading-relaxed">
+                    Your profile is currently <strong>{{ isProfilePublic ? 'visible' : 'hidden' }}</strong> to the EduConnect community. 
+                    You can change this in your account settings.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </transition>
         </div>
-      </UiCard>
-    </div>
-    <div>hellow world </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -286,6 +378,11 @@ const visibleFriends = computed(() =>
 )
 
 const isProfilePublic = ref(true)
+
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return 'N/A'
+  return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(dateStr))
+}
 
 const loadProfileData = async () => {
   profileLoading.value = true
@@ -446,4 +543,57 @@ onMounted(async () => {
 
 const skills = ['JavaScript', 'Python', 'Vue.js', 'Machine Learning', 'Data Structures', 'React', 'Node.js']
 </script>
-<style scoped></style>
+
+<style scoped>
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.fade-slide-enter-active, .fade-slide-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.fade-slide-enter-from { opacity: 0; transform: translateY(15px); }
+.fade-slide-leave-to { opacity: 0; transform: translateY(-15px); }
+
+.scale-in-enter-active { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.scale-in-enter-from { transform: scaleX(0); }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeInUp { animation: fadeInUp 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+.animate-fadeInDown { animation: fadeInDown 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface2) 25%,
+    var(--surface3) 37%,
+    var(--surface2) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.8s ease infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+</style>

@@ -63,62 +63,108 @@
               </button>
             </div>
 
-            <div class="max-h-[24rem] overflow-y-auto p-2 no-scrollbar">
-              <div v-if="loading && !notifications.length" class="space-y-2 p-2">
-                <div v-for="index in 4" :key="index" class="flex animate-pulse items-start gap-3 rounded-2xl p-3">
-                  <div class="h-11 w-11 rounded-2xl bg-slate-200 dark:bg-white/10"></div>
-                  <div class="min-w-0 flex-1 space-y-2 pt-1">
-                    <div class="h-3 w-3/4 rounded-full bg-slate-200 dark:bg-white/10"></div>
-                    <div class="h-2.5 w-full rounded-full bg-slate-200 dark:bg-white/10"></div>
-                    <div class="h-2.5 w-1/2 rounded-full bg-slate-200 dark:bg-white/10"></div>
+            <div class="max-h-[24rem] overflow-y-auto no-scrollbar">
+              <!-- Pending Friend Requests -->
+              <div v-if="pendingFriendRequests.length" class="border-b border-slate-200/70 bg-slate-50/30 p-4 dark:border-white/5 dark:bg-white/[0.01]">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Add Bro Requests</h4>
+                  <span class="flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-[10px] font-bold text-white">{{ pendingFriendRequests.length }}</span>
+                </div>
+                <div class="space-y-3">
+                  <div v-for="request in pendingFriendRequests" :key="request.id" class="flex items-center gap-3">
+                    <NuxtLink :to="`/profile/${request.fromUser.id}`" @click="closeNotificationsPanel">
+                      <div class="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-white/5 dark:bg-white/10 hover:border-brand-primary/50 transition-colors">
+                        <img v-if="request.fromUser.avatar" :src="request.fromUser.avatar" class="h-full w-full object-cover" />
+                        <span v-else class="material-symbols-rounded flex h-full items-center justify-center text-slate-400">person</span>
+                      </div>
+                    </NuxtLink>
+                    <div class="min-w-0 flex-1">
+                      <NuxtLink :to="`/profile/${request.fromUser.id}`" @click="closeNotificationsPanel" class="hover:text-brand-primary transition-colors">
+                        <p class="truncate text-xs font-bold text-slate-900 dark:text-white">{{ request.fromUser.displayName }}</p>
+                      </NuxtLink>
+                      <p class="text-[10px] text-slate-500">Sent you a bro request</p>
+                    </div>
+                    <div class="flex gap-2">
+                      <button 
+                        @click="notificationsStore.acceptFriendRequest(request.id)"
+                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-white transition-all hover:bg-brand-primary/90 shadow-sm"
+                        title="Accept"
+                      >
+                        <span class="material-symbols-rounded text-sm">check</span>
+                      </button>
+                      <button 
+                        @click="notificationsStore.rejectFriendRequest(request.id)"
+                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-200 text-slate-600 transition-all hover:bg-slate-300 dark:bg-white/10 dark:text-slate-400 dark:hover:bg-white/20 shadow-sm"
+                        title="Reject"
+                      >
+                        <span class="material-symbols-rounded text-sm">close</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div v-else-if="notifications.length" class="space-y-2">
-                <button
-                  v-for="notification in visibleNotifications"
-                  :key="notification.id"
-                  type="button"
-                  :class="[
-                    'relative flex items-start gap-4 w-full rounded-2xl p-3 text-left transition-all cursor-pointer group hover:bg-slate-50 dark:hover:bg-white/5',
-                    { 'bg-slate-50/50 dark:bg-white/[0.02]': !notification.read }
-                  ]"
-                  @click="handleNotificationClick(notification)"
-                >
-                  <div class="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-white/5 dark:bg-white/10">
-                    <img
-                      v-if="notification.user?.avatar"
-                      :src="notification.user.avatar"
-                      :alt="notification.user.displayName"
-                      class="h-full w-full object-cover"
-                    />
-                    <span v-else class="material-symbols-rounded text-[18px] text-slate-600 dark:text-slate-300">
-                      {{ getNotificationIcon(notification.type) }}
-                    </span>
-                    <span
-                      v-if="!notification.read"
-                      class="absolute right-1 top-1 h-2 w-2 rounded-full bg-brand-primary shadow-[0_0_0_3px_rgba(255,255,255,0.75)] dark:shadow-[0_0_0_3px_rgba(9,9,11,0.9)]"
-                    />
+              <!-- Main Notifications List -->
+              <div class="p-2">
+                <!-- Skeleton Loading -->
+                <div v-if="loading && !notifications.length" class="space-y-2 p-2">
+                  <div v-for="index in 4" :key="index" class="flex animate-pulse items-start gap-3 rounded-2xl p-3">
+                    <div class="h-11 w-11 rounded-2xl bg-slate-200 dark:bg-white/10"></div>
+                    <div class="min-w-0 flex-1 space-y-2 pt-1">
+                      <div class="h-3 w-3/4 rounded-full bg-slate-200 dark:bg-white/10"></div>
+                      <div class="h-2.5 w-full rounded-full bg-slate-200 dark:bg-white/10"></div>
+                      <div class="h-2.5 w-1/2 rounded-full bg-slate-200 dark:bg-white/10"></div>
+                    </div>
                   </div>
+                </div>
 
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-start justify-between gap-3">
-                      <div class="min-w-0">
-                        <p class="truncate text-xs font-bold text-slate-900 dark:text-white">{{ notification.message }}</p>
-                        <p v-if="notification.content" class="mt-1 line-clamp-2 text-[10px] font-medium text-slate-500">{{ notification.content }}</p>
-                      </div>
-                      <span class="shrink-0 text-[10px] font-medium text-slate-400">{{ formatNotificationTime(notification.timestamp) }}</span>
+                <!-- Actual Notifications -->
+                <div v-else-if="notifications.length" class="space-y-2">
+                  <button
+                    v-for="notification in visibleNotifications"
+                    :key="notification.id"
+                    type="button"
+                    :class="[
+                      'relative flex items-start gap-4 w-full rounded-2xl p-3 text-left transition-all cursor-pointer group hover:bg-slate-50 dark:hover:bg-white/5',
+                      { 'bg-slate-50/50 dark:bg-white/[0.02]': !notification.read }
+                    ]"
+                    @click="handleNotificationClick(notification)"
+                  >
+                    <div class="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-white/5 dark:bg-white/10">
+                      <img
+                        v-if="notification.user?.avatar"
+                        :src="notification.user.avatar"
+                        :alt="notification.user.displayName"
+                        class="h-full w-full object-cover"
+                      />
+                      <span v-else class="material-symbols-rounded text-[18px] text-slate-600 dark:text-slate-300">
+                        {{ getNotificationIcon(notification.type) }}
+                      </span>
+                      <span
+                        v-if="!notification.read"
+                        class="absolute right-1 top-1 h-2 w-2 rounded-full bg-brand-primary shadow-[0_0_0_3px_rgba(255,255,255,0.75)] dark:shadow-[0_0_0_3px_rgba(9,9,11,0.9)]"
+                      />
                     </div>
 
-                    <p v-if="notification.user?.displayName" class="mt-2 truncate text-[10px] font-medium text-slate-500">{{ notification.user.displayName }}</p>
-                  </div>
-                </button>
-              </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="truncate text-xs font-bold text-slate-900 dark:text-white">{{ notification.message }}</p>
+                          <p v-if="notification.content" class="mt-1 line-clamp-2 text-[10px] font-medium text-slate-500">{{ notification.content }}</p>
+                        </div>
+                        <span class="shrink-0 text-[10px] font-medium text-slate-400">{{ formatNotificationTime(notification.timestamp) }}</span>
+                      </div>
 
-              <div v-else class="m-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-5 text-center dark:border-white/10 dark:bg-white/5">
-                <p class="text-sm font-semibold text-slate-900 dark:text-white">No notifications yet</p>
-                <p class="mt-1 text-xs text-slate-500">New activity will appear here when someone interacts with your posts.</p>
+                      <p v-if="notification.user?.displayName" class="mt-2 truncate text-[10px] font-medium text-slate-500">{{ notification.user.displayName }}</p>
+                    </div>
+                  </button>
+                </div>
+
+                <!-- Empty State -->
+                <div v-else class="m-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-5 text-center dark:border-white/10 dark:bg-white/5">
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white">No notifications yet</p>
+                  <p class="mt-1 text-xs text-slate-500">New activity will appear here when someone interacts with your posts.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -150,7 +196,7 @@ import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()
-const { notifications, loading, unreadCount } = storeToRefs(notificationsStore)
+const { notifications, loading, unreadCount, pendingFriendRequests } = storeToRefs(notificationsStore)
 const { resolvedTheme, toggleTheme } = useTheme()
 
 const searchQuery = ref('')
