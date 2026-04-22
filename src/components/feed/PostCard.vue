@@ -1,21 +1,17 @@
 <template>
   <article 
     class="post-card overflow-hidden transition-all duration-300"
-    :class="[post.content && (post.mediaUrl || post.image) ? 'flex flex-row min-h-[320px]' : 'flex flex-col']"
+    :class="[isSplitLayout ? 'flex min-h-[320px] flex-row' : 'flex flex-col']"
   >
-    <!-- Media Section -->
-    <div 
-      v-if="post.mediaUrl || post.image" 
-      class="relative bg-black overflow-hidden group/media flex-shrink-0"
-      :class="[
-        post.content ? 'w-[60%] border-r border-[var(--line)]' : 'w-full aspect-video'
-      ]"
+    <div
+      v-if="isSplitLayout"
+      class="relative w-[60%] flex-shrink-0 overflow-hidden border-r border-[var(--line)] bg-black group/media"
     >
       <video
         v-if="resolvedMediaType === 'video'"
         ref="videoRef"
         :src="post.mediaUrl || post.image"
-        class="w-full h-full object-cover"
+        class="h-full w-full object-cover"
         autoplay
         muted
         loop
@@ -25,58 +21,35 @@
       <img
         v-else
         :src="post.mediaUrl || post.image"
-        class="w-full h-full object-cover transition-transform duration-700 group-hover/media:scale-105"
+        class="h-full w-full object-cover transition-transform duration-700 group-hover/media:scale-105"
         loading="lazy"
       />
 
-      <!-- Custom Video UI -->
       <template v-if="resolvedMediaType === 'video'">
-        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/media:opacity-100 transition-opacity pointer-events-none flex items-center justify-center">
-          <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
-            <span class="material-symbols-rounded text-white text-3xl">{{ isPlaying ? 'pause' : 'play_arrow' }}</span>
+        <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover/media:opacity-100">
+          <div class="flex h-14 w-14 items-center justify-center rounded-full border border-white/30 bg-white/20 backdrop-blur-md">
+            <span class="material-symbols-rounded text-3xl text-white">{{ isPlaying ? 'pause' : 'play_arrow' }}</span>
           </div>
         </div>
-        
+
         <div class="absolute bottom-3 right-3 z-10 flex gap-2">
           <button 
             @click.stop="toggleMute"
-            class="w-8 h-8 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-black/60 transition-all"
+            class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black/40 text-white transition-all hover:bg-black/60"
           >
             <span class="material-symbols-rounded text-lg">{{ isMuted ? 'volume_off' : 'volume_up' }}</span>
           </button>
         </div>
       </template>
-
-      <!-- Overlay Header for 100% Media (No Caption) -->
-      <div v-if="!post.content" class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
-        <div class="flex items-center gap-3 pointer-events-auto">
-          <NuxtLink :to="`/profile/${post.user.username}`">
-            <UiAvatar 
-              :src="post.user.profilePicUrl || post.user.avatar" 
-              :name="post.user.displayName"
-              size="sm"
-              class="rounded-lg ring-2 ring-white/20"
-            />
-          </NuxtLink>
-          <div class="flex flex-col">
-            <NuxtLink :to="`/profile/${post.user.username}`" class="text-sm font-bold text-white leading-none">
-              {{ post.user.displayName }}
-            </NuxtLink>
-            <span class="text-[10px] text-white/70 font-medium mt-1 uppercase tracking-wider">{{ post.user.role || 'Scholar' }}</span>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- Content Side (Right side if horizontal, Bottom if vertical) -->
     <div 
       class="flex flex-col p-4 bg-[var(--surface)]"
       :class="[
-        post.content && (post.mediaUrl || post.image) ? 'w-[40%] min-w-[280px]' : 'w-full',
+        isSplitLayout ? 'w-[40%] min-w-[280px]' : 'w-full',
         !post.content ? 'py-3' : ''
       ]"
     >
-      <!-- Header (Shown if horizontal or if vertical and has content) -->
       <div v-if="post.content" class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
           <NuxtLink :to="`/profile/${post.user.username}`">
@@ -107,20 +80,26 @@
         </button>
       </div>
 
-      <!-- Caption Section (Dynamic sizing) -->
       <div v-if="post.content" class="flex-1 flex flex-col justify-center py-2 overflow-hidden">
         <div 
-          class="whitespace-pre-wrap break-words transition-all duration-500"
+          class="post-content break-words transition-all duration-300"
           :class="[
             captionSizeClasses,
-            hasHighlights ? 'text-[var(--t1)]' : 'text-[var(--t2)] font-medium leading-relaxed'
+            hasHighlights ? 'text-[var(--t1)]' : 'text-[var(--t2)] font-medium',
+            !isCaptionExpanded && shouldShowCaptionToggle ? 'caption-clamp' : ''
           ]"
+          v-html="highlightedCaption"
+        />
+        <button
+          v-if="shouldShowCaptionToggle"
+          type="button"
+          class="mt-2 w-fit text-[12px] font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors"
+          @click="isCaptionExpanded = !isCaptionExpanded"
         >
-          <span v-html="highlightedCaption"></span>
-        </div>
+          {{ isCaptionExpanded ? 'See less' : 'See more' }}
+        </button>
       </div>
 
-      <!-- Actions (Bottom Right aligned) -->
       <div 
         class="flex items-center gap-4 mt-auto border-t border-[var(--line)] pt-3"
         :class="[post.content ? 'justify-end' : 'justify-between']"
@@ -147,6 +126,67 @@
         <button class="text-[var(--t3)] hover:text-brand-primary transition-colors">
           <span class="material-symbols-rounded text-lg">share</span>
         </button>
+      </div>
+    </div>
+
+    <!-- Media Section -->
+    <div 
+      v-if="hasMedia && !isSplitLayout" 
+      class="relative bg-black overflow-hidden group/media flex-shrink-0"
+      :class="[post.content ? 'w-full border-t border-[var(--line)] aspect-[16/10] md:aspect-video' : 'w-full aspect-video']"
+    >
+      <video
+        v-if="resolvedMediaType === 'video'"
+        ref="videoRef"
+        :src="post.mediaUrl || post.image"
+        class="w-full h-full object-cover"
+        autoplay
+        muted
+        loop
+        playsinline
+        @click="togglePlay"
+      />
+      <img
+        v-else
+        :src="post.mediaUrl || post.image"
+        class="w-full h-full object-cover transition-transform duration-700 group-hover/media:scale-105"
+        loading="lazy"
+      />
+
+      <template v-if="resolvedMediaType === 'video'">
+        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/media:opacity-100 transition-opacity pointer-events-none flex items-center justify-center">
+          <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
+            <span class="material-symbols-rounded text-white text-3xl">{{ isPlaying ? 'pause' : 'play_arrow' }}</span>
+          </div>
+        </div>
+        
+        <div class="absolute bottom-3 right-3 z-10 flex gap-2">
+          <button 
+            @click.stop="toggleMute"
+            class="w-8 h-8 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-black/60 transition-all"
+          >
+            <span class="material-symbols-rounded text-lg">{{ isMuted ? 'volume_off' : 'volume_up' }}</span>
+          </button>
+        </div>
+      </template>
+
+      <div v-if="!post.content" class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+        <div class="flex items-center gap-3 pointer-events-auto">
+          <NuxtLink :to="`/profile/${post.user.username}`">
+            <UiAvatar 
+              :src="post.user.profilePicUrl || post.user.avatar" 
+              :name="post.user.displayName"
+              size="sm"
+              class="rounded-lg ring-2 ring-white/20"
+            />
+          </NuxtLink>
+          <div class="flex flex-col">
+            <NuxtLink :to="`/profile/${post.user.username}`" class="text-sm font-bold text-white leading-none">
+              {{ post.user.displayName }}
+            </NuxtLink>
+            <span class="text-[10px] text-white/70 font-medium mt-1 uppercase tracking-wider">{{ post.user.role || 'Scholar' }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </article>
@@ -188,10 +228,20 @@
 .post-content :deep(.mention-tag:hover) {
   text-decoration: underline;
 }
+
+.post-content {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.caption-clamp {
+  overflow: hidden;
+  max-height: calc(1.6em * 3);
+}
 </style>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface User {
   id: string
@@ -234,6 +284,7 @@ const props = withDefaults(defineProps<Props>(), {
 const videoRef = ref<HTMLVideoElement | null>(null)
 const isPlaying = ref(true)
 const isMuted = ref(true)
+const isCaptionExpanded = ref(false)
 
 const togglePlay = () => {
   if (!videoRef.value) return
@@ -254,6 +305,19 @@ const toggleMute = () => {
 
 const isGuest = computed(() => props.isGuest)
 const isOwnPost = computed(() => !!props.currentUserId && String(props.post.user.id) === String(props.currentUserId))
+const hasMedia = computed(() => !!(props.post.mediaUrl || props.post.image))
+const hasContent = computed(() => !!props.post.content)
+const isSplitLayout = computed(() => hasMedia.value && hasContent.value && !isCaptionExpanded.value)
+const shouldShowCaptionToggle = computed(() => {
+  const content = props.post.content || ''
+  const normalizedLines = content
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+
+  if (normalizedLines.length > 3) return true
+  return content.length > 180
+})
 
 const formatTimestamp = (value: string): string => {
   const date = new Date(value)
@@ -325,6 +389,10 @@ const resolvedMediaType = computed<'image' | 'video'>(() => {
   }
   return inferMediaTypeFromUrl(props.post.mediaUrl || props.post.image)
 })
+
+watch(() => props.post.content, () => {
+  isCaptionExpanded.value = false
+}, { immediate: true })
 
 defineEmits<{
   like: [postId: string]

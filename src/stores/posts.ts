@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { addComment, createPost, deletePost, getFeedPosts, likePost, unlikePost, uploadPostMedia } from '~/services/api/social'
-import type { Post } from '~/types/post'
+import type { Comment, Post } from '~/types/post'
 
 interface PostsState {
   posts: Post[]
@@ -142,13 +142,18 @@ export const usePostsStore = defineStore('posts', {
       }
 
       const previousCount = post.comments
+      const previousComments = [...(post.commentItems || [])]
       post.comments += 1
 
       const result = await addComment(postId, { commentText: trimmedComment })
 
       if (!result.success) {
         post.comments = previousCount
+        post.commentItems = previousComments
         this.error = result.error || 'Failed to add comment'
+      } else if (result.data) {
+        const newComment = result.data as Comment
+        post.commentItems = [...(post.commentItems || []), newComment]
       }
 
       return result

@@ -5,7 +5,7 @@
 
     <div class="flex flex-1 relative">
       <!-- Left Sidebar -->
-      <LayoutSidebar v-if="showDesktopSidebar" class="hidden md:flex z-20" />
+      <LayoutSidebar v-if="showDesktopSidebar" class="hidden md:flex z-20" @logout="userStore.logout" />
       
       <!-- Main Content Area -->
       <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen flex-1 transition-all duration-300', showDesktopSidebar ? 'md:ml-72' : '', showDesktopRightSidebar ? 'lg:mr-80' : '']">
@@ -42,6 +42,7 @@
         <LayoutSidebar 
           class="absolute left-0 top-0 bottom-0 w-[240px] animate-slide-up" 
           @navigate="toggleMobileMenu"
+          @logout="userStore.logout"
         />
     </div>
     

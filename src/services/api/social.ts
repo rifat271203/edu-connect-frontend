@@ -376,6 +376,7 @@ const resolvePostMediaType = (source: Record<string, unknown>, mediaUrl?: string
 const normalizePost = (value: unknown): FeedPost => {
   const source = asRecord(value) || {}
   const id = toId(source.id, globalThis.crypto?.randomUUID?.() || String(Date.now()))
+  const commentItems = asArray(source.comments).map(normalizeComment)
 
   const fallbackAuthor =
     source.user || source.author
@@ -429,6 +430,8 @@ const normalizePost = (value: unknown): FeedPost => {
           ? source.comment_count
       : typeof source.comments === 'number'
         ? source.comments
+        : Array.isArray(source.comments)
+          ? commentItems.length
         : 0
 
   const shares =
@@ -451,6 +454,7 @@ const normalizePost = (value: unknown): FeedPost => {
     image: mediaType === 'video' ? undefined : mediaUrl,
     likes,
     comments,
+    commentItems,
     shares,
     isLiked: Boolean(source.isLiked || source.is_liked || source.likedByMe || source.liked_by_me),
     timestamp: toIsoTimestamp(source.createdAt || source.created_at || source.timestamp),

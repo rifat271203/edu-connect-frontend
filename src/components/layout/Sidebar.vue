@@ -28,7 +28,7 @@
     </div>
 
     <!-- Profile completion card (Placeholder from demo) -->
-    <div class="mt-auto mb-8 p-4 dark:bg-white/5 bg-slate-50 rounded-2xl border border-slate-200 dark:border-white/5">
+    <div class="mt-auto p-4 dark:bg-white/5 bg-slate-50 rounded-2xl border border-slate-200 dark:border-white/5 mb-4">
       <div class="flex justify-between items-center mb-2">
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Profile Strength</span>
         <span class="text-[10px] font-bold text-brand-primary">85%</span>
@@ -40,11 +40,26 @@
         Complete Setup
       </button>
     </div>
+
+    <!-- Logout Button -->
+    <div class="mb-8 px-2">
+      <button 
+        @click="$emit('logout')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all duration-200 group"
+      >
+        <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-sm shadow-rose-500/10">
+          <span class="material-symbols-rounded text-[20px]">logout</span>
+        </div>
+        <span>Sign Out</span>
+      </button>
+    </div>
   </aside>
 </template>
 
 <script setup lang="ts">
 import { useUserStore } from '~/stores/user'
+
+defineEmits(['logout', 'navigate'])
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -78,7 +93,7 @@ const menuGroups = computed(() => {
     {
       title: 'Personal',
       items: [
-        { path: userStore.user ? `/profile/${userStore.user.id}` : '/profile', label: 'Profile', icon: 'person' },
+        { path: '/profile', label: 'Profile', icon: 'person' },
         { path: '/settings', label: 'Settings', icon: 'settings' },
       ]
     }

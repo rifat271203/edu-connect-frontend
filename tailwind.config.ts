@@ -13,10 +13,10 @@ export default <Config>{
     extend: {
       colors: {
         brand: {
-          primary: "#10b981", // Emerald 500
-          dark: "#09090b",
+          primary: "#2E6F40", 
+          dark: "#121A15",
           light: "#ffffff",
-          accent: "#4edea3"
+          accent: "#4DBF7D"
         },
         ink: '#07090f',
         'ink-2': '#0c1120',
@@ -70,12 +70,12 @@ export default <Config>{
         "on-tertiary-fixed": "var(--color-on-tertiary-fixed, #3e0406)",
         "surface-container-lowest": "var(--color-surface-container-lowest, #ffffff)",
         "tertiary-fixed": "var(--color-tertiary-fixed, #ffdad7)",
-        "primary": "var(--color-primary, #005136)",
+        "primary": "var(--color-primary, #2E6F40)",
         "surface": "var(--color-surface, #f8f9fa)",
         "on-surface-variant": "var(--color-on-surface-variant, #3f4943)",
         "on-error-container": "var(--color-on-error-container, #93000a)",
         "inverse-surface": "var(--color-inverse-surface, #2e3132)",
-        "on-secondary-fixed-variant": "var(--color-on-secondary-fixed-variant, #2e4d3d)",
+        "on-secondary-fixed-variant": "var(--color-on-secondary-fixed-variant, #253D2C)",
         "surface-container-highest": "var(--color-surface-container-highest, #e1e3e4)",
         "error-container": "var(--color-error-container, #ffdad6)",
         theme: {
@@ -116,11 +116,11 @@ export default <Config>{
         },
         // Primary Green - Eye-catching vibrant green
         green: {
-          DEFAULT: '#10b981',
-          light: '#6ee7b7',
-          lighter: '#a7f3d0',
-          dark: '#059669',
-          darker: '#047857',
+          DEFAULT: '#2E6F40',
+          light: '#4DBF7D',
+          lighter: '#A7F3D0',
+          dark: '#245a33',
+          darker: '#1a4126',
           50: '#f0fdf4',
           100: '#dcfce7',
           200: '#bbf7d0',
@@ -134,9 +134,9 @@ export default <Config>{
         },
         // Secondary accent - Golden/Orange
         secondary: {
-          DEFAULT: '#f59e0b',
-          light: '#fbbf24',
-          dark: '#d97706',
+          DEFAULT: '#253D2C',
+          light: '#3A483F',
+          dark: '#1a4126',
           50: '#fffbeb',
           100: '#fef3c7',
           200: '#fde68a',

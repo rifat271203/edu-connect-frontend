@@ -9,6 +9,7 @@ export interface Post {
   image?: string
   likes: number
   comments: number
+  commentItems?: Comment[]
   shares: number
   isLiked: boolean
   timestamp: string

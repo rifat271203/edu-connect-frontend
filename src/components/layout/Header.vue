@@ -135,8 +135,7 @@
             :src="userStore.user?.avatar"
             :name="userStore.user?.name"
             size="md"
-            has-ring
-            class="border-2 border-brand-primary/20 p-0.5"
+            class="rounded-xl"
           />
         </NuxtLink>
       </div>

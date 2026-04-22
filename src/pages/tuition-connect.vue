@@ -1,6 +1,6 @@
 <template>
-  <div class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-6xl mx-auto w-full">
+  <div class="px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-6xl">
       <div class="w-full text-center py-20" v-if="loadingAuth">
          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary mx-auto"></div>
          <p class="mt-4 text-[var(--t2)] font-medium tracking-wide">Syncing profile...</p>
@@ -8,37 +8,58 @@
       
       <div class="w-full" v-else>
         <!-- Header Section -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-          <div>
-            <h1 class="text-3xl md:text-4xl font-black text-[var(--t1)] tracking-tight font-display">
-              {{ isTeacher ? 'Find Students' : 'Find Tutors' }}
-            </h1>
-            <p class="text-[var(--t2)] mt-2 font-semibold text-lg">
-              {{ isTeacher ? 'Post tuition offers and connect with students.' : 'Discover tutors and tuition opportunities.' }}
-            </p>
+        <section class="mb-8 overflow-hidden rounded-[32px] border border-[var(--line)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--surface)_88%,transparent),color-mix(in_srgb,var(--surface2)_72%,transparent))] p-6 shadow-[var(--shadow-sm)] md:p-8">
+          <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+              <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--t3)]">
+                <span class="material-symbols-rounded text-[16px] text-brand-primary">{{ isTeacher ? 'school' : 'menu_book' }}</span>
+                Tuition Connect
+              </div>
+              <h1 class="text-3xl font-black tracking-tight text-[var(--t1)] md:text-4xl">
+                {{ isTeacher ? 'Find Students' : 'Find Tutors' }}
+              </h1>
+              <p class="mt-3 max-w-2xl text-[15px] font-medium leading-7 text-[var(--t2)] md:text-base">
+                {{ isTeacher ? 'Post tuition offers, review incoming requests, and manage interested students from one clean workspace.' : 'Browse verified tuition opportunities, send connection requests, and move approved conversations into messages.' }}
+              </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 lg:min-w-[22rem]">
+              <div class="rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4">
+                <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--t3)]">
+                  {{ isTeacher ? 'Received Requests' : 'Sent Requests' }}
+                </p>
+                <p class="mt-2 text-2xl font-black tracking-tight text-[var(--t1)]">
+                  {{ isTeacher ? tuitionStore.receivedRequests.length : tuitionStore.sentRequests.length }}
+                </p>
+              </div>
+              <div class="rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4">
+                <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--t3)]">Open Posts</p>
+                <p class="mt-2 text-2xl font-black tracking-tight text-[var(--t1)]">{{ tuitionStore.posts.length }}</p>
+              </div>
+            </div>
           </div>
-          
-          <div class="flex items-center gap-3">
+
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button 
               v-if="isTeacher"
               @click="showCreateModal = true"
-              class="btn-primary h-12 px-8 flex items-center gap-2 shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+              class="btn-primary h-12 rounded-xl px-6 shadow-[var(--shadow-sm)]"
             >
-              <span class="material-symbols-rounded">add_circle</span>
+              <span class="material-symbols-rounded text-[18px]">add_circle</span>
               <span class="font-bold">Post Opportunity</span>
             </button>
             
             <button 
               @click="activeTab = activeTab === 'browse' ? 'requests' : 'browse'"
-              class="btn-secondary h-12 px-6 flex items-center gap-2 hover:bg-[var(--surface2)] transition-all"
+              class="btn-secondary h-12 rounded-xl px-6"
             >
-              <span class="material-symbols-rounded">
-                {{ activeTab === 'browse' ? 'notifications_active' : 'search' }}
+              <span class="material-symbols-rounded text-[18px]">
+                {{ activeTab === 'browse' ? 'notifications_active' : 'travel_explore' }}
               </span>
               <span class="font-bold">{{ activeTab === 'browse' ? (isTeacher ? 'Manage Requests' : 'Sent Requests') : 'Browse Posts' }}</span>
             </button>
           </div>
-        </div>
+        </section>
 
         <!-- Main Content Area -->
         <div v-if="tuitionStore.loading && !tuitionStore.posts.length" class="flex justify-center py-20">
@@ -47,8 +68,8 @@
 
         <div v-else class="animate-fadeIn">
           <!-- Browse Posts Tab -->
-          <div v-if="activeTab === 'browse'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div v-if="!tuitionStore.posts.length" class="col-span-full py-24 text-center bg-[var(--surface)] rounded-[32px] border border-[var(--line)] shadow-sm">
+          <div v-if="activeTab === 'browse'" class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div v-if="!tuitionStore.posts.length" class="col-span-full rounded-[32px] border border-[var(--line)] bg-[var(--surface)] py-24 text-center shadow-sm">
               <div class="w-20 h-20 bg-[var(--surface2)] rounded-full flex items-center justify-center mx-auto mb-6">
                 <span class="material-symbols-rounded text-4xl text-[var(--t3)]">search_off</span>
               </div>
@@ -58,17 +79,17 @@
             <div 
               v-for="post in tuitionStore.posts" 
               :key="post.id"
-              class="ui-card p-6 flex flex-col h-full hover:border-brand-primary/40 hover:shadow-xl transition-all duration-300 group rounded-[24px]"
+              class="ui-card group flex h-full flex-col rounded-[26px] border-[var(--line)] p-6 transition-all duration-200 hover:border-brand-primary/35 hover:shadow-[var(--shadow-md)]"
             >
               <div class="flex items-start justify-between mb-5">
                 <div class="flex items-center gap-3">
-                  <UiAvatar :src="post.profile_pic_url" :name="post.teacher_name" size="md" class="rounded-xl ring-2 ring-[var(--line)]" />
+                  <UiAvatar :src="post.profile_pic_url" :name="post.teacher_name" size="md" class="rounded-xl" />
                   <div>
                     <h3 class="font-black text-[var(--t1)] leading-none text-base">{{ post.teacher_name }}</h3>
                     <p class="text-[11px] text-[var(--t3)] font-bold uppercase tracking-wider mt-1.5">{{ post.teacher_institution || 'Verified Teacher' }}</p>
                   </div>
                 </div>
-                <div class="bg-brand-primary/10 text-brand-primary px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-brand-primary/20">
+                <div class="rounded-xl border border-brand-primary/15 bg-brand-primary/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-brand-primary">
                   {{ post.subject }}
                 </div>
               </div>
@@ -78,23 +99,23 @@
                   v-if="post.image_url" 
                   :src="post.image_url" 
                   alt="Tuition Post Image" 
-                  class="w-full h-40 object-cover rounded-lg mb-4"
+                  class="mb-1 h-44 w-full rounded-2xl object-cover"
                 />
                 <div class="flex flex-col gap-2">
                   <div class="flex items-center gap-2.5 text-[var(--t2)]">
-                    <div class="w-7 h-7 rounded-lg bg-[var(--surface2)] flex items-center justify-center">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--surface2)]">
                       <span class="material-symbols-rounded text-sm">location_on</span>
                     </div>
                     <span class="text-sm font-bold">{{ post.location }}</span>
                   </div>
                   <div class="flex items-center gap-2.5 text-brand-primary">
-                    <div class="w-7 h-7 rounded-lg bg-brand-primary/10 flex items-center justify-center border border-brand-primary/20">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-primary/15 bg-brand-primary/10">
                       <span class="material-symbols-rounded text-sm font-bold">payments</span>
                     </div>
                     <span class="text-sm font-black">{{ post.tuition_fee }}</span>
                   </div>
                 </div>
-                <div class="p-4 bg-[var(--surface2)]/50 rounded-2xl border border-[var(--line)]">
+                <div class="rounded-2xl border border-[var(--line)] bg-[var(--surface2)]/50 p-4">
                   <p class="text-[13px] text-[var(--t2)] leading-relaxed line-clamp-3 font-medium">
                     {{ post.details }}
                   </p>
@@ -106,7 +127,7 @@
                   v-if="!isTeacher"
                   @click="handleConnect(post.id)"
                   :disabled="isRequesting(post.id)"
-                  class="w-full btn-primary h-12 flex items-center justify-center gap-2 rounded-xl group-hover:scale-[1.01] transition-transform"
+                  class="btn-primary h-12 w-full rounded-xl"
                 >
                   <span class="material-symbols-rounded text-lg">contact_mail</span>
                   <span class="font-bold">{{ isRequesting(post.id) ? 'Requesting...' : 'Request to Connect' }}</span>
@@ -135,7 +156,7 @@
               <div 
                 v-for="req in tuitionStore.receivedRequests" 
                 :key="req.id"
-                class="ui-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-l-4 rounded-2xl shadow-sm transition-all"
+                class="ui-card flex flex-col justify-between gap-5 rounded-[24px] border-l-4 p-5 shadow-sm transition-all sm:flex-row sm:items-center"
                 :class="getStatusBorderClass(req.status)"
               >
                 <div class="flex items-center gap-4">
@@ -175,7 +196,7 @@
               <div 
                 v-for="req in tuitionStore.sentRequests" 
                 :key="req.id"
-                class="ui-card p-6 border-l-4 rounded-2xl transition-all"
+                class="ui-card rounded-[24px] border-l-4 p-6 transition-all"
                 :class="getStatusBorderClass(req.status)"
               >
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -334,44 +355,6 @@ watch(activeTab, logActiveTab);
 </script>
 
 <style scoped lang="scss">
-.font-display {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 700;
-}
-
-h1 {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 900;
-  font-size: 2.5rem;
-  color: #333;
-}
-
-h2 {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 700;
-  font-size: 2rem;
-  color: #444;
-}
-
-p {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  color: #555;
-}
-
-button {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-textarea, input {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1rem;
-  color: #333;
-}
-
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
 </style>
