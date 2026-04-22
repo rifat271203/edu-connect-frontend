@@ -55,11 +55,11 @@ export default defineNuxtConfig({
       turnPass: process.env.NUXT_PUBLIC_TURN_PASS,
       backendUrl:
         process.env.NUXT_PUBLIC_BACKEND_URL ||
-        'http://localhost:3001',
+        'https://edu-connect-backend-bcf0.onrender.com',
       socketUrl:
         process.env.NUXT_PUBLIC_SOCKET_URL ||
         process.env.NUXT_PUBLIC_BACKEND_URL ||
-        'http://localhost:3001',
+        'https://edu-connect-backend-bcf0.onrender.com',
       iceServers:
         process.env.NUXT_PUBLIC_ICE_SERVERS ||
         '[{"urls":"stun:stun.l.google.com:19302"},{"urls":"stun:stun1.l.google.com:19302"}]',

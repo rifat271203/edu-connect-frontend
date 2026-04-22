@@ -7,7 +7,7 @@ const authCookieMaxAgeSeconds = 60 * 60 * 24 * 30
 
 // Rewrites Railway /uploads/ URLs to use the Nuxt proxy so the browser
 // doesn't hit Cross-Origin-Resource-Policy restrictions.
-const BACKEND_UPLOAD_PREFIX = 'https://sincere-spontaneity-production-ab4e.up.railway.app/uploads/'
+const BACKEND_UPLOAD_PREFIX = 'https://edu-connect-backend-bcf0.onrender.com/uploads/'
 const rewriteUploadUrl = (url?: string): string | undefined => {
   if (!url) return url
   if (url.startsWith(BACKEND_UPLOAD_PREFIX)) {

@@ -241,6 +241,11 @@ onBeforeUnmount(() => {
 })
 
 onMounted(() => {
+  userStore.initAuth()
   hasMounted.value = true
+
+  if (userStore.isAuthenticated && !userStore.user) {
+    void userStore.syncCurrentUser()
+  }
 })
 </script>

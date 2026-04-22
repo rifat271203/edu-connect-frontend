@@ -200,7 +200,7 @@ const normalizeProfilePicUploadResponse = (payload: unknown): UploadProfilePicRe
   return { profilePicUrl }
 }
 
-const BACKEND_UPLOAD_PREFIX = 'https://sincere-spontaneity-production-ab4e.up.railway.app/uploads/'
+const BACKEND_UPLOAD_PREFIX = 'https://edu-connect-backend-bcf0.onrender.com/uploads/'
 
 /**
  * Rewrites a Railway-hosted upload URL to go through the Nuxt proxy route

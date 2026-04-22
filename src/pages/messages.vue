@@ -299,7 +299,7 @@ const resolveSocketUrl = (): string => {
     runtimeConfig.public.backendUrl ||
     process.env.NUXT_PUBLIC_SOCKET_URL ||
     process.env.NUXT_PUBLIC_BACKEND_URL ||
-    'https://sincere-spontaneity-production-ab4e.up.railway.app/'
+    'https://edu-connect-backend-bcf0.onrender.com/'
 
   return normalizeUrl(configuredUrl)
 }
