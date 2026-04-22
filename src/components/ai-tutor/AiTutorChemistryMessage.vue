@@ -116,14 +116,14 @@
     </div>
 
     <!-- Step-by-Step Breakdown Section -->
-    <div v-if="message.chemistrySolution?.steps?.length" class="space-y-2.5">
+    <div v-if="revealedSteps.length" class="space-y-2.5">
       <div class="flex items-center gap-2">
         <span class="text-[11px] uppercase tracking-[0.6px] font-semibold" :style="{ color: 'var(--text3)', fontFamily: 'DM Mono' }">
           📋 Step-by-step breakdown
         </span>
       </div>
       <div class="space-y-2.5">
-        <div v-for="(step, idx) in message.chemistrySolution.steps"
+        <div v-for="(step, idx) in revealedSteps"
              :key="'step-' + messageIndex + '-' + idx"
              class="rounded-2xl border overflow-hidden transition-all"
              :class="{ 'expanded': expandedSteps[idx] }"
@@ -390,8 +390,8 @@
 
     <!-- Mechanism Steps (Legacy support) -->
     <MechanismSteps
-      v-if="message.mechanismSteps?.length && message.showMechanismSteps"
-      :steps="message.mechanismSteps"
+      v-if="revealedMechanismSteps.length && message.showMechanismSteps"
+      :steps="revealedMechanismSteps"
       :theme="renderTheme"
       :svg-by-smiles="svgBySmiles"
       :errors-by-smiles="errorsBySmiles"
@@ -427,6 +427,16 @@ if (props.message.chemistrySolution?.steps?.length) {
 const toggleStep = (idx: number) => {
   expandedSteps.value[idx] = !expandedSteps.value[idx]
 }
+
+const revealedSteps = computed(() => {
+  const count = props.message.revealedMathSteps ?? props.message.chemistrySolution?.steps?.length ?? 0
+  return props.message.chemistrySolution?.steps?.slice(0, count) || []
+})
+
+const revealedMechanismSteps = computed(() => {
+  const count = props.message.revealedMathSteps ?? props.message.mechanismSteps?.length ?? 0
+  return props.message.mechanismSteps?.slice(0, count) || []
+})
 
 const hasDiagramContent = (diagram?: ReactionDiagramData): boolean => {
   if (!diagram) return false

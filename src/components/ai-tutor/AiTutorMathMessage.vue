@@ -19,11 +19,11 @@
     </div>
 
     <!-- Steps Section -->
-    <div v-if="message.mathSolution?.steps?.length" class="space-y-2">
+    <div v-if="revealedSteps.length" class="space-y-2">
       <p class="text-[11px] uppercase tracking-[0.5px] font-medium font-mono text-slate-500 dark:text-slate-400">Step-by-step breakdown</p>
       
       <div
-        v-for="(step, stepIndex) in message.mathSolution.steps"
+        v-for="(step, stepIndex) in revealedSteps"
         :key="`math-step-${messageIndex}-${stepIndex}`"
         class="rounded-[20px] border overflow-hidden transition-all duration-300 bg-slate-50 dark:bg-white/5"
         :class="expandedStep === stepIndex ? 'border-brand-primary/30 dark:border-brand-primary/40' : 'border-slate-200 dark:border-white/10'"
@@ -48,7 +48,7 @@
           <!-- Title -->
           <div class="flex-1 text-left">
             <p class="font-semibold text-sm text-slate-900 dark:text-white">{{ step.title || `Step ${stepIndex + 1}` }}</p>
-            <p v-if="!expandedStep" class="text-xs mt-0.5 font-mono text-slate-500 dark:text-slate-400">Click to expand</p>
+            <p v-if="expandedStep !== stepIndex" class="text-xs mt-0.5 font-mono text-slate-500 dark:text-slate-400">Click to expand</p>
           </div>
 
           <!-- Chevron -->
@@ -117,6 +117,11 @@ const emit = defineEmits<{
 }>()
 
 const expandedStep = ref(-1)
+
+const revealedSteps = computed(() => {
+  const count = props.message.revealedMathSteps ?? props.message.mathSolution?.steps?.length ?? 0
+  return props.message.mathSolution?.steps?.slice(0, count) || []
+})
 
 const answerLines = computed(() => {
   return (props.message.mathSolution?.answer || '')

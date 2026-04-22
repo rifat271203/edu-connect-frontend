@@ -23,7 +23,7 @@
         </header>
         
         <!-- Page Content -->
-        <div class="flex-1 p-4 md:p-8">
+        <div :class="['flex-1', isAiTutorRoute ? '' : 'p-4 md:p-8']">
           <slot />
         </div>
       </main>
