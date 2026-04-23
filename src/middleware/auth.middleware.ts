@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  const guestAllowedPaths = new Set(['/login', '/loginV2', '/signup', '/home', '/ai-tutor'])
+  const guestAllowedPaths = new Set(['/login', '/loginV2', '/signup', '/home', '/ai-tutor', '/auth/google/callback', '/auth/setup-profile'])
 
   // Initialize user store to load user data from localStorage
   const userStore = useUserStore()
