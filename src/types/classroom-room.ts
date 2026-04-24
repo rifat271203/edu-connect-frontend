@@ -47,7 +47,9 @@ export interface ClassroomNotice {
   attachmentUrl?: string
 }
 
-export type ResourceCategory = 'pdf' | 'video' | 'link' | 'document'
+export type ResourceCategory = 'pdf' | 'video' | 'link' | 'document' | 'book' | 'recording'
+
+export type MaterialVisibility = 'public' | 'enrolled_only'
 
 export interface ClassroomResource {
   id: string
@@ -58,6 +60,59 @@ export interface ClassroomResource {
   url: string
   downloadCount: number
   uploadedAt: string
+  visibility?: MaterialVisibility
+  thumbnailUrl?: string
+}
+
+export interface CourseLiveRoom {
+  roomId: string
+  courseId: string
+  status: 'waiting' | 'live' | 'ended'
+  participantCount: number
+  startedAt?: string
+  title?: string
+  createdBy?: string
+}
+
+export interface CourseMaterial {
+  id: string
+  courseId: string
+  title: string
+  description?: string
+  type: 'notice' | 'pdf' | 'book' | 'recording' | 'document' | 'link' | 'video'
+  url?: string
+  thumbnailUrl?: string
+  visibility: MaterialVisibility
+  uploadedAt: string
+  uploadedBy?: string
+  uploadedByName?: string
+  fileSize?: number
+  duration?: number // seconds, for recordings/videos
+  downloadCount?: number
+}
+
+export interface CourseRecordedClass {
+  id: string
+  courseId: string
+  title: string
+  description?: string
+  videoUrl: string
+  thumbnailUrl?: string
+  duration?: number
+  recordedAt: string
+  uploadedAt: string
+  visibility: MaterialVisibility
+  viewCount?: number
+}
+
+export interface CourseGroupChat {
+  id: string
+  courseId: string
+  courseTitle: string
+  memberCount: number
+  lastMessageText?: string
+  lastMessageAt?: string
+  unreadCount: number
 }
 
 export interface PersonalNote {

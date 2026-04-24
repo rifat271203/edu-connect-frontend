@@ -1,5 +1,6 @@
 import { apiRequest, type ApiResponse } from './client'
 import type { UserPreview } from '~/types/user'
+import type { Notification as ClassroomNotification, NotificationType } from '~/types/notification'
 
 export interface ClassroomCoursesQuery {
   page?: number
@@ -259,7 +260,7 @@ const normalizeCourse = (value: unknown): ClassroomCourse => {
 
 const normalizeEnrollmentRequest = (value: unknown): ClassroomEnrollmentRequest => {
   const source = asRecord(value) || {}
-  const requestId = toId(source.id || source.requestId || source.request_id, String(Date.now()))
+  const requestId = toId(source.id || source.requestId || source.request_id || source.enrollment_id, String(Date.now()))
   const nestedCourse = asRecord(source.course)
   const courseId = toId(
     source.courseId || source.course_id || nestedCourse?.id || source.classroomCourseId || source.classroom_course_id
@@ -271,14 +272,28 @@ const normalizeEnrollmentRequest = (value: unknown): ClassroomEnrollmentRequest 
     source.requester ||
     source.member || {
       id: source.studentId || source.student_id || source.userId || source.user_id,
-      displayName: source.studentName || source.student_name || source.userName || source.user_name,
-      username: source.studentUsername || source.student_username || source.username,
+      displayName:
+        source.studentName ||
+        source.student_name ||
+        source.userName ||
+        source.user_name ||
+        source.displayName ||
+        source.display_name ||
+        source.name,
+      username:
+        source.studentUsername ||
+        source.student_username ||
+        source.username ||
+        source.user_name ||
+        source.student_email?.split('@')[0],
       avatar:
         source.studentAvatar ||
         source.student_avatar ||
         source.studentProfilePicUrl ||
         source.student_profile_pic_url ||
-        source.avatar,
+        source.avatar ||
+        source.profilePicUrl ||
+        source.profile_pic_url,
     }
 
   return {
@@ -294,7 +309,13 @@ const normalizeEnrollmentRequest = (value: unknown): ClassroomEnrollmentRequest 
       (typeof source.message === 'string' && source.message) ||
       (typeof source.note === 'string' && source.note) ||
       undefined,
-    createdAt: toIsoTimestamp(source.createdAt || source.created_at || source.timestamp),
+    createdAt: toIsoTimestamp(
+      source.createdAt ||
+        source.created_at ||
+        source.requestedAt ||
+        source.requested_at ||
+        source.timestamp,
+    ),
   }
 }
 
@@ -426,9 +447,13 @@ export const requestCourseEnrollment = async (
 
 export const getCourseEnrollmentRequests = async (
   courseId: string,
+  status?: string,
 ): Promise<ApiResponse<ClassroomEnrollmentRequest[]>> => {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  const qs = params.toString() ? `?${params.toString()}` : ''
   const result = await apiRequest<unknown>(
-    `/api/classroom/courses/${encodeURIComponent(courseId)}/enrollment-requests`,
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/enrollment-requests${qs}`,
     'GET',
   )
 
@@ -477,6 +502,145 @@ export const rejectCourseEnrollmentRequest = async (
   return {
     ...result,
     data: normalizeEnrollmentRequest(result.data),
+  }
+}
+
+const classroomNotificationTypes: NotificationType[] = [
+  'friend_request',
+  'friend_accepted',
+  'like',
+  'comment',
+  'share',
+  'mention',
+  'follow',
+  'enrollment_requested',
+  'enrollment_approved',
+  'enrollment_rejected',
+  'system',
+]
+
+const toNotificationType = (value: unknown): NotificationType => {
+  if (typeof value === 'string' && classroomNotificationTypes.includes(value as NotificationType)) {
+    return value as NotificationType
+  }
+
+  return 'system'
+}
+
+const normalizeClassroomNotification = (value: unknown): ClassroomNotification => {
+  const source = asRecord(value) || {}
+  const actorSource =
+    asRecord(source.user) ||
+    asRecord(source.actor) ||
+    asRecord(source.sender) ||
+    asRecord(source.student) ||
+    asRecord(source.teacher) ||
+    source
+
+  const courseSource =
+    asRecord(source.course) ||
+    asRecord(source.classroomCourse) ||
+    asRecord(source.classroom_course) ||
+    {}
+
+  const id = toId(
+    source.id || source.notificationId || source.notification_id || source.requestId || source.request_id,
+    String(Date.now()),
+  )
+
+  const message =
+    (typeof source.message === 'string' && source.message) ||
+    (typeof source.title === 'string' && source.title) ||
+    'Notification'
+
+  const courseId =
+    (typeof source.courseId === 'string' && source.courseId) ||
+    (typeof source.course_id === 'string' && source.course_id) ||
+    (typeof courseSource.id === 'string' && courseSource.id) ||
+    (typeof courseSource.courseId === 'string' && courseSource.courseId) ||
+    undefined
+
+  const courseTitle =
+    (typeof source.courseTitle === 'string' && source.courseTitle) ||
+    (typeof source.course_title === 'string' && source.course_title) ||
+    (typeof courseSource.title === 'string' && courseSource.title) ||
+    (typeof courseSource.courseTitle === 'string' && courseSource.courseTitle) ||
+    undefined
+
+  const reviewNote =
+    (typeof source.reviewNote === 'string' && source.reviewNote) ||
+    (typeof source.review_note === 'string' && source.review_note) ||
+    undefined
+
+  const actionUrl =
+    (typeof source.actionUrl === 'string' && source.actionUrl) ||
+    (typeof source.action_url === 'string' && source.action_url) ||
+    (courseId ? `/classroom/${encodeURIComponent(courseId)}` : undefined)
+
+  const hasActorData = Boolean(
+    source.user ||
+      source.actor ||
+      source.sender ||
+      source.student ||
+      source.teacher ||
+      source.userId ||
+      source.user_id ||
+      source.actorId ||
+      source.actor_id,
+  )
+
+  return {
+    id,
+    type: toNotificationType(source.type || source.notificationType || source.notification_type),
+    user: hasActorData ? normalizeUserPreview(actorSource, `notification-user-${id}`) : undefined,
+    content:
+      (typeof source.content === 'string' && source.content) ||
+      (typeof source.note === 'string' && source.note) ||
+      (typeof source.description === 'string' && source.description) ||
+      undefined,
+    message,
+    timestamp: toIsoTimestamp(source.createdAt || source.created_at || source.timestamp),
+    read:
+      source.read === true ||
+      source.read === 1 ||
+      source.read === '1' ||
+      source.read === 'true' ||
+      source.isRead === true ||
+      source.isRead === 1 ||
+      source.isRead === '1' ||
+      source.isRead === 'true' ||
+      source.is_read === true ||
+      source.is_read === 1 ||
+      source.is_read === '1' ||
+      source.is_read === 'true',
+    actionUrl,
+    courseId,
+    courseTitle,
+    entityId:
+      (typeof source.entityId === 'string' && source.entityId) ||
+      (typeof source.entity_id === 'string' && source.entity_id) ||
+      (typeof source.requestId === 'string' && source.requestId) ||
+      (typeof source.request_id === 'string' && source.request_id) ||
+      undefined,
+    entityType:
+      (typeof source.entityType === 'string' && source.entityType) ||
+      (typeof source.entity_type === 'string' && source.entity_type) ||
+      undefined,
+    reviewNote,
+  }
+}
+
+const mapClassroomNotificationsResponse = (payload: unknown): ClassroomNotification[] => {
+  return pickList(payload, ['notifications', 'items', 'results', 'data']).map(normalizeClassroomNotification)
+}
+
+export const getClassroomNotifications = async (): Promise<ApiResponse<ClassroomNotification[]>> => {
+  const result = await apiRequest<unknown>('/api/classroom/notifications', 'GET')
+  if (!result.success) return result as ApiResponse<ClassroomNotification[]>
+
+  return {
+    ...result,
+    data: mapClassroomNotificationsResponse(result.data),
   }
 }
 
@@ -582,3 +746,324 @@ export const getMyProgress = async (courseId: string): Promise<ApiResponse<any>>
   return await apiRequest<any>(`/api/classroom/courses/${encodeURIComponent(courseId)}/progress/me`, 'GET')
 }
 
+// --- Course Details (single course with enrollment context) ---
+
+export interface CourseDetailResponse {
+  course: ClassroomCourse
+  isEnrolled: boolean
+  enrollmentStatus?: string
+  materials?: unknown[]
+  liveRoom?: unknown
+}
+
+export const getCourseSingleDetails = async (courseId: string): Promise<ApiResponse<CourseDetailResponse>> => {
+  const result = await apiRequest<unknown>(`/api/classroom/courses/${encodeURIComponent(courseId)}`, 'GET')
+  if (!result.success) return result as ApiResponse<CourseDetailResponse>
+
+  const root = asRecord(result.data) || {}
+  const courseSource = asRecord(root.course) || root
+  const enrollmentStatusRaw =
+    (typeof root.enrollmentStatus === 'string' && root.enrollmentStatus) ||
+    (typeof root.enrollment_status === 'string' && root.enrollment_status) ||
+    (typeof courseSource.enrollmentStatus === 'string' && courseSource.enrollmentStatus) ||
+    ''
+
+  const isEnrolledRaw = root.isEnrolled ?? root.is_enrolled
+  const isEnrolled =
+    isEnrolledRaw === true ||
+    isEnrolledRaw === 1 ||
+    isEnrolledRaw === '1' ||
+    isEnrolledRaw === 'true' ||
+    ['approved', 'active', 'enrolled'].includes(enrollmentStatusRaw.toLowerCase())
+
+  return {
+    ...result,
+    data: {
+      course: normalizeCourse(courseSource),
+      isEnrolled,
+      enrollmentStatus: enrollmentStatusRaw || undefined,
+      materials: asArray(root.materials || root.resources),
+      liveRoom: asRecord(root.liveRoom || root.live_room),
+    },
+  }
+}
+
+// --- Course Live Room ---
+
+export interface CourseLiveRoomInfo {
+  roomId: string
+  courseId: string
+  status: string
+  participantCount: number
+  startedAt?: string
+  title?: string
+  createdBy?: string
+}
+
+const normalizeLiveRoom = (value: unknown, courseId: string): CourseLiveRoomInfo | null => {
+  const source = asRecord(value)
+  if (!source) return null
+
+  const roomId = toId(source.roomId || source.room_id || source.id)
+  if (!roomId) return null
+
+  return {
+    roomId,
+    courseId: toId(source.courseId || source.course_id) || courseId,
+    status:
+      (typeof source.status === 'string' && source.status) || 'waiting',
+    participantCount: toNumber(source.participantCount || source.participant_count),
+    startedAt:
+      (typeof source.startedAt === 'string' && source.startedAt) ||
+      (typeof source.started_at === 'string' && source.started_at) ||
+      undefined,
+    title: (typeof source.title === 'string' && source.title) || undefined,
+    createdBy: toId(source.createdBy || source.created_by || source.teacherId || source.teacher_id) || undefined,
+  }
+}
+
+export const getCourseLiveRoom = async (courseId: string): Promise<ApiResponse<CourseLiveRoomInfo | null>> => {
+  const result = await apiRequest<unknown>(
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/live-room`,
+    'GET',
+  )
+
+  if (!result.success) {
+    // 404 means no active room — not an error
+    if (result.status === 404) {
+      return { success: true, data: null, status: 200 }
+    }
+    return result as ApiResponse<CourseLiveRoomInfo | null>
+  }
+
+  const root = asRecord(result.data) || {}
+  const roomSource = asRecord(root.liveRoom) || asRecord(root.room) || asRecord(root.data) || root
+
+  return {
+    ...result,
+    data: normalizeLiveRoom(roomSource, courseId),
+  }
+}
+
+export const createCourseLiveRoom = async (
+  courseId: string,
+  title?: string,
+): Promise<ApiResponse<CourseLiveRoomInfo>> => {
+  const payload = title?.trim() ? { title: title.trim() } : undefined
+  const result = await apiRequest<unknown>(
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/live-room`,
+    'POST',
+    payload,
+  )
+
+  if (!result.success) return result as ApiResponse<CourseLiveRoomInfo>
+
+  const root = asRecord(result.data) || {}
+  const roomSource = asRecord(root.liveRoom) || asRecord(root.room) || asRecord(root.data) || root
+  const normalized = normalizeLiveRoom(roomSource, courseId)
+
+  if (!normalized) {
+    return {
+      success: false,
+      error: 'Live room created but response is missing room info',
+      status: result.status,
+    }
+  }
+
+  return { ...result, data: normalized }
+}
+
+// --- Course Materials ---
+
+export interface CourseMaterialItem {
+  id: string
+  courseId: string
+  title: string
+  description?: string
+  type: string
+  url?: string
+  thumbnailUrl?: string
+  visibility: string
+  uploadedAt: string
+  uploadedBy?: string
+  uploadedByName?: string
+  fileSize?: number
+  duration?: number
+  downloadCount?: number
+}
+
+const normalizeCourseMaterial = (value: unknown, courseId: string): CourseMaterialItem => {
+  const source = asRecord(value) || {}
+
+  return {
+    id: toId(source.id || source.materialId || source.material_id, String(Date.now())),
+    courseId: toId(source.courseId || source.course_id) || courseId,
+    title:
+      (typeof source.title === 'string' && source.title) ||
+      (typeof source.name === 'string' && source.name) ||
+      'Untitled Material',
+    description:
+      (typeof source.description === 'string' && source.description) || undefined,
+    type:
+      (typeof source.type === 'string' && source.type) ||
+      (typeof source.category === 'string' && source.category) ||
+      (typeof source.materialType === 'string' && source.materialType) ||
+      (typeof source.material_type === 'string' && source.material_type) ||
+      'document',
+    url:
+      (typeof source.url === 'string' && source.url) ||
+      (typeof source.fileUrl === 'string' && source.fileUrl) ||
+      (typeof source.file_url === 'string' && source.file_url) ||
+      (typeof source.videoUrl === 'string' && source.videoUrl) ||
+      (typeof source.video_url === 'string' && source.video_url) ||
+      undefined,
+    thumbnailUrl:
+      (typeof source.thumbnailUrl === 'string' && source.thumbnailUrl) ||
+      (typeof source.thumbnail_url === 'string' && source.thumbnail_url) ||
+      (typeof source.thumbnail === 'string' && source.thumbnail) ||
+      undefined,
+    visibility:
+      (typeof source.visibility === 'string' && source.visibility) ||
+      'enrolled_only',
+    uploadedAt: toIsoTimestamp(source.uploadedAt || source.uploaded_at || source.createdAt || source.created_at),
+    uploadedBy: toId(source.uploadedBy || source.uploaded_by || source.teacherId || source.teacher_id) || undefined,
+    uploadedByName:
+      (typeof source.uploadedByName === 'string' && source.uploadedByName) ||
+      (typeof source.uploaded_by_name === 'string' && source.uploaded_by_name) ||
+      (typeof source.teacherName === 'string' && source.teacherName) ||
+      undefined,
+    fileSize: toNumber(source.fileSize || source.file_size, 0) || undefined,
+    duration: toNumber(source.duration, 0) || undefined,
+    downloadCount: toNumber(source.downloadCount || source.download_count, 0),
+  }
+}
+
+export const getCourseMaterials = async (
+  courseId: string,
+  type?: string,
+): Promise<ApiResponse<CourseMaterialItem[]>> => {
+  const params = new URLSearchParams()
+  if (type) params.set('type', type)
+  const qs = params.toString() ? `?${params.toString()}` : ''
+
+  const result = await apiRequest<unknown>(
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/materials${qs}`,
+    'GET',
+  )
+
+  if (!result.success) return result as ApiResponse<CourseMaterialItem[]>
+
+  const items = pickList(result.data, ['materials', 'items', 'resources', 'data'])
+
+  return {
+    ...result,
+    data: items.map((item) => normalizeCourseMaterial(item, courseId)),
+  }
+}
+
+export const uploadCourseMaterial = async (
+  courseId: string,
+  payload: {
+    title: string
+    description?: string
+    type: string
+    url: string
+    visibility?: string
+    thumbnailUrl?: string
+    duration?: number
+  },
+): Promise<ApiResponse<CourseMaterialItem>> => {
+  const result = await apiRequest<unknown>(
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/materials`,
+    'POST',
+    payload,
+  )
+
+  if (!result.success) return result as ApiResponse<CourseMaterialItem>
+
+  const root = asRecord(result.data) || {}
+  const source = asRecord(root.material) || asRecord(root.data) || root
+
+  return {
+    ...result,
+    data: normalizeCourseMaterial(source, courseId),
+  }
+}
+
+// --- Recorded Classes ---
+
+export const getCourseRecordedClasses = async (courseId: string): Promise<ApiResponse<CourseMaterialItem[]>> => {
+  return await getCourseMaterials(courseId, 'recording')
+}
+
+// --- Public Preview ---
+
+export const getCoursePublicPreview = async (courseId: string): Promise<ApiResponse<CourseMaterialItem[]>> => {
+  const result = await apiRequest<unknown>(
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/materials/public`,
+    'GET',
+  )
+
+  if (!result.success) return result as ApiResponse<CourseMaterialItem[]>
+
+  const items = pickList(result.data, ['materials', 'items', 'resources', 'data'])
+
+  return {
+    ...result,
+    data: items.map((item) => normalizeCourseMaterial(item, courseId)),
+  }
+}
+
+// --- Course Group Chat ---
+
+export interface CourseGroupChatInfo {
+  id: string
+  courseId: string
+  courseTitle: string
+  memberCount: number
+  lastMessageText?: string
+  lastMessageAt?: string
+  unreadCount: number
+}
+
+const normalizeGroupChat = (value: unknown, courseId: string): CourseGroupChatInfo => {
+  const source = asRecord(value) || {}
+
+  return {
+    id: toId(source.id || source.groupId || source.group_id || source.chatId || source.chat_id, courseId),
+    courseId: toId(source.courseId || source.course_id) || courseId,
+    courseTitle:
+      (typeof source.courseTitle === 'string' && source.courseTitle) ||
+      (typeof source.course_title === 'string' && source.course_title) ||
+      (typeof source.title === 'string' && source.title) ||
+      'Course Chat',
+    memberCount: toNumber(source.memberCount || source.member_count, 0),
+    lastMessageText:
+      (typeof source.lastMessageText === 'string' && source.lastMessageText) ||
+      (typeof source.last_message_text === 'string' && source.last_message_text) ||
+      (typeof source.lastMessage === 'string' && source.lastMessage) ||
+      undefined,
+    lastMessageAt:
+      (typeof source.lastMessageAt === 'string' && source.lastMessageAt) ||
+      (typeof source.last_message_at === 'string' && source.last_message_at) ||
+      undefined,
+    unreadCount: toNumber(source.unreadCount || source.unread_count, 0),
+  }
+}
+
+export const getCourseGroupChat = async (courseId: string): Promise<ApiResponse<CourseGroupChatInfo>> => {
+  const result = await apiRequest<unknown>(
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/group-chat`,
+    'GET',
+  )
+
+  if (!result.success) return result as ApiResponse<CourseGroupChatInfo>
+
+  const root = asRecord(result.data) || {}
+  const source = asRecord(root.group) || asRecord(root.chat) || asRecord(root.data) || root
+
+  return {
+    ...result,
+    data: normalizeGroupChat(source, courseId),
+  }
+}
