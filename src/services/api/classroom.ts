@@ -1067,3 +1067,13 @@ export const getCourseGroupChat = async (courseId: string): Promise<ApiResponse<
     data: normalizeGroupChat(source, courseId),
   }
 }
+
+export interface StreamTokenResponse {
+  token: string
+  apiKey: string
+}
+
+export const getStreamToken = async (): Promise<ApiResponse<StreamTokenResponse>> => {
+  return await apiRequest<StreamTokenResponse>('/api/stream/token', 'GET')
+}
+

@@ -400,14 +400,24 @@ useHead(() => ({
 const handleLiveClass = async () => {
   if (isTeacher.value) {
     if (classroomStore.hasActiveLiveRoom && classroomStore.liveRoom) {
-      await navigateTo(`/classroom/meeting/${classroomStore.liveRoom.roomId}?role=teacher`)
+      await navigateTo(`/meeting/${classroomStore.liveRoom.roomId}?role=teacher`)
     } else {
       const room = await classroomStore.startLiveRoom(`${classroomStore.course?.title || 'Class'} - Live`)
-      if (room) await navigateTo(`/classroom/meeting/${room.roomId}?role=teacher`)
+      if (room) {
+        await navigateTo(`/meeting/${room.roomId}?role=teacher`)
+      } else {
+        classroomError.value = 'Failed to start live session. Please try again.'
+      }
     }
   } else {
+    // Student side
     if (classroomStore.hasActiveLiveRoom && classroomStore.liveRoom) {
-      await navigateTo(`/classroom/meeting/${classroomStore.liveRoom.roomId}?role=student`)
+      await navigateTo(`/meeting/${classroomStore.liveRoom.roomId}?role=student`)
+    } else {
+      // Fallback: If no explicit live room is found, use course-id as the room name 
+      // so students can still join the session.
+      const fallbackRoomId = `course-${courseId.value}`
+      await navigateTo(`/meeting/${fallbackRoomId}?role=student`)
     }
   }
 }
