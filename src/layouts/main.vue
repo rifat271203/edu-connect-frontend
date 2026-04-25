@@ -50,26 +50,26 @@
     <LayoutMobileNav v-if="!isGuest && !isAiTutorRoute" class="lg:hidden" />
 
     <!-- First-login profile picture modal -->
-      <div
-        v-if="userStore.shouldShowProfilePicPrompt"
-        class="fixed inset-0 z-[70] flex items-center justify-center p-4"
-      >
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+    <div
+      v-if="userStore.shouldShowProfilePicPrompt"
+      class="fixed inset-0 z-[70] flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-        <div class="relative w-full max-w-md card-theme p-6">
-          <h2 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Add a profile photo</h2>
-          <p class="mt-2 text-sm text-[var(--t2)]">
-            Upload a profile picture so classmates can recognize you.
-          </p>
+      <div class="relative w-full max-w-md card-theme p-6">
+        <h2 class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Add a profile photo</h2>
+        <p class="mt-2 text-sm text-[var(--t2)]">
+          Upload a profile picture so classmates can recognize you.
+        </p>
 
-          <div class="mt-5 flex items-center gap-4">
-            <div class="h-24 w-24 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface2)]">
-              <img
-                :src="profilePicPreviewUrl || userStore.user?.avatar"
-                alt="Profile preview"
-                class="h-full w-full object-cover"
-              />
-            </div>
+        <div class="mt-5 flex items-center gap-4">
+          <div class="h-24 w-24 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface2)]">
+            <img
+              :src="profilePicPreviewUrl || userStore.user?.avatar"
+              alt="Profile preview"
+              class="h-full w-full object-cover"
+            />
+          </div>
 
           <div class="flex-1">
             <input
@@ -105,16 +105,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Live Class Notification -->
+    <ClassroomLiveClassToast 
+      v-if="activeLiveNotification" 
+      :data="activeLiveNotification" 
+      @close="activeLiveNotification = null" 
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useUserStore } from '~/stores/user'
+import { useGlobalSocket } from '~/composables/useGlobalSocket'
+import { useClassroomStore } from '~/stores/classroom'
 
 const showMobileMenu = ref(false)
 const hasMounted = ref(false)
 const userStore = useUserStore()
+const { connect: connectSocket, on: onSocket } = useGlobalSocket()
 
+const activeLiveNotification = ref<any>(null)
 const profilePicInputRef = ref<HTMLInputElement | null>(null)
 const selectedProfilePicFile = ref<File | null>(null)
 const profilePicPreviewUrl = ref('')
@@ -203,7 +214,6 @@ const tokenCookie = useCookie<string | null>('educonnect_token')
 const hasCookieSession = computed(() => authCookie.value === 'true' && Boolean(tokenCookie.value))
 const isGuest = computed(() => {
   const guest = !(userStore.isAuthenticated || hasCookieSession.value)
-  console.log('MainLayout isGuest:', guest, 'isAuthenticated:', userStore.isAuthenticated, 'hasCookieSession:', hasCookieSession.value)
   return guest
 })
 const guestAllowedPaths = new Set(['/login', '/loginV2', '/signup', '/home', '/ai-tutor'])
@@ -211,8 +221,6 @@ const isProtectedRoute = computed(() => !guestAllowedPaths.has(route.path))
 const showDesktopSidebar = computed(() => {
   if (isProtectedRoute.value) return true
 
-  // Keep SSR/CSR first render consistent for guest-allowed routes (like /home)
-  // unless we already have auth cookies available during SSR.
   if (!hasMounted.value && !hasCookieSession.value) {
     return false
   }
@@ -236,6 +244,12 @@ watch(
   }
 )
 
+watch(() => userStore.isAuthenticated, (auth) => {
+  if (auth) {
+    connectSocket()
+  }
+})
+
 onBeforeUnmount(() => {
   revokeProfilePicPreview()
 })
@@ -244,8 +258,34 @@ onMounted(() => {
   userStore.initAuth()
   hasMounted.value = true
 
-  if (userStore.isAuthenticated && !userStore.user) {
-    void userStore.syncCurrentUser()
+  if (userStore.isAuthenticated) {
+    if (!userStore.user) {
+      void userStore.syncCurrentUser()
+    }
+    
+    // Global socket notifications
+    connectSocket()
+    onSocket('live_class_started', (data: any) => {
+      activeLiveNotification.value = data
+      // Auto-dismiss safety
+      setTimeout(() => {
+        if (activeLiveNotification.value?.roomId === data.roomId) {
+          activeLiveNotification.value = null
+        }
+      }, 12000)
+    })
+
+    onSocket('live_class_ended', (data: any) => {
+      if (activeLiveNotification.value?.courseId === data.courseId) {
+        activeLiveNotification.value = null
+      }
+      
+      // If user is currently viewing that course, refresh the store to hide the "Join" button
+      const classroomStore = useClassroomStore()
+      if (classroomStore.courseId === String(data.courseId)) {
+        classroomStore.fetchLiveRoom()
+      }
+    })
   }
 })
 </script>

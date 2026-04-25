@@ -1,45 +1,74 @@
 <template>
-  <div class="group relative overflow-hidden rounded-3xl border border-surface-glass-border bg-dark-900/90 shadow-card transition-all duration-300 hover:border-accent/35 hover:shadow-card-hover">
-    <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-purple-500/10 opacity-70" />
+  <div 
+    class="group relative overflow-hidden rounded-[28px] border bg-[#0D0D0E] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
+    :class="[
+      isSpeaking ? 'border-red-500 ring-2 ring-red-500/20' : 'border-white/5 hover:border-white/10'
+    ]"
+  >
+    <!-- Background Gradient for depth -->
+    <div class="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
 
     <video
       ref="videoRef"
       autoplay
       playsinline
-      class="h-full min-h-56 w-full object-cover transition duration-500 group-hover:scale-[1.01]"
+      class="h-full min-h-[220px] md:min-h-[280px] w-full object-cover transition-opacity duration-700"
+      :class="[!hasVisibleVideo ? 'opacity-0' : 'opacity-100']"
       :muted="muted"
     />
 
+    <!-- Video Off / Placeholder State -->
     <div
-      v-if="!stream || !hasVisibleVideo"
-      class="absolute inset-0 flex flex-col items-center justify-center bg-dark-900/80 text-center"
+      v-if="!hasVisibleVideo"
+      class="absolute inset-0 flex flex-col items-center justify-center bg-[#0D0D0E] transition-all duration-500"
     >
-      <div class="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-dark-700/70 text-dark-100">
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="1.8"
-            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14m-6 4h2a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"
-          />
-        </svg>
+      <div class="relative">
+        <div class="absolute inset-0 bg-red-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+        <div class="relative h-20 w-20 rounded-[24px] bg-white/[0.03] border border-white/5 flex items-center justify-center text-white/20">
+          <span class="material-symbols-rounded text-4xl">videocam_off</span>
+        </div>
       </div>
-      <p class="text-sm font-medium text-dark-100">{{ label }}</p>
-      <p class="mt-1 text-xs text-dark-300">
-        {{ stream ? 'Video is currently off' : 'Waiting for stream...' }}
-      </p>
+      <p class="mt-4 text-sm font-bold text-white/80 tracking-tight">{{ label }}</p>
+      <div class="mt-1 flex items-center gap-1.5">
+        <span class="h-1.5 w-1.5 rounded-full bg-red-500/50" />
+        <span class="text-[11px] font-medium text-white/40 uppercase tracking-widest">Camera Off</span>
+      </div>
     </div>
 
-    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent px-3 pb-3 pt-6">
-      <div class="flex items-end justify-between gap-2">
-        <div>
-          <p class="text-sm font-medium text-white drop-shadow">{{ label }}</p>
-          <p class="text-2xs text-white/75">{{ streamStateLabel }}</p>
+    <!-- User Label & Status Overlay -->
+    <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div 
+            v-if="isMuted" 
+            class="h-7 w-7 rounded-lg bg-red-500/20 backdrop-blur-md flex items-center justify-center border border-red-500/20 text-red-500"
+          >
+            <span class="material-symbols-rounded text-[16px]">mic_off</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[14px] font-bold text-white truncate drop-shadow-md">{{ label }}</p>
+          </div>
         </div>
-        <span class="inline-flex items-center gap-1 rounded-lg bg-black/45 px-2 py-1 text-2xs text-white/90">
-          <span class="h-1.5 w-1.5 rounded-full" :class="stream ? 'bg-green-400' : 'bg-dark-400'" />
-          {{ stream ? 'Live' : 'Idle' }}
-        </span>
+        
+        <div class="flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md px-2.5 py-1 border border-white/5">
+          <div class="relative h-1.5 w-1.5">
+            <div class="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
+            <div class="relative h-full w-full rounded-full bg-green-500" />
+          </div>
+          <span class="text-[10px] font-bold text-white/90 uppercase tracking-wider">Live</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speaking Indicator Glow -->
+    <div 
+      v-if="isSpeaking" 
+      class="absolute top-4 right-4 h-8 w-8 rounded-full bg-red-500/10 backdrop-blur-md border border-red-500/20 flex items-center justify-center"
+    >
+      <div class="flex gap-0.5 items-end h-3">
+        <div class="w-0.5 bg-red-500 animate-[bounce_0.6s_infinite]" />
+        <div class="w-0.5 bg-red-500 animate-[bounce_0.8s_infinite]" />
+        <div class="w-0.5 bg-red-500 animate-[bounce_0.4s_infinite]" />
       </div>
     </div>
   </div>
@@ -50,10 +79,12 @@ interface Props {
   stream: MediaStream | null
   label: string
   muted?: boolean
+  isSpeaking?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   muted: false,
+  isSpeaking: false
 })
 
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -63,16 +94,9 @@ const hasVisibleVideo = computed(() => {
   return props.stream.getVideoTracks().some((track) => track.enabled)
 })
 
-const streamStateLabel = computed(() => {
-  if (!props.stream) return 'Not connected'
-
-  const audioTrack = props.stream.getAudioTracks()[0]
-  const videoTrack = props.stream.getVideoTracks()[0]
-
-  const audioState = audioTrack?.enabled ? 'Mic on' : 'Mic off'
-  const videoState = videoTrack?.enabled ? 'Camera on' : 'Camera off'
-
-  return `${audioState} · ${videoState}`
+const isMuted = computed(() => {
+  if (!props.stream) return true
+  return !props.stream.getAudioTracks().some((track) => track.enabled)
 })
 
 const syncVideoElement = async () => {
@@ -85,7 +109,7 @@ const syncVideoElement = async () => {
   try {
     await videoRef.value.play()
   } catch {
-    // Autoplay may be blocked until user interaction.
+    // Autoplay may be blocked
   }
 }
 
@@ -102,3 +126,9 @@ onMounted(() => {
 })
 </script>
 
+<style scoped>
+@keyframes bounce {
+  0%, 100% { height: 4px; }
+  50% { height: 12px; }
+}
+</style>

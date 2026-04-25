@@ -135,35 +135,60 @@
 
       <!-- 3 Action Cards -->
       <div class="grid gap-4 sm:grid-cols-3">
-        <!-- Join Live Class -->
-        <button
-          type="button"
-          class="group relative overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 text-left transition-all duration-200 hover:border-[var(--gold)]/40 hover:shadow-lg hover:shadow-[var(--gold)]/5"
-          @click="handleLiveClass"
+        <!-- Join Live Class Redesigned -->
+        <div
+          class="group relative overflow-hidden rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-6 transition-all duration-300 hover:border-red-500/30 hover:shadow-[0_20px_40px_rgba(239,68,68,0.05)]"
         >
-          <div class="absolute inset-0 bg-gradient-to-br from-red-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div class="relative">
-            <div class="flex items-center justify-between">
-              <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-                <svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          <!-- Animated Gradient Background -->
+          <div class="absolute inset-0 bg-gradient-to-br from-red-500/[0.03] to-orange-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <div class="relative flex flex-col h-full">
+            <div class="flex items-start justify-between">
+              <div class="relative">
+                <div class="w-12 h-12 rounded-[16px] bg-red-500/10 flex items-center justify-center border border-red-500/10 transition-transform group-hover:scale-110 duration-500">
+                  <svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <!-- Pulsing ring if live -->
+                <div v-if="classroomStore.hasActiveLiveRoom" class="absolute -inset-1 rounded-[18px] border border-red-500/20 animate-pulse" />
               </div>
-              <span v-if="classroomStore.hasActiveLiveRoom" class="flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">
-                <span class="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
+
+              <div v-if="classroomStore.hasActiveLiveRoom" class="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-red-500 border border-red-500/20">
+                <span class="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
                 LIVE
-              </span>
+              </div>
             </div>
-            <h3 class="mt-3 text-[15px] font-bold text-[var(--t1)]">
-              {{ isTeacher ? 'Start Live Class' : 'Join Live Class' }}
-            </h3>
-            <p class="mt-1 text-[12px] text-[var(--t2)]">
-              <template v-if="classroomStore.liveRoomLoading">Checking...</template>
-              <template v-else-if="classroomStore.hasActiveLiveRoom">
-                {{ classroomStore.liveRoom?.participantCount || 0 }} participants · {{ classroomStore.liveRoom?.status }}
-              </template>
-              <template v-else>No live class right now</template>
-            </p>
+
+            <div class="mt-5">
+              <h3 class="text-[16px] font-bold text-[var(--t1)] tracking-tight">
+                {{ isTeacher ? 'Live Session Management' : 'Live Classroom' }}
+              </h3>
+              <p class="mt-1.5 text-[12.5px] text-[var(--t3)] leading-relaxed">
+                {{ classroomStore.hasActiveLiveRoom 
+                  ? 'A live session is currently in progress. Join your classmates and instructor now.' 
+                  : (isTeacher ? 'Start a new live session for your students. High-quality video & screen sharing.' : 'No active session right now. You will be notified when class starts.') 
+                }}
+              </p>
+            </div>
+
+            <div class="mt-6">
+              <UiButton 
+                block 
+                :variant="classroomStore.hasActiveLiveRoom ? 'primary' : 'secondary'"
+                class="!rounded-[14px] !h-11 shadow-sm transition-all group-hover:shadow-md"
+                :class="classroomStore.hasActiveLiveRoom ? '!bg-red-500 hover:!bg-red-600 !text-white border-transparent' : ''"
+                @click="handleLiveClass"
+              >
+                <template #icon-left>
+                   <span v-if="classroomStore.hasActiveLiveRoom" class="material-symbols-rounded text-lg">play_circle</span>
+                   <span v-else class="material-symbols-rounded text-lg">{{ isTeacher ? 'add_circle' : 'visibility' }}</span>
+                </template>
+                {{ classroomStore.hasActiveLiveRoom ? 'Join Live Room' : (isTeacher ? 'Start Live Class' : 'View Schedule') }}
+              </UiButton>
+            </div>
           </div>
-        </button>
+        </div>
 
         <!-- Recorded Classes -->
         <button
@@ -380,6 +405,18 @@ const formatDate = (iso: string) => {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
   return new Intl.DateTimeFormat('en-BD', { month: 'short', day: 'numeric', year: 'numeric' }).format(d)
+}
+
+const formatTimestamp = (iso: string) => {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return new Intl.DateTimeFormat('en-BD', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(d)
 }
 
 const formatDuration = (seconds: number) => {

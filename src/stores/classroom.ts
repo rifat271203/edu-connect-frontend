@@ -6,6 +6,7 @@ import {
   getMyClassroomEnrollments,
   getCourseLiveRoom,
   createCourseLiveRoom,
+  deactivateCourseLiveRoom,
   getCourseMaterials,
   getCourseRecordedClasses,
   getCourseGroupChat,
@@ -212,6 +213,19 @@ export const useClassroomStore = defineStore('classroom-room', {
         return result.data
       }
       return null
+    },
+
+    async endLiveRoom() {
+      if (!this.courseId) return false
+      this.liveRoomLoading = true
+      const result = await deactivateCourseLiveRoom(this.courseId)
+      this.liveRoomLoading = false
+
+      if (result.success) {
+        this.liveRoom = null
+        return true
+      }
+      return false
     },
 
     async fetchMaterials(type?: string) {

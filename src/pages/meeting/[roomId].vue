@@ -1,83 +1,95 @@
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-dark-950 text-dark-50">
-    <!-- Decorative background elements -->
+  <div class="relative min-h-screen overflow-hidden bg-[#070708] text-white">
+    <!-- Immersive Background -->
     <div class="pointer-events-none absolute inset-0">
-      <div class="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
-      <div class="absolute -right-16 top-24 h-72 w-72 rounded-full bg-purple-500/20 blur-3xl" />
-      <div class="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-secondary-500/10 blur-3xl" />
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_55%)]" />
+      <div class="absolute -left-48 -top-48 h-[600px] w-[600px] rounded-full bg-red-500/[0.03] blur-[120px]" />
+      <div class="absolute -right-48 bottom-0 h-[500px] w-[500px] rounded-full bg-orange-500/[0.03] blur-[120px]" />
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.02),transparent_60%)]" />
     </div>
 
-    <div class="relative z-10 px-4 py-6 md:px-8 md:py-8">
-      <div class="mx-auto flex w-full max-w-7xl flex-col gap-5">
-        <header class="rounded-3xl border border-surface-glass-border bg-dark-900/75 p-5 shadow-card backdrop-blur-xl md:p-6">
-          <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p class="text-xs font-medium uppercase tracking-[0.22em] text-dark-300">EduConnect Live Session</p>
-              <h1 class="mt-1 text-2xl font-semibold md:text-3xl">Meeting Room</h1>
-              <p class="mt-2 text-sm text-dark-300">
-                Room ID:
-                <span class="rounded-lg bg-dark-800/70 px-2 py-1 font-mono text-dark-100">{{ roomId }}</span>
-              </p>
+    <div class="relative z-10 flex h-screen flex-col overflow-hidden">
+      <!-- Minimalist Header -->
+      <header class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-black/20 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <div class="h-10 w-10 rounded-xl bg-red-500 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+            <span class="material-symbols-rounded text-white">school</span>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-[15px] font-bold tracking-tight truncate">{{ courseTitle || 'Live Classroom' }}</h1>
+            <p class="text-[11px] text-white/40 font-medium uppercase tracking-[0.1em]">Session in progress · {{ roomId }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex -space-x-2">
+            <div v-for="i in Math.min(participants.length, 3)" :key="i" class="h-8 w-8 rounded-full border-2 border-[#070708] bg-white/5 flex items-center justify-center text-[10px] font-bold">
+              {{ participants[i-1]?.name?.charAt(0) || 'P' }}
             </div>
-
-            <div class="flex flex-wrap items-center gap-2 text-sm">
-              <span class="rounded-xl border border-surface-glass-border bg-dark-800/80 px-3 py-1.5 text-dark-100">
-                {{ participants.length }} Participant{{ participants.length === 1 ? '' : 's' }}
-              </span>
-              <span :class="connectionBadgeClass" class="rounded-xl px-3 py-1.5 font-medium">
-                {{ connectionStatus }}
-              </span>
+            <div v-if="participants.length > 3" class="h-8 w-8 rounded-full border-2 border-[#070708] bg-white/10 flex items-center justify-center text-[10px] font-bold">
+              +{{ participants.length - 3 }}
             </div>
           </div>
+          <div class="h-8 w-px bg-white/10" />
+          <span :class="connectionBadgeClass" class="rounded-full px-3 py-1 text-[11px] font-bold tracking-tight border">
+            {{ connectionStatus }}
+          </span>
+        </div>
+      </header>
 
-          <div v-if="error" class="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-            {{ error }}
-          </div>
-        </header>
+      <!-- Main Video Grid -->
+      <main class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+        <div 
+          class="mx-auto grid gap-6"
+          :class="[
+            participants.length <= 1 ? 'max-w-4xl grid-cols-1' : 
+            participants.length <= 2 ? 'max-w-6xl grid-cols-1 md:grid-cols-2' :
+            'max-w-7xl grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+          ]"
+        >
+          <!-- Local Participant -->
+          <MeetingVideoTile
+            v-if="localParticipant"
+            :stream="localParticipant.videoStream || null"
+            :label="`You (${localParticipant.name || 'User'})`"
+            muted
+          />
 
-        <section class="rounded-3xl border border-surface-glass-border bg-dark-900/70 p-4 shadow-card backdrop-blur-xl md:p-5">
-          <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h2 class="text-lg font-semibold">Participants</h2>
-            <p class="text-sm text-dark-300">
-              {{ participants.length > 1 ? 'Live media streams are active.' : 'Share the room link and wait for others to join.' }}
-            </p>
-          </div>
+          <!-- Remote Participants -->
+          <MeetingVideoTile
+            v-for="participant in remoteParticipants"
+            :key="participant.sessionId"
+            :stream="participant.videoStream || null"
+            :label="participant.name || 'Participant'"
+          />
 
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <!-- Local Participant -->
-            <MeetingVideoTile
-              v-if="localParticipant"
-              :stream="localParticipant.videoStream || null"
-              :label="`You${localParticipant.isMuted ? ' (Muted)' : ''}`"
-              muted
-            />
-
-            <!-- Remote Participants -->
-            <MeetingVideoTile
-              v-for="participant in remoteParticipants"
-              :key="participant.sessionId"
-              :stream="participant.videoStream || null"
-              :label="participant.name || 'Participant'"
-            />
-
-            <!-- Empty State -->
-            <div
-              v-if="remoteParticipants.length === 0 && !isConnecting"
-              class="flex min-h-56 flex-col items-center justify-center rounded-3xl border border-dashed border-surface-glass-border bg-dark-800/35 px-5 text-center"
-            >
-              <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/20 text-accent-light">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5V4H2v16h5m10 0v-5a3 3 0 00-3-3H10a3 3 0 00-3 3v5m10 0H7" />
-                </svg>
+          <!-- Empty State -->
+          <div
+            v-if="remoteParticipants.length === 0 && !isConnecting"
+            class="flex flex-col items-center justify-center rounded-[32px] border-2 border-dashed border-white/5 bg-white/[0.02] p-12 text-center transition-all hover:bg-white/[0.04] group"
+          >
+            <div class="relative mb-6">
+              <div class="absolute inset-0 bg-red-500/10 blur-3xl rounded-full scale-150 animate-pulse" />
+              <div class="relative h-20 w-20 rounded-[28px] bg-red-500/10 flex items-center justify-center border border-red-500/10 text-red-500 group-hover:scale-110 transition-transform duration-500">
+                <span class="material-symbols-rounded text-4xl">group_add</span>
               </div>
-              <p class="font-medium text-dark-100">Waiting for participants</p>
-              <p class="mt-1 text-sm text-dark-300">Invite classmates using the copy link button below.</p>
             </div>
+            <h2 class="text-xl font-bold tracking-tight">Waiting for others to join</h2>
+            <p class="mt-2 text-sm text-white/40 max-w-xs mx-auto">
+              You're the first one here! Copy the session link and share it with your students or peers.
+            </p>
+            <button 
+              @click="copyMeetingLink"
+              class="mt-8 h-11 px-6 rounded-xl bg-white text-black font-bold text-sm hover:scale-105 transition-transform shadow-lg"
+            >
+              Copy Session Link
+            </button>
           </div>
-        </section>
+        </div>
+      </main>
 
-        <div class="sticky bottom-4 z-20">
+      <!-- Fixed Controls Area -->
+      <footer class="px-6 py-8 pointer-events-none">
+        <div class="pointer-events-auto">
           <MeetingControls
             :is-muted="isMuted"
             :is-camera-off="isCameraOff"
@@ -88,7 +100,7 @@
             @leave="leaveSession"
           />
         </div>
-      </div>
+      </footer>
     </div>
   </div>
 </template>
@@ -96,12 +108,15 @@
 <script setup lang="ts">
 import { useStreamVideo } from '~/composables/useStreamVideo'
 import { useUserStore } from '~/stores/user'
+import { useClassroomStore } from '~/stores/classroom'
+import { useRole } from '~/composables/useRole'
 
 definePageMeta({
   layout: 'blank',
 })
 
 const route = useRoute()
+const classroomStore = useClassroomStore()
 const roomId = computed(() => String(route.params.roomId || ''))
 const { call, isConnecting, error, joinCall, leaveCall } = useStreamVideo()
 
@@ -112,17 +127,19 @@ const remoteParticipants = computed(() => call.value?.state.remoteParticipants |
 const isMuted = computed(() => localParticipant.value?.isMuted || false)
 const isCameraOff = computed(() => !localParticipant.value?.videoStream)
 
+const courseTitle = computed(() => classroomStore.course?.title)
+
 const connectionStatus = computed(() => {
-  if (isConnecting.value) return 'Connecting...'
+  if (isConnecting.value) return 'Connecting'
   if (error.value) return 'Error'
-  if (call.value) return 'Connected'
-  return 'Initializing...'
+  if (call.value) return 'Encrypted'
+  return 'Initializing'
 })
 
 const connectionBadgeClass = computed(() => {
-  if (error.value) return 'border border-red-500/30 bg-red-500/15 text-red-300'
-  if (isConnecting.value) return 'border border-secondary-500/30 bg-secondary-500/15 text-secondary-300'
-  return 'border border-accent/30 bg-accent/15 text-accent-light'
+  if (error.value) return 'border-red-500/20 bg-red-500/10 text-red-500'
+  if (isConnecting.value) return 'border-orange-500/20 bg-orange-500/10 text-orange-500'
+  return 'border-green-500/20 bg-green-500/10 text-green-500'
 })
 
 const toggleMic = async () => {
@@ -138,11 +155,14 @@ const toggleCamera = async () => {
 const copyMeetingLink = () => {
   if (process.client) {
     navigator.clipboard.writeText(window.location.href)
-    // You could add a toast notification here
   }
 }
 
 const leaveSession = async () => {
+  const { isTeacher } = useRole()
+  if (isTeacher.value) {
+    await classroomStore.endLiveRoom()
+  }
   await leaveCall()
   navigateTo('/classroom')
 }
@@ -153,3 +173,19 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+</style>

@@ -873,6 +873,13 @@ export const createCourseLiveRoom = async (
   return { ...result, data: normalized }
 }
 
+export const deactivateCourseLiveRoom = async (courseId: string): Promise<ApiResponse<{ message: string }>> => {
+  return await apiRequest<{ message: string }>(
+    `/api/classroom/courses/${encodeURIComponent(courseId)}/live-room`,
+    'DELETE',
+  )
+}
+
 // --- Course Materials ---
 
 export interface CourseMaterialItem {

@@ -1,64 +1,72 @@
 <template>
-  <div class="rounded-3xl border border-surface-glass-border bg-dark-900/85 p-3 shadow-card backdrop-blur-xl">
-    <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3">
-      <UiButton :variant="isMuted ? 'danger' : 'secondary'" :disabled="disabled" class="!h-11 !rounded-2xl !px-4" @click="$emit('toggle-mic')">
-        <template #icon-left>
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.8"
-              d="M12 1v11m0 0a3 3 0 003-3V5a3 3 0 10-6 0v4a3 3 0 003 3zm-7 0a7 7 0 0014 0M12 19v4"
-            />
-          </svg>
-        </template>
-        {{ isMuted ? 'Unmute' : 'Mute' }}
-      </UiButton>
+  <div class="flex flex-col items-center gap-4">
+    <div class="relative group">
+      <!-- Glow effect behind the bar -->
+      <div class="absolute -inset-4 bg-red-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      
+      <div class="relative flex items-center gap-2 p-2 rounded-[24px] border border-white/10 bg-black/60 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        
+        <!-- Toggle Mic -->
+        <button
+          @click="$emit('toggle-mic')"
+          :disabled="disabled"
+          class="h-12 w-12 flex items-center justify-center rounded-[18px] transition-all duration-300"
+          :class="[
+            isMuted 
+              ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]' 
+              : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+          ]"
+        >
+          <span class="material-symbols-rounded text-2xl">
+            {{ isMuted ? 'mic_off' : 'mic' }}
+          </span>
+        </button>
 
-      <UiButton :variant="isCameraOff ? 'danger' : 'secondary'" :disabled="disabled" class="!h-11 !rounded-2xl !px-4" @click="$emit('toggle-camera')">
-        <template #icon-left>
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.8"
-              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14m-6 4h2a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"
-            />
-          </svg>
-        </template>
-        {{ isCameraOff ? 'Camera On' : 'Camera Off' }}
-      </UiButton>
+        <!-- Toggle Camera -->
+        <button
+          @click="$emit('toggle-camera')"
+          :disabled="disabled"
+          class="h-12 w-12 flex items-center justify-center rounded-[18px] transition-all duration-300"
+          :class="[
+            isCameraOff 
+              ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]' 
+              : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+          ]"
+        >
+          <span class="material-symbols-rounded text-2xl">
+            {{ isCameraOff ? 'videocam_off' : 'videocam' }}
+          </span>
+        </button>
 
-      <UiButton variant="secondary" :disabled="disabled" class="!h-11 !rounded-2xl !px-4" @click="$emit('copy-link')">
-        <template #icon-left>
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.8"
-              d="M8 11h8m-8 4h5m-7 5h12a2 2 0 002-2V6a2 2 0 00-2-2H9.414a2 2 0 01-1.414-.586L6.586 2A2 2 0 005.172 1.414H4a2 2 0 00-2 2v15a2 2 0 002 2z"
-            />
-          </svg>
-        </template>
-        Copy Link
-      </UiButton>
+        <div class="w-px h-6 bg-white/10 mx-1" />
 
-      <UiButton variant="danger" :disabled="disabled" class="!h-11 !rounded-2xl !px-5" @click="$emit('leave')">
-        <template #icon-left>
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.8"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
-            />
-          </svg>
-        </template>
-        Leave Call
-      </UiButton>
+        <!-- Copy Link -->
+        <button
+          @click="$emit('copy-link')"
+          :disabled="disabled"
+          class="h-12 px-4 flex items-center gap-2 rounded-[18px] bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all duration-300"
+        >
+          <span class="material-symbols-rounded text-[20px]">content_copy</span>
+          <span class="hidden md:inline text-[13px] font-bold tracking-tight">Copy Link</span>
+        </button>
+
+        <div class="w-px h-6 bg-white/10 mx-1" />
+
+        <!-- Leave Call -->
+        <button
+          @click="$emit('leave')"
+          :disabled="disabled"
+          class="h-12 px-5 flex items-center gap-2 rounded-[18px] bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 group/leave"
+        >
+          <span class="material-symbols-rounded text-2xl group-hover/leave:translate-x-1 transition-transform">logout</span>
+          <span class="hidden md:inline text-[13px] font-bold tracking-tight">End Session</span>
+        </button>
+      </div>
     </div>
-
-    <p class="mt-2 text-center text-2xs text-dark-400">Meeting controls remain visible while you scroll.</p>
+    
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-white/20 select-none">
+      Secure end-to-end encrypted session
+    </p>
   </div>
 </template>
 
@@ -80,4 +88,3 @@ defineEmits<{
   (e: 'leave'): void
 }>()
 </script>
-
