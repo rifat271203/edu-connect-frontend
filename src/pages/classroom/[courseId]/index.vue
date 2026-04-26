@@ -172,7 +172,7 @@
               </p>
             </div>
 
-            <div class="mt-6">
+            <div class="mt-6 flex flex-col gap-2">
               <UiButton 
                 block 
                 :variant="classroomStore.hasActiveLiveRoom ? 'primary' : 'secondary'"
@@ -185,6 +185,20 @@
                    <span v-else class="material-symbols-rounded text-lg">{{ isTeacher ? 'add_circle' : 'visibility' }}</span>
                 </template>
                 {{ classroomStore.hasActiveLiveRoom ? 'Join Live Room' : (isTeacher ? 'Start Live Class' : 'View Schedule') }}
+              </UiButton>
+
+              <UiButton
+                v-if="isTeacher && classroomStore.hasActiveLiveRoom"
+                block
+                variant="ghost"
+                class="!rounded-[14px] !h-10 !text-red-500 hover:!bg-red-500/10 !border-red-500/20"
+                :loading="classroomStore.liveRoomLoading"
+                @click="classroomStore.endLiveRoom()"
+              >
+                <template #icon-left>
+                  <span class="material-symbols-rounded text-lg">stop_circle</span>
+                </template>
+                End Current Session
               </UiButton>
             </div>
           </div>

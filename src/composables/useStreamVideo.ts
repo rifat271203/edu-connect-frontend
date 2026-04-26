@@ -12,7 +12,7 @@ export const useStreamVideo = () => {
   const runtimeConfig = useRuntimeConfig()
   
   const client = shallowRef<StreamVideoClient | null>(null)
-  const call = ref<Call | null>(null)
+  const call = shallowRef<Call | null>(null)
   const isConnecting = ref(false)
   const error = ref<string | null>(null)
 
@@ -56,13 +56,46 @@ export const useStreamVideo = () => {
     }
   }
 
-  const joinCall = async (roomId: string, type: string = 'default') => {
+  const joinCall = async (roomId: string, type: string = 'default', options: { audio?: boolean, video?: boolean } = { audio: true, video: true }) => {
     const streamClient = await initClient()
     if (!streamClient) return null
 
     try {
       const newCall = streamClient.call(type, roomId)
+      
       await newCall.join({ create: true })
+
+      // Explicitly enable media based on options
+      if (options.video) {
+        try {
+          // Debugging: Log available devices
+          if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            const devices = await navigator.mediaDevices.enumerateDevices()
+            const videoDevices = devices.filter(d => d.kind === 'videoinput')
+            console.log('[StreamVideo] Detected video devices:', videoDevices.length ? videoDevices : 'NONE FOUND BY BROWSER')
+          }
+          await newCall.camera.enable()
+        } catch (e: any) {
+          if (e.name === 'NotAllowedError' || e.name === 'NotFoundError' || e.name === 'NotReadableError') {
+            console.warn(`[StreamVideo] Camera access failed (${e.name}):`, e.message)
+          } else {
+            console.error('[StreamVideo] Camera enable failed:', e)
+          }
+        }
+      }
+      
+      if (options.audio) {
+        try {
+          await newCall.microphone.enable()
+        } catch (e: any) {
+          if (e.name === 'NotAllowedError' || e.name === 'NotFoundError' || e.name === 'NotReadableError') {
+            console.warn(`[StreamVideo] Microphone access failed (${e.name}):`, e.message)
+          } else {
+            console.error('[StreamVideo] Microphone enable failed:', e)
+          }
+        }
+      }
+
       call.value = newCall
       return newCall
     } catch (err: any) {
@@ -87,9 +120,6 @@ export const useStreamVideo = () => {
     }
   }
 
-  onBeforeUnmount(() => {
-    disconnect()
-  })
 
   return {
     client,

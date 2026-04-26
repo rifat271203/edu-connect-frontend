@@ -114,7 +114,7 @@ const syncVideoElement = async () => {
 }
 
 watch(
-  () => [props.stream, props.muted, hasVisibleVideo.value] as const,
+  () => props.stream,
   () => {
     syncVideoElement().catch(() => undefined)
   },
