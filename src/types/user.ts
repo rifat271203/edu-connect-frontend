@@ -22,4 +22,8 @@ export interface UserPreview {
   profilePicUrl?: string
   isProfilePublic?: boolean
   role?: string
+  isFriend?: boolean
+  pendingSent?: boolean
+  pendingReceived?: boolean
+  requestId?: string
 }

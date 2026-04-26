@@ -39,12 +39,11 @@
 
           <p v-if="searchError" class="mt-2 text-xs text-[rgba(239,68,68,0.9)]">{{ searchError }}</p>
 
-          <div v-if="searchedUsers.length" class="mt-2 max-h-40 overflow-y-auto space-y-1 pr-1">
-            <button
+          <div v-if="searchedUsers.length" class="mt-2 max-h-60 overflow-y-auto space-y-2 pr-1">
+            <div
               v-for="user in searchedUsers"
               :key="`search-${user.id}`"
-              type="button"
-              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg border border-transparent hover:bg-[var(--surface2)] hover:border-[var(--line)] transition-colors text-left"
+              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg border border-[var(--line)] bg-[var(--surface2)] hover:bg-[var(--surface2)] hover:border-[var(--line)] transition-colors text-left"
               @click="openConversation(user)"
             >
               <UiAvatar :src="user.avatar" :name="user.displayName" size="sm" />
@@ -52,7 +51,7 @@
                 <p class="text-xs text-[var(--t1)] truncate">{{ user.displayName }}</p>
                 <p class="mono-label text-[11px] text-[var(--t3)] truncate">@{{ user.username }}</p>
               </div>
-            </button>
+            </div>
           </div>
         </div>
 
@@ -86,12 +85,12 @@
           <p class="section-label mb-2">Course Groups</p>
           <div class="space-y-1">
             <button v-for="group in courseGroups" :key="'group-'+group.courseId" type="button" class="w-full text-left flex items-center gap-2 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--surface2)]" @click="openGroupChat(group)">
-              <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--gold)]/20 to-[var(--blue)]/20 flex items-center justify-center text-xs shrink-0">📚</div>
+              <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--primary)]/20 to-[var(--accent-dim)] flex items-center justify-center text-xs shrink-0">📚</div>
               <div class="min-w-0 flex-1">
                 <p class="text-xs text-[var(--t1)] truncate font-medium">{{ group.courseTitle }}</p>
                 <p class="text-[10px] text-[var(--t3)]">{{ group.memberCount }} members</p>
               </div>
-              <span v-if="group.unreadCount > 0" class="shrink-0 min-w-4 px-1 h-4 rounded-full bg-[var(--gold)] text-[#07090f] text-[10px] font-semibold inline-flex items-center justify-center">{{ group.unreadCount }}</span>
+              <span v-if="group.unreadCount > 0" class="shrink-0 min-w-4 px-1 h-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-semibold inline-flex items-center justify-center">{{ group.unreadCount }}</span>
             </button>
           </div>
         </div>
@@ -117,7 +116,7 @@
               class="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
               :class="[
                 selectedUserId === String(conversation.user.id)
-                  ? 'bg-[rgba(196,164,100,0.1)] border-l-2 border-l-[var(--gold)] border-[var(--line)]'
+                  ? 'bg-[var(--accent-subtle)] border-l-2 border-l-[var(--primary)] border-[var(--line)]'
                   : 'hover:bg-[var(--surface2)] border border-transparent',
               ]"
               @click="openConversation(conversation.user)"
@@ -140,7 +139,7 @@
 
               <span
                 v-if="conversation.unreadCount > 0"
-                class="shrink-0 min-w-5 px-1.5 h-5 rounded-full bg-[var(--gold)] text-[#07090f] text-[11px] font-semibold inline-flex items-center justify-center"
+                class="shrink-0 min-w-5 px-1.5 h-5 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold inline-flex items-center justify-center"
               >
                 {{ conversation.unreadCount }}
               </span>
@@ -194,14 +193,14 @@
                 class="max-w-[85%] sm:max-w-[68%] rounded-[12px] px-3 py-2"
                 :class="[
                   isOwnMessage(message)
-                    ? 'bg-[var(--gold)] text-[#07090f]'
+                    ? 'bg-[var(--primary)] text-[var(--on-primary)]'
                     : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
                 ]"
               >
                 <p class="text-[14px] whitespace-pre-wrap break-words">{{ message.messageText }}</p>
                 <p
                   class="mt-1 text-[10px]"
-                  :class="isOwnMessage(message) ? 'text-[#07090f]/65' : 'text-[rgba(244,241,235,0.3)]'"
+                  :class="isOwnMessage(message) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
                 >
                   {{ formatMessageTime(message.createdAt) }}
                   <span v-if="isOwnMessage(message)">· {{ message.isRead ? 'Seen' : 'Sent' }}</span>
@@ -247,6 +246,8 @@ import {
   sendDmMessage,
   type DmConversation,
   type DmMessage,
+  respondToFriendRequest,
+  sendFriendRequest,
   type SocialUserRole,
 } from '~/services/api/social'
 import type { UserPreview } from '~/types/user'
@@ -615,7 +616,43 @@ const loadMessages = async (options: { older?: boolean } = {}) => {
   await markVisibleMessagesRead()
 }
 
+const handleFriendAction = async (user: UserPreview, action: 'add' | 'accept') => {
+  if (searchLoading.value) return
+  searchLoading.value = true
+  searchError.value = ''
+
+  try {
+    if (action === 'add') {
+      const result = await sendFriendRequest(user.id)
+      if (result.success) {
+        user.pendingSent = true
+      } else {
+        searchError.value = result.error || 'Failed to send request'
+      }
+    } else if (action === 'accept' && user.requestId) {
+      const result = await respondToFriendRequest(user.requestId, 'accepted')
+      if (result.success) {
+        user.isFriend = true
+        user.pendingReceived = false
+        // Refresh friends list
+        loadFriends()
+      } else {
+        searchError.value = result.error || 'Failed to accept request'
+      }
+    }
+  } catch (err) {
+    searchError.value = 'An error occurred'
+  } finally {
+    searchLoading.value = false
+  }
+}
+
 const openConversation = async (user: UserPreview) => {
+  if (!user.isFriend && String(user.id) !== currentUserId.value) {
+    if (!conversationUserIds.value.has(String(user.id))) {
+      return
+    }
+  }
   const normalizedUserId = String(user.id)
 
   selectedUserId.value = normalizedUserId
