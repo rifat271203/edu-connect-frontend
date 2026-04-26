@@ -16,8 +16,8 @@
           <svg class="book-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 12C8 9.79086 9.79086 8 12 8H28C30.2091 8 32 9.79086 32 12V52C32 54.2091 30.2091 56 28 56H12C9.79086 56 8 54.2091 8 52V12Z" fill="white" fill-opacity="0.9"/>
             <path d="M32 12C32 9.79086 33.7909 8 36 8H52C54.2091 8 56 9.79086 56 12V52C56 54.2091 54.2091 56 52 56H36C33.7909 56 32 54.2091 32 52V12Z" fill="white" fill-opacity="0.8"/>
-            <path d="M20 8H44V20C44 20 38 16 32 16C26 16 20 20 20 20V8Z" fill="#3b4fd6"/>
-            <!-- Graduation Cap -->
+            <path d="M20 8H44V20C44 20 38 16 32 16C26 16 20 20 20 20V8Z" fill="#2E6F40"/>
+<!-- Graduation Cap -->
             <path d="M32 2L52 10L32 18L12 10L32 2Z" fill="white"/>
             <path d="M44 12V22L32 28L20 22V12" stroke="white" stroke-width="2" fill="none"/>
             <rect x="48" y="10" width="4" height="14" fill="white"/>
@@ -128,7 +128,7 @@ export default {
 /* Left Section */
 .left-section {
   flex: 0 0 45%;
-  background: linear-gradient(180deg, #0a192f 0%, #112240 100%);
+  background: linear-gradient(180deg, #121A15 0%, #253D2C 100%);
   padding: 40px;
   position: relative;
   overflow: hidden;

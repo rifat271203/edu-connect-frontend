@@ -3,86 +3,46 @@
     <!-- Tag Row with dynamic categorization -->
     <div class="flex flex-wrap gap-1.5 items-center">
       <!-- Primary Chemistry tag -->
-      <span class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all" 
-            :style="{ 
-              background: 'var(--gold-dim)', 
-              color: 'var(--gold2)', 
-              border: '1px solid rgba(212,168,67,0.3)', 
-              fontFamily: 'DM Mono'
-            }">
+      <span class="px-2.5 py-1 rounded-full text-[11px] font-medium font-mono border border-brand-primary/30 bg-brand-primary/10 text-brand-primary transition-all dark:border-brand-primary/40 dark:bg-brand-primary/20">
         ⚗️ Chemistry
       </span>
 
       <!-- Mode badge -->
       <span v-if="message.chemistrySolution?.question_mode" 
-            class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-            :style="{ 
-              background: 'var(--bg3)', 
-              color: 'var(--teal)', 
-              border: '1px solid rgba(45,212,191,0.3)', 
-              fontFamily: 'DM Mono'
-            }">
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium font-mono border border-teal-200 bg-slate-50 text-teal-600 transition-all dark:border-teal-800/50 dark:bg-white/5 dark:text-teal-400">
         {{ questionModeLabel(message.chemistrySolution.question_mode) }}
       </span>
 
       <!-- Reaction type badge -->
       <span v-if="getReactionType()" 
-            class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-            :style="{ 
-              background: 'var(--bg3)', 
-              color: 'var(--text2)', 
-              border: '1px solid var(--line)', 
-              fontFamily: 'DM Mono'
-            }">
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium font-mono border border-slate-200 bg-slate-50 text-slate-600 transition-all dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
         {{ reactionTypeLabel(getReactionType()) }}
       </span>
 
       <!-- Carbon change badge -->
       <span v-if="getCarbonChange()" 
-            class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-            :style="{ 
-              background: 'var(--bg3)', 
-              color: 'var(--text2)', 
-              border: '1px solid var(--line)', 
-              fontFamily: 'DM Mono'
-            }">
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium font-mono border border-slate-200 bg-slate-50 text-slate-600 transition-all dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
         {{ carbonChangeLabel(getCarbonChange()) }}
       </span>
 
       <!-- Context used badge -->
       <span v-if="message.chemistrySolution?.contextUsed" 
-            class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-            :style="{ 
-              background: 'var(--bg3)', 
-              color: 'var(--text2)', 
-              border: '1px solid var(--line)', 
-              fontFamily: 'DM Mono'
-            }">
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium font-mono border border-slate-200 bg-slate-50 text-slate-600 transition-all dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
         context used
       </span>
     </div>
 
     <!-- Overview Card with Enhanced Styling -->
     <div v-if="message.chemistrySolution?.overview" 
-         class="px-6 py-5 rounded-2xl backdrop-blur-sm transition-all hover:border-opacity-60"
-         :style="{ 
-           background: 'linear-gradient(135deg, rgba(14,21,32,0.6) 0%, rgba(20,29,46,0.4) 100%)',
-           border: '1px solid rgba(212,168,67,0.15)',
-           borderLeft: '3px solid var(--gold2)'
-         }">
+         class="px-6 py-5 rounded-2xl border-l-4 border-l-brand-primary border-y border-r border-y-brand-primary/20 border-r-brand-primary/20 bg-brand-primary/5 backdrop-blur-sm transition-all dark:border-y-brand-primary/30 dark:border-r-brand-primary/30 dark:bg-brand-primary/10">
       <!-- Overview title -->
       <div v-if="message.chemistrySolution.overview.title" class="mb-2">
-        <p class="text-sm font-semibold" :style="{ color: 'var(--gold2)', fontFamily: 'DM Sans', letterSpacing: '0.3px' }">
+        <p class="text-sm font-semibold tracking-[0.3px] text-brand-primary">
           {{ message.chemistrySolution.overview.title }}
         </p>
       </div>
       <!-- Overview text with formatted bold -->
-      <p class="text-sm leading-relaxed" 
-         :style="{ 
-           color: 'var(--text2)', 
-           fontFamily: 'DM Sans',
-           lineHeight: '1.68'
-         }"
+      <p class="text-sm leading-[1.68] text-slate-700 dark:text-slate-300" 
          v-html="formatBoldText(message.chemistrySolution.overview.text)">
       </p>
     </div>

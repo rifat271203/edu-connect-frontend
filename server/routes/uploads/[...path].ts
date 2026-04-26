@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://sincere-spontaneity-production-ab4e.up.railway.app'
+const BACKEND_URL = 'https://edu-connect-backend-bcf0.onrender.com'
 
 export default defineEventHandler(async (event) => {
   const path = event.context.params?.path || ''

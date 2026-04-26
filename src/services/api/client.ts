@@ -1,6 +1,6 @@
 // API architecture: Config -> Client provider -> Base client -> HTTP executor
 
-const DEFAULT_API_BASE_URL = 'http://localhost:3001'
+const DEFAULT_API_BASE_URL = 'https://edu-connect-backend-bcf0.onrender.com'
 
 const normalizeBaseUrl = (value: string): string => value.replace(/\/+$/, '')
 

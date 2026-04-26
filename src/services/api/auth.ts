@@ -63,7 +63,7 @@ const toBoolean = (value: unknown, fallback = false): boolean => {
   return fallback
 }
 
-const BACKEND_UPLOAD_PREFIX = 'https://sincere-spontaneity-production-ab4e.up.railway.app/uploads/'
+const BACKEND_UPLOAD_PREFIX = 'https://edu-connect-backend-bcf0.onrender.com/uploads/'
 
 const toMediaUrl = (value: string | undefined | false): string | undefined => {
   if (!value) return undefined

@@ -1,48 +1,36 @@
 <template>
-  <div class="relative min-h-screen bg-[var(--ink)] text-[var(--t1)] flex overflow-x-hidden">
-    <!-- Left Sidebar - Desktop -->
-    <LayoutSidebar v-if="showDesktopSidebar" class="hidden lg:flex z-20" />
-    
-    <!-- Main Content Area -->
-    <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen', showDesktopSidebar ? 'lg:pl-[240px]' : '']">
-      <!-- Mobile Header -->
-      <header v-if="!isAiTutorRoute" class="topbar lg:hidden sticky top-0 z-40">
-        <div class="flex h-[60px] items-center justify-between px-4">
-          <NuxtLink to="/home" class="flex items-center gap-2 group">
-            <div class="w-8 h-8 rounded-lg border border-[rgba(196,164,100,0.38)] bg-[var(--surface2)] text-[var(--gold)] flex items-center justify-center transition-all duration-150 group-hover:border-[var(--gold)]">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4.5 6.5h7v4.5h-7zM12.5 8h7v4.5h-7zM7 13.5h7v4h-7z" />
-              </svg>
-            </div>
-            <span class="font-semibold text-[18px] tracking-[-0.02em] text-[var(--t1)]">EduConnect</span>
-          </NuxtLink>
-          
-          <div class="flex items-center gap-2">
-            <button class="btn-ghost !h-9 !w-9 !p-0">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-            </button>
-            <button v-if="!isGuest" @click="toggleMobileMenu" class="btn-ghost !h-9 !w-9 !p-0">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
+  <div class="relative min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col">
+    <!-- Desktop Header -->
+    <LayoutHeader v-if="!isGuest" class="hidden md:flex" />
+
+    <div class="flex flex-1 relative">
+      <!-- Left Sidebar -->
+      <LayoutSidebar v-if="showDesktopSidebar" class="hidden md:flex z-20" @logout="userStore.logout" />
       
-      <!-- Page Content -->
-      <div class="flex-1 flex min-h-0">
-        <!-- Middle Content (Feed) -->
-        <div class="flex-1 min-w-0 min-h-0 bg-[var(--ink)]">
+      <!-- Main Content Area -->
+      <main :class="['relative z-10 w-full min-w-0 flex flex-col min-h-screen flex-1 transition-all duration-300', showDesktopSidebar ? 'md:ml-72' : '', showDesktopRightSidebar ? 'lg:mr-80' : '']">
+        <!-- Mobile Header (Existing) -->
+        <header v-if="!isAiTutorRoute && !isGuest" class="sticky top-0 z-40 flex md:hidden justify-between items-center w-full px-6 py-3 border-b border-white/5 dark:bg-black/40 bg-white/60 backdrop-blur-xl">
+          <NuxtLink to="/home" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg shadow-brand-primary/20">
+              <span class="material-symbols-rounded text-white font-bold text-lg">school</span>
+            </div>
+            <span class="text-lg font-extrabold tracking-tight dark:text-white text-slate-900">EduConnect</span>
+          </NuxtLink>
+          <button @click="toggleMobileMenu" class="w-9 h-9 flex items-center justify-center text-slate-500">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+        </header>
+        
+        <!-- Page Content -->
+        <div class="flex-1 p-4 md:p-8">
           <slot />
         </div>
-        
-        <!-- Right Sidebar - Desktop (hidden on ai-tutor/messages pages) -->
-        <LayoutRightSidebar v-if="showDesktopRightSidebar" class="hidden xl:block" />
-      </div>
-    </main>
+      </main>
+
+      <!-- Right Sidebar Hub -->
+      <LayoutRightSidebar v-if="showDesktopRightSidebar" class="hidden lg:flex" />
+    </div>
     
     <!-- Mobile Sidebar Overlay -->
       <div 
@@ -54,6 +42,7 @@
         <LayoutSidebar 
           class="absolute left-0 top-0 bottom-0 w-[240px] animate-slide-up" 
           @navigate="toggleMobileMenu"
+          @logout="userStore.logout"
         />
     </div>
     
@@ -212,7 +201,11 @@ const isAiTutorRoute = computed(() => route.path === '/ai-tutor')
 const authCookie = useCookie<string | null>('educonnect_auth')
 const tokenCookie = useCookie<string | null>('educonnect_token')
 const hasCookieSession = computed(() => authCookie.value === 'true' && Boolean(tokenCookie.value))
-const isGuest = computed(() => !(userStore.isAuthenticated || hasCookieSession.value))
+const isGuest = computed(() => {
+  const guest = !(userStore.isAuthenticated || hasCookieSession.value)
+  console.log('MainLayout isGuest:', guest, 'isAuthenticated:', userStore.isAuthenticated, 'hasCookieSession:', hasCookieSession.value)
+  return guest
+})
 const guestAllowedPaths = new Set(['/login', '/loginV2', '/signup', '/home', '/ai-tutor'])
 const isProtectedRoute = computed(() => !guestAllowedPaths.has(route.path))
 const showDesktopSidebar = computed(() => {
@@ -248,6 +241,11 @@ onBeforeUnmount(() => {
 })
 
 onMounted(() => {
+  userStore.initAuth()
   hasMounted.value = true
+
+  if (userStore.isAuthenticated && !userStore.user) {
+    void userStore.syncCurrentUser()
+  }
 })
 </script>

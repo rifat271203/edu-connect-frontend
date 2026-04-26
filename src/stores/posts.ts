@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { addComment, createPost, deletePost, getFeedPosts, likePost, unlikePost, uploadPostMedia } from '~/services/api/social'
-import type { Post } from '~/types/post'
+import type { Comment, Post } from '~/types/post'
 
 interface PostsState {
   posts: Post[]
@@ -44,10 +44,13 @@ export const usePostsStore = defineStore('posts', {
       this.error = null
 
       const offset = (this.page - 1) * this.limit
+      console.log('Fetching posts with offset:', offset, 'limit:', this.limit)
       const result = await getFeedPosts(this.limit, offset)
+      console.log('Fetch posts result:', result)
 
       if (result.success && result.data) {
         const incomingPosts = result.data
+        console.log('Incoming posts count:', incomingPosts.length)
 
         if (this.page === 1 || reset) {
           this.posts = incomingPosts
@@ -139,13 +142,18 @@ export const usePostsStore = defineStore('posts', {
       }
 
       const previousCount = post.comments
+      const previousComments = [...(post.commentItems || [])]
       post.comments += 1
 
       const result = await addComment(postId, { commentText: trimmedComment })
 
       if (!result.success) {
         post.comments = previousCount
+        post.commentItems = previousComments
         this.error = result.error || 'Failed to add comment'
+      } else if (result.data) {
+        const newComment = result.data as Comment
+        post.commentItems = [...(post.commentItems || []), newComment]
       }
 
       return result

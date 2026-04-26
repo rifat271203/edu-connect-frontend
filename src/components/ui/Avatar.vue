@@ -1,20 +1,20 @@
 <template>
   <div 
-    class="relative inline-flex shrink-0" 
-    :class="[sizeClasses, { 'ring-2 ring-[rgba(255,255,255,0.14)]': hasRing }]"
+    class="relative inline-flex shrink-0 overflow-hidden" 
+    :class="[sizeClasses, rounded, { 'ring-2 ring-[rgba(255,255,255,0.14)]': hasRing }]"
   >
     <img
       v-if="src && !imageError"
       :src="src"
       :alt="alt"
-      class="rounded-full object-cover bg-dark-700"
-      :class="sizeClasses"
+      class="object-cover bg-dark-700 w-full h-full"
+      :class="rounded"
       @error="handleImageError"
     />
     <div
       v-else
-      class="rounded-full flex items-center justify-center text-white font-bold uppercase tracking-[0.02em] font-['DM_Sans']"
-      :class="sizeClasses"
+      class="flex items-center justify-center text-white font-bold uppercase tracking-[0.02em] font-['DM_Sans'] w-full h-full"
+      :class="[rounded]"
       :style="{ background: fallbackBackground }"
     >
       <span :class="textSizeClasses">{{ initials }}</span>
@@ -38,12 +38,13 @@
 interface Props {
   src?: string
   alt?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   online?: boolean
   showOnline?: boolean
   showDot?: boolean
   hasRing?: boolean
   name?: string
+  rounded?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -53,7 +54,8 @@ const props = withDefaults(defineProps<Props>(), {
   showOnline: false,
   showDot: false,
   hasRing: false,
-  name: ''
+  name: '',
+  rounded: 'rounded-full'
 })
 
 const imageError = ref(false)
@@ -64,7 +66,8 @@ const sizeClasses = computed(() => {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
     lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
+    xl: 'w-16 h-16',
+    '2xl': 'w-24 h-24 md:w-32 md:h-32'
   }
   return sizes[props.size]
 })
@@ -75,7 +78,8 @@ const textSizeClasses = computed(() => {
     sm: 'text-xs',
     md: 'text-[13px]',
     lg: 'text-base',
-    xl: 'text-xl'
+    xl: 'text-xl',
+    '2xl': 'text-3xl'
   }
   return sizes[props.size]
 })
