@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getCurrentUser, login, register, logout, type UserRole } from '~/services/api/auth'
+import { getCurrentUser, login, register, logout, exchangeGoogleCode, type UserRole } from '~/services/api/auth'
 import { uploadProfilePicture as uploadProfilePictureApi } from '~/services/api/social'
 
 const getProfilePicSkipStorageKey = (userId: string | number) => `educonnect_profile_pic_prompt_skipped_${String(userId)}`
@@ -315,7 +315,69 @@ export const useUserStore = defineStore('user', {
         return { success: false, message: result.error || 'Registration failed' }
       }
     },
+    // Login with Google function
+    async loginWithGoogle(code: string, state?: string) {
+      this.loading = true
+
+      const result = await exchangeGoogleCode(code, state)
+
+      if (result.success && result.data) {
+        const userData: User = {
+          id: result.data.user.id,
+          role: result.data.user.role,
+          email: result.data.user.email,
+          name: result.data.user.name,
+          displayName: result.data.user.name,
+          username: result.data.user.username,
+          avatar: result.data.user.profilePicUrl || result.data.user.avatar,
+          profilePicUrl: result.data.user.profilePicUrl,
+          isProfilePublic: result.data.user.isProfilePublic,
+          department: result.data.user.department,
+          institution: result.data.user.institution,
+        }
+
+        this.token = result.data.token
+        this.user = userData
+        this.isAuthenticated = true
+        this.persistSession()
+        this.evaluateProfilePicPrompt()
+
+        this.loading = false
+        return { success: true, isNewUser: result.data.is_new_user }
+      } else {
+        this.loading = false
+        return { success: false, message: result.error || 'Google login failed' }
+      }
+    },
     
+    updateProfileSetup(role: UserRole, department: string, institution: string) {
+      if (this.user) {
+        this.user.role = role
+        this.user.department = department
+        this.user.institution = institution
+        this.persistSession()
+      }
+      if (process.client) {
+        localStorage.setItem('educonnect_google_role', role)
+        localStorage.setItem('educonnect_google_department', department)
+        localStorage.setItem('educonnect_google_institution', institution)
+      }
+    },
+    
+    updateProfileSetup(role, department, institution) {
+      if (this.user) {
+        this.user.role = role
+        this.user.department = department
+        this.user.institution = institution
+        this.persistSession()
+      }
+      if (process.client) {
+        localStorage.setItem('educonnect_google_role', role)
+        localStorage.setItem('educonnect_google_department', department)
+        localStorage.setItem('educonnect_google_institution', institution)
+      }
+    },
+
     // Logout function
     logout() {
       this.clearSession()

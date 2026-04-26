@@ -54,11 +54,11 @@
     </div>
 
     <!-- Steps Section -->
-    <div v-if="message.physicsSolution?.steps?.length" class="space-y-2">
+    <div v-if="revealedSteps.length" class="space-y-2">
       <p class="text-[11px] font-medium uppercase tracking-[0.5px] font-mono text-slate-500 dark:text-slate-400">Step-by-step breakdown</p>
       
       <div
-        v-for="(step, stepIndex) in message.physicsSolution.steps"
+        v-for="(step, stepIndex) in revealedSteps"
         :key="`physics-step-${messageIndex}-${stepIndex}`"
         class="space-y-2 rounded-[20px] border border-slate-200 bg-slate-50 px-5 py-4 dark:border-white/10 dark:bg-white/5"
       >
@@ -107,7 +107,7 @@
 import type { Message } from '~/types/aiTutor'
 import MathBlock from '~/components/math/MathBlock.vue'
 
-defineProps<{
+const props = defineProps<{
   message: Message
   messageIndex: number
 }>()
@@ -115,4 +115,9 @@ defineProps<{
 const emit = defineEmits<{
   'open-math-zoom': [content: string]
 }>()
+
+const revealedSteps = computed(() => {
+  const count = props.message.revealedMathSteps ?? props.message.physicsSolution?.steps?.length ?? 0
+  return props.message.physicsSolution?.steps?.slice(0, count) || []
+})
 </script>

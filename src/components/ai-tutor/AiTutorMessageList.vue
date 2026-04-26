@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="flex-1 min-h-0 overflow-y-auto px-4 lg:px-10 py-6 lg:py-8 space-y-5 lg:space-y-7 pb-6 thin-scrollbar bg-white dark:bg-[#0f1115]">
+  <div ref="container" class="thin-scrollbar flex-1 min-h-0 space-y-5 overflow-y-auto bg-transparent px-4 py-6 pb-6 lg:space-y-7 lg:px-10 lg:py-8">
     <div
       v-for="(message, index) in messages"
       :key="index"
@@ -21,8 +21,8 @@
           <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5 font-mono text-slate-400 dark:text-slate-500">AI Tutor</p>
 
           <!-- Content -->
-          <div v-if="message.isStreaming" class="px-5 py-3.5 rounded-3xl rounded-tl-md border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
-            <p class="text-sm leading-relaxed text-slate-800 dark:text-slate-200">{{ message.content }}</p>
+          <div v-if="message.isStreaming" class="rounded-3xl rounded-tl-md border border-slate-200/80 bg-white px-5 py-3.5 shadow-sm dark:border-white/10 dark:bg-white/5">
+            <p class="text-sm leading-relaxed text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{{ message.content }}</p>
           </div>
 
           <AiTutorChemistryMessage
@@ -51,21 +51,18 @@
 
           <div
             v-else
-            class="px-5 py-3.5 rounded-3xl rounded-tl-md border border-slate-200 bg-slate-50 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 text-sm leading-[1.8]"
+            class="rounded-3xl rounded-tl-md border border-slate-200/80 bg-white px-5 py-3.5 text-sm leading-[1.8] text-slate-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
             v-html="renderMarkdown(message.content)"
           ></div>
         </div>
       </div>
 
       <!-- User Message -->
-      <div v-else class="flex gap-4 max-w-xs">
-        <div class="min-w-0 flex-1">
-          <!-- Label -->
-          <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5 font-mono text-slate-400 dark:text-slate-500 text-right">You</p>
-
+      <div v-else class="flex justify-end w-full">
+        <div class="max-w-[70%] lg:max-w-xl">
           <!-- Bubble -->
-          <div class="px-5 py-3.5 rounded-3xl rounded-br-md border border-brand-primary bg-brand-primary text-white dark:border-brand-primary dark:bg-brand-primary dark:text-slate-900">
-            <p class="text-sm leading-relaxed">{{ message.content }}</p>
+          <div class="rounded-2xl rounded-tr-sm bg-brand-primary px-5 py-3 shadow-sm dark:bg-brand-primary/80">
+            <p class="text-[14px] leading-relaxed text-white">{{ message.content }}</p>
           </div>
         </div>
       </div>
@@ -82,7 +79,7 @@
 
         <div>
           <p class="text-[10px] uppercase font-medium tracking-[0.3px] mb-2.5 font-mono text-slate-400 dark:text-slate-500">AI Tutor</p>
-          <div class="px-5 py-3.5 rounded-3xl rounded-tl-md flex gap-1.5 items-center border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
+          <div class="flex items-center gap-1.5 rounded-3xl rounded-tl-md border border-slate-200/80 bg-white px-5 py-3.5 shadow-sm dark:border-white/10 dark:bg-white/5">
             <span class="w-2 h-2 bg-brand-primary rounded-full animate-bounce" style="animationDelay: '0ms'"></span>
             <span class="w-2 h-2 bg-brand-primary rounded-full animate-bounce" style="animationDelay: '150ms'"></span>
             <span class="w-2 h-2 bg-brand-primary rounded-full animate-bounce" style="animationDelay: '300ms'"></span>

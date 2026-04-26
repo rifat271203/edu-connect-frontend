@@ -8,6 +8,9 @@ export type NotificationType =
   | 'share'
   | 'mention'
   | 'follow'
+  | 'enrollment_requested'
+  | 'enrollment_approved'
+  | 'enrollment_rejected'
   | 'system'
 
 export interface Notification {
@@ -19,6 +22,11 @@ export interface Notification {
   timestamp: string
   read: boolean
   actionUrl?: string
+  courseId?: string
+  courseTitle?: string
+  entityId?: string
+  entityType?: string
+  reviewNote?: string
 }
 
 export interface FriendRequest {

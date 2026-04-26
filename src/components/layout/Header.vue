@@ -151,11 +151,23 @@
                         <div class="min-w-0">
                           <p class="truncate text-xs font-bold text-slate-900 dark:text-white">{{ notification.message }}</p>
                           <p v-if="notification.content" class="mt-1 line-clamp-2 text-[10px] font-medium text-slate-500">{{ notification.content }}</p>
+                          <p v-else-if="notification.reviewNote" class="mt-1 line-clamp-2 text-[10px] font-medium text-slate-500">{{ notification.reviewNote }}</p>
+                          <p v-else-if="notification.courseTitle" class="mt-1 line-clamp-1 text-[10px] font-medium text-slate-500">
+                            {{ notification.courseTitle }}
+                          </p>
                         </div>
                         <span class="shrink-0 text-[10px] font-medium text-slate-400">{{ formatNotificationTime(notification.timestamp) }}</span>
                       </div>
 
-                      <p v-if="notification.user?.displayName" class="mt-2 truncate text-[10px] font-medium text-slate-500">{{ notification.user.displayName }}</p>
+                      <div class="mt-2 flex flex-wrap items-center gap-2">
+                        <p v-if="notification.user?.displayName" class="truncate text-[10px] font-medium text-slate-500">{{ notification.user.displayName }}</p>
+                        <span
+                          v-if="notification.type.startsWith('enrollment_')"
+                          class="inline-flex items-center rounded-full bg-brand-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-brand-primary"
+                        >
+                          Classroom
+                        </span>
+                      </div>
                     </div>
                   </button>
                 </div>
@@ -214,6 +226,9 @@ const getNotificationIcon = (type: string) => {
     share: 'share',
     mention: 'alternate_email',
     follow: 'person',
+    enrollment_requested: 'school',
+    enrollment_approved: 'verified',
+    enrollment_rejected: 'block',
     system: 'notifications',
   }
 
@@ -265,6 +280,11 @@ const handleNotificationClick = async (notification: (typeof notifications.value
   }
 
   closeNotificationsPanel()
+
+  if (notification.type.startsWith('enrollment_') && notification.courseId) {
+    await navigateTo(`/classroom/${notification.courseId}`)
+    return
+  }
 
   if (!notification.actionUrl) return
 

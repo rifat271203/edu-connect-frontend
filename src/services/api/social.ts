@@ -250,6 +250,9 @@ const notificationTypes: NotificationType[] = [
   'share',
   'mention',
   'follow',
+  'enrollment_requested',
+  'enrollment_approved',
+  'enrollment_rejected',
   'system',
 ]
 

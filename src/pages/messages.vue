@@ -82,6 +82,20 @@
           </div>
         </div>
 
+        <div v-if="courseGroups.length" class="px-3 py-2 border-b border-[var(--line)]">
+          <p class="section-label mb-2">Course Groups</p>
+          <div class="space-y-1">
+            <button v-for="group in courseGroups" :key="'group-'+group.courseId" type="button" class="w-full text-left flex items-center gap-2 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--surface2)]" @click="openGroupChat(group)">
+              <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--gold)]/20 to-[var(--blue)]/20 flex items-center justify-center text-xs shrink-0">📚</div>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs text-[var(--t1)] truncate font-medium">{{ group.courseTitle }}</p>
+                <p class="text-[10px] text-[var(--t3)]">{{ group.memberCount }} members</p>
+              </div>
+              <span v-if="group.unreadCount > 0" class="shrink-0 min-w-4 px-1 h-4 rounded-full bg-[var(--gold)] text-[#07090f] text-[10px] font-semibold inline-flex items-center justify-center">{{ group.unreadCount }}</span>
+            </button>
+          </div>
+        </div>
+
         <div class="px-4 py-2">
           <p class="section-label">Recent</p>
         </div>
@@ -236,6 +250,7 @@ import {
   type SocialUserRole,
 } from '~/services/api/social'
 import type { UserPreview } from '~/types/user'
+import { getCourseGroupChat, type CourseGroupChatInfo } from '~/services/api/classroom'
 
 definePageMeta({
   layout: 'main',
@@ -266,6 +281,8 @@ const selectedUserId = ref('')
 const selectedUser = ref<UserPreview | null>(null)
 const messageDraft = ref('')
 const showMobileConversation = ref(false)
+const courseGroups = ref<CourseGroupChatInfo[]>([])
+const activeGroupCourseId = ref('')
 
 const socket = ref<Socket | null>(null)
 const pendingReadIds = new Set<string>()
@@ -796,11 +813,35 @@ const connectDmSocket = () => {
   })
 }
 
+const openGroupChat = (group: CourseGroupChatInfo) => {
+  activeGroupCourseId.value = group.courseId
+  // For now, navigate to classroom messages for that course
+  navigateTo(`/classroom/${encodeURIComponent(group.courseId)}/messages`)
+}
+
+const handleGroupQueryParam = async () => {
+  const route = useRoute()
+  const groupParam = route.query.group as string | undefined
+  if (!groupParam || !groupParam.startsWith('course-')) return
+
+  const courseId = groupParam.replace('course-', '')
+  const result = await getCourseGroupChat(courseId)
+  if (result.success && result.data) {
+    if (!courseGroups.value.find(g => g.courseId === courseId)) {
+      courseGroups.value = [result.data, ...courseGroups.value]
+    }
+    openGroupChat(result.data)
+  }
+}
+
 onMounted(async () => {
   await Promise.all([loadConversations(), loadFriends()])
   connectDmSocket()
 
-  if (conversations.value.length > 0) {
+  // Handle group query param from classroom
+  await handleGroupQueryParam()
+
+  if (!activeGroupCourseId.value && conversations.value.length > 0) {
     await openConversation(conversations.value[0].user)
   }
 })

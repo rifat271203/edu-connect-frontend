@@ -283,3 +283,39 @@ export const changePassword = async (
 ): Promise<ApiResponse<{ message: string }>> => {
   return await apiRequest<{ message: string }>('/api/auth/password', 'PATCH', payload)
 }
+
+export const getGoogleAuthUrl = async (role: UserRole = 'student'): Promise<ApiResponse<{ url: string }>> => {
+  return await apiRequest<{ url: string }>(`/api/auth/google/initiate?role=${role}`, 'GET')
+}
+
+export const exchangeGoogleCode = async (
+  code: string,
+  state?: string
+): Promise<ApiResponse<AuthResponse & { is_new_user?: boolean }>> => {
+  const result = await apiRequest<unknown>('/api/auth/google/callback', 'POST', { code, state })
+
+  if (!result.success) {
+    return result as ApiResponse<AuthResponse & { is_new_user?: boolean }>
+  }
+
+  const normalized = normalizeAuthResponse(result.data, result.token)
+  if (!normalized) {
+    return {
+      success: false,
+      error: 'Authentication succeeded but response format was invalid',
+      status: result.status,
+    }
+  }
+
+  const root = asRecord(result.data) || {}
+  const isNewUser = toBoolean(root.is_new_user ?? root.isNewUser, false)
+
+  return {
+    ...result,
+    data: {
+      ...normalized,
+      is_new_user: isNewUser,
+    },
+    token: normalized.token,
+  }
+}

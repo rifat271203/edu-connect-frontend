@@ -176,14 +176,15 @@
               <div class="h-px flex-1 bg-[var(--border)]"></div>
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <button class="flex items-center justify-center gap-3 h-11 px-4 social-btn rounded-lg text-sm font-medium" type="button">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <button class="flex items-center justify-center gap-3 h-11 px-4 social-btn rounded-lg text-sm font-medium" type="button" @click="handleGoogleLogin" :disabled="isGoogleLoading">
+                <span v-if="isGoogleLoading" class="w-4 h-4 rounded-full border-2 border-[var(--text)]/30 border-t-[var(--text)] animate-spin"></span>
+                <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285f4"></path>
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34a853"></path>
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#fbbc05"></path>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#ea4335"></path>
                 </svg>
-                <span>Google</span>
+                <span v-if="!isGoogleLoading">Google</span>
               </button>
               <button class="flex items-center justify-center gap-3 h-11 px-4 social-btn rounded-lg text-sm font-medium" type="button">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -212,6 +213,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { UserRole } from '~/services/api/auth'
+import { getGoogleAuthUrl } from '~/services/api/auth'
 import { useUserStore } from '~/stores/user'
 
 definePageMeta({
@@ -242,7 +244,7 @@ const AUTH_THEME_STORAGE_KEY = 'educonnect_auth_page_theme'
 
 const userStore = useUserStore()
 
-const theme = ref<'dark' | 'light'>('dark')
+const theme = ref<'dark' | 'light'>('light')
 const accountType = ref<AccountType>('student')
 const signupName = ref('')
 const signupEmail = ref('')
@@ -251,6 +253,7 @@ const confirmPassword = ref('')
 const acceptTerms = ref(false)
 const showPassword = ref(false)
 const isLoading = ref(false)
+const isGoogleLoading = ref(false)
 const errorMessage = ref('')
 
 const signupErrors = reactive<Record<SignupField, string>>({
@@ -359,76 +362,93 @@ const handleSignup = async (): Promise<void> => {
 
   await navigateTo('/home')
 }
+
+const handleGoogleLogin = async (): Promise<void> => {
+  errorMessage.value = ''
+  isGoogleLoading.value = true
+
+  const response = await getGoogleAuthUrl(mapAccountTypeToRole(accountType.value))
+  
+  if (response.success && response.data?.url) {
+    if (process.client) {
+      sessionStorage.setItem('educonnect_auth_role_preference', accountType.value)
+    }
+    window.location.href = response.data.url
+  } else {
+    isGoogleLoading.value = false
+    errorMessage.value = response.error || 'Failed to initiate Google login.'
+  }
+}
 </script>
 
 <style scoped lang="scss">
 .login-v2 {
-  --bg: #0a0c10;
-  --bg2: #10131a;
-  --hero-base: linear-gradient(160deg, #030406 0%, #07090e 62%, #0b0f16 100%);
-  --hero-glow-1: rgba(0, 201, 167, 0.06);
-  --hero-glow-2: rgba(0, 201, 167, 0.04);
-  --surface: #13161f;
-  --surface2: #1a1e2a;
-  --border: rgba(255, 255, 255, 0.07);
-  --border2: rgba(255, 255, 255, 0.12);
-  --text: #f0f2f7;
-  --text2: #8b90a0;
-  --text3: #5a5f70;
-  --accent: #00c9a7;
-  --accent2: #00a88d;
+  --bg: #09090b;
+  --bg2: #121214;
+  --hero-base: linear-gradient(160deg, #09090b 0%, #121214 62%, #18181b 100%);
+  --hero-glow-1: rgba(16, 185, 129, 0.06);
+  --hero-glow-2: rgba(16, 185, 129, 0.04);
+  --surface: #18181b;
+  --surface2: #27272a;
+  --border: rgba(255, 255, 255, 0.05);
+  --border2: rgba(255, 255, 255, 0.1);
+  --text: #f8fafc;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --accent: #10b981;
+  --accent2: #059669;
   --label: rgba(255, 255, 255, 0.5);
-  --input-bg: #0e1118;
-  --input-border: rgba(255, 255, 255, 0.09);
-  --input-focus: rgba(0, 201, 167, 0.35);
-  --btn-bg: #00c9a7;
-  --btn-text: #0a0c10;
-  --shadow: 0 0 0 1px rgba(0, 201, 167, 0.15), 0 16px 40px rgba(0, 0, 0, 0.5);
+  --input-bg: #09090b;
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-focus: rgba(16, 185, 129, 0.35);
+  --btn-bg: #10b981;
+  --btn-text: #ffffff;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --stat-bg: rgba(255, 255, 255, 0.03);
-  --chip-bg: rgba(0, 201, 167, 0.08);
-  --chip-text: #00c9a7;
+  --chip-bg: rgba(16, 185, 129, 0.1);
+  --chip-text: #10b981;
   --divider-text: rgba(255, 255, 255, 0.3);
-  --social-bg: #1a1e2a;
+  --social-bg: #27272a;
   --social-border: rgba(255, 255, 255, 0.08);
-  --social-hover: #1f2330;
-  --right-grid-line: rgba(0, 201, 167, 0.2);
-  --right-grid-soft: rgba(0, 201, 167, 0.08);
-  --right-grid-glow: rgba(0, 201, 167, 0.16);
-  --right-grid-fade: rgba(10, 12, 16, 0.88);
+  --social-hover: #3f3f46;
+  --right-grid-line: rgba(16, 185, 129, 0.15);
+  --right-grid-soft: rgba(16, 185, 129, 0.05);
+  --right-grid-glow: rgba(16, 185, 129, 0.1);
+  --right-grid-fade: rgba(9, 9, 11, 0.88);
 }
 
 .login-v2[data-theme='light'] {
-  --bg: #f4f5f8;
-  --bg2: #e6eaf0;
-  --hero-base: linear-gradient(160deg, #e4e9f0 0%, #dce3ec 60%, #d3dce7 100%);
-  --hero-glow-1: rgba(0, 126, 104, 0.14);
-  --hero-glow-2: rgba(0, 126, 104, 0.1);
+  --bg: #f8fafc;
+  --bg2: #f1f5f9;
+  --hero-base: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+  --hero-glow-1: rgba(16, 185, 129, 0.1);
+  --hero-glow-2: rgba(16, 185, 129, 0.05);
   --surface: #ffffff;
-  --surface2: #edf2f7;
-  --border: rgba(15, 17, 23, 0.14);
-  --border2: rgba(15, 17, 23, 0.2);
-  --text: #0b0f16;
-  --text2: #2f3948;
-  --text3: #5e6b7f;
-  --accent: #007e68;
-  --accent2: #006a58;
-  --label: rgba(11, 15, 22, 0.72);
-  --input-bg: #eef3f8;
-  --input-border: rgba(11, 15, 22, 0.2);
-  --input-focus: rgba(0, 126, 104, 0.28);
-  --btn-bg: #007e68;
+  --surface2: #f1f5f9;
+  --border: rgba(0, 0, 0, 0.05);
+  --border2: rgba(0, 0, 0, 0.1);
+  --text: #0f172a;
+  --text2: #475569;
+  --text3: #94a3b8;
+  --accent: #10b981;
+  --accent2: #059669;
+  --label: rgba(15, 23, 42, 0.72);
+  --input-bg: #f8fafc;
+  --input-border: rgba(0, 0, 0, 0.1);
+  --input-focus: rgba(16, 185, 129, 0.2);
+  --btn-bg: #10b981;
   --btn-text: #ffffff;
-  --shadow: 0 0 0 1px rgba(0, 126, 104, 0.18), 0 16px 40px rgba(0, 0, 0, 0.12);
-  --stat-bg: rgba(11, 15, 22, 0.05);
-  --chip-bg: rgba(0, 126, 104, 0.14);
-  --chip-text: #006a58;
-  --divider-text: rgba(11, 15, 22, 0.5);
-  --social-bg: #e9eef4;
-  --social-border: rgba(11, 15, 22, 0.12);
-  --social-hover: #dde6ef;
-  --right-grid-line: rgba(0, 126, 104, 0.22);
-  --right-grid-soft: rgba(0, 126, 104, 0.1);
-  --right-grid-glow: rgba(0, 126, 104, 0.18);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --stat-bg: rgba(15, 23, 42, 0.05);
+  --chip-bg: rgba(16, 185, 129, 0.1);
+  --chip-text: #059669;
+  --divider-text: rgba(15, 23, 42, 0.5);
+  --social-bg: #f1f5f9;
+  --social-border: rgba(0, 0, 0, 0.08);
+  --social-hover: #e2e8f0;
+  --right-grid-line: rgba(16, 185, 129, 0.1);
+  --right-grid-soft: rgba(16, 185, 129, 0.05);
+  --right-grid-glow: rgba(16, 185, 129, 0.1);
   --right-grid-fade: rgba(255, 255, 255, 0.8);
 }
 

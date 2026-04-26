@@ -7,6 +7,7 @@ import {
   markNotificationAsRead,
   respondToFriendRequest,
 } from '~/services/api/social'
+import { getClassroomNotifications } from '~/services/api/classroom'
 import type { FriendRequestItem } from '~/services/api/social'
 import type { Notification as ApiNotification, NotificationType } from '~/types/notification'
 
@@ -26,6 +27,11 @@ interface Notification {
   timestamp: string
   read: boolean
   actionUrl?: string
+  courseId?: string
+  courseTitle?: string
+  entityId?: string
+  entityType?: string
+  reviewNote?: string
 }
 
 interface FriendRequest {
@@ -63,7 +69,33 @@ const mapNotification = (notification: ApiNotification): Notification => ({
   timestamp: notification.timestamp,
   read: notification.read,
   actionUrl: notification.actionUrl,
+  courseId: notification.courseId,
+  courseTitle: notification.courseTitle,
+  entityId: notification.entityId,
+  entityType: notification.entityType,
+  reviewNote: notification.reviewNote,
 })
+
+const mergeNotifications = (lists: Notification[][]): Notification[] => {
+  const byId = new Map<string, Notification>()
+
+  for (const list of lists) {
+    for (const item of list) {
+      byId.set(item.id, item)
+    }
+  }
+
+  return [...byId.values()].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+}
+
+const extractUnreadCount = (payload: unknown): number => {
+  if (!payload || typeof payload !== 'object') return 0
+  const source = payload as Record<string, unknown>
+  const raw = source.unreadCount ?? source.count ?? source.total ?? source.data
+  if (typeof raw === 'number' && Number.isFinite(raw)) return raw
+  if (typeof raw === 'string' && raw.trim() && !Number.isNaN(Number(raw))) return Number(raw)
+  return 0
+}
 
 // Dummy friend requests
 const dummyFriendRequests: FriendRequest[] = [
@@ -111,20 +143,27 @@ export const useNotificationsStore = defineStore('notifications', {
       
       this.loading = true
 
-      const [notificationsResult, unreadCountResult, friendRequestResult] = await Promise.all([
+      const [notificationsResult, classroomNotificationsResult, unreadCountResult, friendRequestResult] = await Promise.all([
         getNotifications(20, 0),
+        getClassroomNotifications(),
         getUnreadNotificationsCount(),
         getFriendRequests(),
       ])
 
-      if (notificationsResult.success && notificationsResult.data) {
-        this.notifications = notificationsResult.data.map(mapNotification)
-      } else {
-        this.notifications = []
-      }
+      const socialNotifications = notificationsResult.success && notificationsResult.data
+        ? notificationsResult.data.map(mapNotification)
+        : []
+
+      const classroomNotifications = classroomNotificationsResult.success && classroomNotificationsResult.data
+        ? classroomNotificationsResult.data.map(mapNotification)
+        : []
+
+      this.notifications = mergeNotifications([socialNotifications, classroomNotifications])
 
       if (unreadCountResult.success && unreadCountResult.data) {
-        this.unreadBadgeCount = unreadCountResult.data.unreadCount
+        this.unreadBadgeCount =
+          extractUnreadCount(unreadCountResult.data) +
+          classroomNotifications.filter((notification) => !notification.read).length
       } else {
         this.unreadBadgeCount = this.notifications.filter((notification) => !notification.read).length
       }
@@ -139,13 +178,15 @@ export const useNotificationsStore = defineStore('notifications', {
     },
     
     async markAsRead(notificationId: string) {
-      const result = await markNotificationAsRead(notificationId)
-      if (!result.success) {
-        return
-      }
-
       const notification = this.notifications.find(n => n.id === notificationId)
       if (notification && !notification.read) {
+        if (!notification.type.startsWith('enrollment_')) {
+          const result = await markNotificationAsRead(notificationId)
+          if (!result.success) {
+            return
+          }
+        }
+
         notification.read = true
         this.unreadBadgeCount = Math.max(this.unreadBadgeCount - 1, 0)
       }
@@ -154,6 +195,10 @@ export const useNotificationsStore = defineStore('notifications', {
     async markAllAsRead() {
       const result = await markAllNotificationsAsRead()
       if (!result.success) {
+        this.notifications.forEach(n => {
+          n.read = true
+        })
+        this.unreadBadgeCount = 0
         return
       }
 
