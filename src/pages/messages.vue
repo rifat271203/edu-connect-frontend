@@ -43,41 +43,69 @@
             <div
               v-for="user in searchedUsers"
               :key="`search-${user.id}`"
-              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg border border-[var(--line)] bg-[var(--surface2)] hover:bg-[var(--surface2)] hover:border-[var(--line)] transition-colors text-left"
-              @click="openConversation(user)"
+              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg border border-[var(--line)] bg-[var(--surface2)] hover:border-[var(--line)] transition-colors text-left"
             >
               <UiAvatar :src="user.avatar" :name="user.displayName" size="sm" />
               <div class="min-w-0 flex-1">
                 <p class="text-xs text-[var(--t1)] truncate">{{ user.displayName }}</p>
                 <p class="mono-label text-[11px] text-[var(--t3)] truncate">@{{ user.username }}</p>
               </div>
+
+              <div class="shrink-0 flex gap-1">
+                <template v-if="user.isFriend">
+                  <UiButton size="sm" variant="secondary" @click="openConversation(user)">
+                    Message
+                  </UiButton>
+                </template>
+                <template v-else-if="user.pendingSent">
+                  <UiButton size="sm" variant="ghost" disabled>
+                    Sent
+                  </UiButton>
+                </template>
+                <template v-else-if="user.pendingReceived">
+                  <UiButton size="sm" variant="primary" @click="handleFriendAction(user, 'accept')">
+                    Accept
+                  </UiButton>
+                </template>
+                <template v-else>
+                  <UiButton size="sm" variant="secondary" @click="handleFriendAction(user, 'add')">
+                    Add
+                  </UiButton>
+                </template>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="px-3 py-3 border-b border-[var(--line)]">
-          <div class="flex items-center justify-between px-1">
+          <div class="flex items-center justify-between px-1 mb-2">
             <p class="section-label">Friends</p>
             <span class="text-[11px] font-semibold text-[var(--t3)]">{{ visibleFriends.length }}</span>
           </div>
 
-          <div v-if="friendsLoading" class="mt-2 flex gap-2 overflow-hidden">
-            <UiSkeleton v-for="idx in 5" :key="`friend-skeleton-${idx}`" variant="circular" class="w-12 h-12" />
+          <div v-if="friendsLoading" class="mt-2 space-y-2">
+            <UiSkeleton v-for="idx in 3" :key="`friend-skeleton-${idx}`" variant="rectangular" class="h-10 rounded-lg" />
           </div>
 
           <p v-else-if="friendsError" class="mt-2 text-xs text-[rgba(239,68,68,0.9)] px-1">{{ friendsError }}</p>
 
-          <div v-else class="mt-2 flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          <div v-else class="max-h-[200px] overflow-y-auto space-y-1">
             <button
               v-for="friend in visibleFriends"
               :key="`friend-${friend.id}`"
               type="button"
-              class="shrink-0 flex flex-col items-center gap-1.5 w-14"
+              class="w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--surface2)] text-left"
               @click="openConversation(friend)"
             >
-              <UiAvatar :src="friend.avatar" :name="friend.displayName" size="md" />
-              <span class="text-[11px] text-[var(--t2)] truncate w-full">{{ friend.displayName }}</span>
+              <UiAvatar :src="friend.avatar" :name="friend.displayName" size="sm" />
+              <div class="min-w-0 flex-1">
+                <p class="text-xs text-[var(--t1)] truncate">{{ friend.displayName }}</p>
+                <p class="text-[10px] text-[var(--t3)] truncate">@{{ friend.username }}</p>
+              </div>
             </button>
+            <p v-if="visibleFriends.length === 0" class="text-[11px] text-[var(--t3)] px-1 italic">
+              All friends are in recent chats.
+            </p>
           </div>
         </div>
 
