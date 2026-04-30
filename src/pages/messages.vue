@@ -1,16 +1,16 @@
 <template>
-  <div class="h-[calc(100vh-6.2rem)] lg:h-[calc(100vh-1.5rem)] p-2 lg:p-4 pb-24 lg:pb-4">
+  <div class="h-screen p-0 bg-[var(--bg)] flex flex-col overflow-hidden">
     <p v-if="pageError" class="mb-2 inline-flex rounded-full px-2.5 py-1 mono-label text-[11px] bg-[rgba(239,68,68,0.1)] text-[rgba(239,68,68,0.9)]">{{ pageError }}</p>
 
-    <div class="h-full rounded-[14px] border border-[var(--line)] bg-[var(--ink2)] overflow-hidden grid lg:grid-cols-[minmax(0,1fr)_360px]">
+    <div class="flex-1 rounded-none border-none bg-[var(--surface)] overflow-hidden grid lg:grid-cols-[minmax(0,1fr)_360px]">
       <aside
         class="border-b lg:border-b-0 lg:border-l border-[var(--line)] flex flex-col bg-[var(--ink2)] lg:order-2"
         :class="showMobileConversation ? 'hidden lg:flex' : 'flex'"
       >
         <div class="px-4 pt-4 pb-3 border-b border-[var(--line)]">
           <div class="flex items-center justify-between">
-            <p class="text-[22px] font-bold tracking-[-0.02em] text-[var(--t1)]">Messages</p>
-            <p class="text-[12px] text-[rgba(244,241,235,0.35)]">@{{ userStore.user?.username || 'user' }}</p>
+            <p class="text-[24px] font-display font-bold tracking-tight text-[var(--t1)]">Messages</p>
+            <p class="text-[12px] font-body text-[var(--t3)]">@{{ userStore.user?.username || 'user' }}</p>
           </div>
 
           <div class="mt-3 flex gap-2">
@@ -160,7 +160,10 @@
                     {{ formatRelativeTime(conversation.lastMessageAt) }}
                   </span>
                 </div>
-                <p class="text-xs truncate" :class="conversation.unreadCount > 0 ? 'text-[var(--t1)] font-medium' : 'text-[var(--t2)]'">
+                <p v-if="typingPartnerIds.has(String(conversation.user.id))" class="text-xs text-[var(--primary)] font-medium animate-pulse">
+                  typing...
+                </p>
+                <p v-else class="text-xs truncate font-body" :class="conversation.unreadCount > 0 ? 'text-[var(--t1)] font-medium' : 'text-[var(--t2)]'">
                   {{ conversation.lastMessageText || 'No messages yet' }}
                 </p>
               </div>
@@ -182,13 +185,18 @@
             <UiButton class="lg:hidden" variant="ghost" size="sm" @click="closeMobileConversation">
               Back
             </UiButton>
-            <UiAvatar :src="activeUser.avatar" :name="activeUser.displayName" size="md" />
+            <UiAvatar :src="activeUser.avatar || (activeUser as any).other_user_profile_pic_url" :name="activeUser.displayName" size="md" class="rounded-xl" />
             <div class="min-w-0 flex-1">
-              <p class="text-[15px] font-semibold text-[var(--t1)] truncate">{{ activeUser.displayName }}</p>
-              <p class="text-[12px] text-[rgba(244,241,235,0.35)] truncate">@{{ activeUser.username }}</p>
+              <p class="text-[16px] font-display font-bold text-[var(--t1)] truncate">{{ activeUser.displayName }}</p>
+              <p class="text-[12px] font-body text-[var(--t3)] truncate">@{{ activeUser.username }} • ID: {{ activeUser.id }}</p>
             </div>
-            <div class="hidden sm:flex items-center gap-2 text-[var(--t2)]">
-              <span class="text-[10px] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 uppercase tracking-[0.1em] font-semibold">DM</span>
+            <div class="flex items-center gap-1 sm:gap-2">
+              <UiButton variant="ghost" size="sm" icon class="text-[var(--t2)] hover:text-[var(--primary)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </UiButton>
+              <div class="hidden sm:flex items-center gap-2 text-[var(--t2)]">
+                <span class="text-[10px] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 uppercase tracking-[0.1em] font-semibold">DM</span>
+              </div>
             </div>
           </header>
 
@@ -218,16 +226,16 @@
               :class="isOwnMessage(message) ? 'justify-end' : 'justify-start'"
             >
               <div
-                class="max-w-[85%] sm:max-w-[68%] rounded-[12px] px-3 py-2"
+                class="max-w-[85%] sm:max-w-[68%] rounded-2xl px-4 py-2.5"
                 :class="[
                   isOwnMessage(message)
-                    ? 'bg-[var(--primary)] text-[var(--on-primary)]'
+                    ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-sm'
                     : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
                 ]"
               >
-                <p class="text-[14px] whitespace-pre-wrap break-words">{{ message.messageText }}</p>
+                <p class="text-[14.5px] font-body whitespace-pre-wrap break-words leading-relaxed">{{ message.messageText }}</p>
                 <p
-                  class="mt-1 text-[10px]"
+                  class="mt-1 text-[10px] font-medium"
                   :class="isOwnMessage(message) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
                 >
                   {{ formatMessageTime(message.createdAt) }}
@@ -237,16 +245,33 @@
             </div>
           </div>
 
-          <form class="px-3 sm:px-4 py-3 border-t border-[var(--line)] bg-[var(--ink2)]" @submit.prevent="handleSendMessage">
-            <div class="flex items-center gap-2 rounded-[10px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+          <div v-if="showEmojiPicker" class="px-4 py-2 bg-[var(--surface2)] border-t border-[var(--line)] flex gap-2 overflow-x-auto no-scrollbar">
+            <button
+              v-for="emoji in ['😊', '😂', '❤️', '👍', '🙏', '🔥', '😮', '😢', '✨', '💯', '🙌']"
+              :key="emoji"
+              type="button"
+              class="text-xl hover:scale-125 transition-transform p-1"
+              @click="addEmoji(emoji)"
+            >
+              {{ emoji }}
+            </button>
+          </div>
+
+          <form class="px-4 py-4 border-t border-[var(--line)] bg-[var(--surface)]" @submit.prevent="handleSendMessage">
+            <div class="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-2.5 shadow-sm">
+              <UiButton variant="ghost" size="sm" icon class="text-[var(--t3)] hover:text-[var(--primary)]" type="button" @click="showEmojiPicker = !showEmojiPicker">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+              </UiButton>
               <textarea
                 v-model="messageDraft"
                 rows="1"
-                class="flex-1 resize-none bg-transparent text-[14px] text-[var(--t1)] placeholder:text-[rgba(244,241,235,0.3)] focus:outline-none"
-                placeholder="Message..."
+                class="flex-1 resize-none bg-transparent text-[15px] font-body text-[var(--t1)] placeholder:text-[var(--t4)] focus:outline-none"
+                placeholder="Write a message..."
                 :disabled="sendingMessage"
+                @input="handleTyping"
+                @keydown.enter.exact.prevent="handleSendMessage"
               />
-              <UiButton type="submit" size="sm" :disabled="sendingMessage || !messageDraft.trim()">
+              <UiButton type="submit" size="sm" variant="primary" :disabled="sendingMessage || !messageDraft.trim()" class="rounded-xl px-5">
                 {{ sendingMessage ? '...' : 'Send' }}
               </UiButton>
             </div>
@@ -312,6 +337,10 @@ const messageDraft = ref('')
 const showMobileConversation = ref(false)
 const courseGroups = ref<CourseGroupChatInfo[]>([])
 const activeGroupCourseId = ref('')
+const showEmojiPicker = ref(false)
+
+const typingPartnerIds = ref(new Set<string>())
+let typingTimeout: any = null
 
 const socket = ref<Socket | null>(null)
 const pendingReadIds = new Set<string>()
@@ -510,6 +539,7 @@ const normalizeSocketMessage = (payload: unknown): DmMessage | null => {
             (typeof senderRecord.avatar === 'string' && senderRecord.avatar) ||
             (typeof senderRecord.profilePicUrl === 'string' && senderRecord.profilePicUrl) ||
             (typeof senderRecord.profile_pic_url === 'string' && senderRecord.profile_pic_url) ||
+            (typeof senderRecord.other_user_profile_pic_url === 'string' && senderRecord.other_user_profile_pic_url) ||
             '',
         }
       : undefined,
@@ -528,6 +558,7 @@ const normalizeSocketMessage = (payload: unknown): DmMessage | null => {
             (typeof receiverRecord.avatar === 'string' && receiverRecord.avatar) ||
             (typeof receiverRecord.profilePicUrl === 'string' && receiverRecord.profilePicUrl) ||
             (typeof receiverRecord.profile_pic_url === 'string' && receiverRecord.profile_pic_url) ||
+            (typeof receiverRecord.other_user_profile_pic_url === 'string' && receiverRecord.other_user_profile_pic_url) ||
             '',
         }
       : undefined,
@@ -790,6 +821,21 @@ const handleSendMessage = async () => {
   await scrollToBottom()
 }
 
+const addEmoji = (emoji: string) => {
+  messageDraft.value += emoji
+}
+
+const handleTyping = () => {
+  if (!socket.value?.connected || !selectedUserId.value) return
+
+  socket.value.emit('dm-typing', { receiverId: selectedUserId.value })
+
+  if (typingTimeout) clearTimeout(typingTimeout)
+  typingTimeout = setTimeout(() => {
+    socket.value?.emit('dm-stop-typing', { receiverId: selectedUserId.value })
+  }, 3000)
+}
+
 const handleIncomingMessage = async (payload: unknown) => {
   const incoming = normalizeSocketMessage(payload)
   if (!incoming) return
@@ -875,6 +921,16 @@ const connectDmSocket = () => {
 
   socket.value.on('dm-message-read', (payload: unknown) => {
     handleIncomingReadReceipt(payload)
+  })
+
+  socket.value.on('dm-typing', (payload: any) => {
+    const partnerId = toId(payload.senderId || payload.partnerId)
+    if (partnerId) typingPartnerIds.value.add(partnerId)
+  })
+
+  socket.value.on('dm-stop-typing', (payload: any) => {
+    const partnerId = toId(payload.senderId || payload.partnerId)
+    if (partnerId) typingPartnerIds.value.delete(partnerId)
   })
 }
 
