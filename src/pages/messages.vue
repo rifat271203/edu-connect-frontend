@@ -141,7 +141,7 @@
               v-for="conversation in sortedConversations"
               :key="`conversation-${conversation.user.id}`"
               type="button"
-              class="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
+              class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl transition-colors"
               :class="[
                 selectedUserId === String(conversation.user.id)
                   ? 'bg-[var(--accent-subtle)] border-l-2 border-l-[var(--primary)] border-[var(--line)]'
@@ -200,7 +200,7 @@
             </div>
           </header>
 
-          <div ref="messageListRef" class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          <div ref="messageListRef" class="flex-1 overflow-y-auto px-4 py-2 space-y-3">
             <div class="text-center">
               <UiButton
                 v-if="hasOlderMessages"
@@ -257,8 +257,8 @@
             </button>
           </div>
 
-          <form class="px-4 py-4 border-t border-[var(--line)] bg-[var(--surface)]" @submit.prevent="handleSendMessage">
-            <div class="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-2.5 shadow-sm">
+          <form class="px-4 py-2 border-t border-[var(--line)] bg-[var(--surface)]" @submit.prevent="handleSendMessage">
+            <div class="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-1.5 shadow-sm">
               <UiButton variant="ghost" size="sm" icon class="text-[var(--t3)] hover:text-[var(--primary)]" type="button" @click="showEmojiPicker = !showEmojiPicker">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
               </UiButton>

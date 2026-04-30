@@ -23,7 +23,7 @@
         </header>
         
         <!-- Page Content -->
-        <div :class="['flex-1', isAiTutorRoute ? '' : 'p-4 md:p-8']">
+        <div :class="['flex-1', isAiTutorRoute || isMessagesRoute ? '' : 'p-4 md:p-8']">
           <slot />
         </div>
       </main>
@@ -209,6 +209,7 @@ const toggleMobileMenu = () => {
 // Close menu on route change
 const route = useRoute()
 const isAiTutorRoute = computed(() => route.path === '/ai-tutor')
+const isMessagesRoute = computed(() => route.path.startsWith('/messages'))
 const authCookie = useCookie<string | null>('educonnect_auth')
 const tokenCookie = useCookie<string | null>('educonnect_token')
 const hasCookieSession = computed(() => authCookie.value === 'true' && Boolean(tokenCookie.value))

@@ -298,9 +298,13 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     (typeof nested.profile_image_url === 'string' && nested.profile_image_url) ||
     (typeof nested.author_profile_pic_url === 'string' && nested.author_profile_pic_url) ||
     (typeof nested.sender_profile_pic_url === 'string' && nested.sender_profile_pic_url) ||
+    (typeof nested.other_user_profile_pic_url === 'string' && nested.other_user_profile_pic_url) ||
+    (typeof nested.otherUserProfilePicUrl === 'string' && nested.otherUserProfilePicUrl) ||
     (typeof root.avatar === 'string' && root.avatar) ||
     (typeof root.profilePicUrl === 'string' && root.profilePicUrl) ||
     (typeof root.profile_pic_url === 'string' && root.profile_pic_url) ||
+    (typeof root.other_user_profile_pic_url === 'string' && root.other_user_profile_pic_url) ||
+    (typeof root.otherUserProfilePicUrl === 'string' && root.otherUserProfilePicUrl) ||
     ''
   )
 
@@ -1075,7 +1079,9 @@ const normalizeDmConversation = (value: unknown): DmConversation => {
         source.partner_avatar ||
         source.partnerAvatar ||
         source.partner_profile_pic_url ||
-        source.partnerProfilePicUrl,
+        source.partnerProfilePicUrl ||
+        source.other_user_profile_pic_url ||
+        source.otherUserProfilePicUrl,
     }
 
   const lastMessageRecord = asRecord(source.lastMessage) || asRecord(source.last_message) || {}
