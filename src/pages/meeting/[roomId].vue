@@ -102,6 +102,9 @@
         </div>
       </footer>
     </div>
+    
+    <!-- Hidden audio element for Stream Video SDK to play remote participants' audio -->
+    <audio id="global-audio-element" ref="audioRef" autoplay playsinline />
   </div>
 </template>
 
@@ -117,14 +120,82 @@ definePageMeta({
 
 const route = useRoute()
 const classroomStore = useClassroomStore()
+const { isTeacher } = useRole()
 const roomId = computed(() => String(route.params.roomId || ''))
 const { call, isConnecting, error, joinCall, leaveCall } = useStreamVideo()
 
-const participants = computed(() => call.value?.state.participants || [])
-const localParticipant = computed(() => call.value?.state.localParticipant)
-const remoteParticipants = computed(() => call.value?.state.remoteParticipants || [])
+const audioRef = ref<HTMLAudioElement | null>(null)
 
-const isMuted = computed(() => localParticipant.value?.isMuted || false)
+// Use a more stable reference to participants to avoid Maximum recursive updates
+const participants = ref<any[]>([])
+const localParticipant = ref<any>(null)
+const remoteParticipants = ref<any[]>([])
+
+let participantsUnsubscribe: any = null
+
+onBeforeUnmount(() => {
+  if (participantsUnsubscribe) {
+    participantsUnsubscribe.unsubscribe()
+  }
+  leaveCall() // Ensure call is left and disconnected on unmount
+})
+
+// Sync SDK state to local refs to avoid deep reactivity loops
+watch(call, (newCall) => {
+  if (participantsUnsubscribe) {
+    participantsUnsubscribe.unsubscribe()
+    participantsUnsubscribe = null
+  }
+
+  if (!newCall) {
+    participants.value = []
+    localParticipant.value = null
+    remoteParticipants.value = []
+    return
+  }
+
+  // Bind audio element if already mounted
+  if (audioRef.value) {
+    // Some versions use bindAudioElement, others setAudioElement
+    if (typeof (newCall as any).bindAudioElement === 'function') {
+      (newCall as any).bindAudioElement(audioRef.value)
+    } else if (typeof (newCall as any).setAudioElement === 'function') {
+      (newCall as any).setAudioElement(audioRef.value)
+    }
+  }
+
+  // Initial state - use raw data to avoid reactivity overhead
+  const state = newCall.state
+  participants.value = [...state.participants]
+  localParticipant.value = state.localParticipant
+  remoteParticipants.value = [...state.remoteParticipants]
+
+  // Watch for state changes manually to keep refs updated without deep Vue tracking
+  participantsUnsubscribe = state.participants$.subscribe((p) => {
+    participants.value = [...p]
+    localParticipant.value = state.localParticipant
+    remoteParticipants.value = [...state.remoteParticipants]
+  })
+}, { immediate: true })
+
+// Ensure audio is bound robustly when mounted
+onMounted(() => {
+  const el = document.getElementById('global-audio-element') as HTMLAudioElement
+  
+  // Watch effect to bind whenever call changes
+  watchEffect(() => {
+    if (call.value && el) {
+      const c = call.value as any
+      if (typeof c.bindAudioElement === 'function') {
+        c.bindAudioElement(el)
+      } else if (typeof c.setAudioElement === 'function') {
+        c.setAudioElement(el)
+      }
+    }
+  })
+})
+
+const isMuted = computed(() => localParticipant.value?.isMuted ?? true)
 const isCameraOff = computed(() => !localParticipant.value?.videoStream)
 
 const courseTitle = computed(() => classroomStore.course?.title)
@@ -144,12 +215,28 @@ const connectionBadgeClass = computed(() => {
 
 const toggleMic = async () => {
   if (!call.value) return
-  await call.value.microphone.toggle()
+  try {
+    await call.value.microphone.toggle()
+  } catch (err: any) {
+    if (err.name === 'NotFoundError') {
+      alert('Microphone not found. Please connect a microphone to speak.')
+    } else {
+      console.warn('Failed to toggle mic:', err)
+    }
+  }
 }
 
 const toggleCamera = async () => {
   if (!call.value) return
-  await call.value.camera.toggle()
+  try {
+    await call.value.camera.toggle()
+  } catch (err: any) {
+    if (err.name === 'NotFoundError') {
+      alert('Camera not found. Please connect a camera to turn on video.')
+    } else {
+      console.warn('Failed to toggle camera:', err)
+    }
+  }
 }
 
 const copyMeetingLink = () => {
@@ -159,7 +246,6 @@ const copyMeetingLink = () => {
 }
 
 const leaveSession = async () => {
-  const { isTeacher } = useRole()
   if (isTeacher.value) {
     await classroomStore.endLiveRoom()
   }
@@ -169,6 +255,10 @@ const leaveSession = async () => {
 
 onMounted(async () => {
   if (roomId.value) {
+    // Ensure classroom store is initialized for the title etc.
+    if (!classroomStore.initialized || classroomStore.courseId !== String(route.params.courseId)) {
+       // We don't have courseId in the meeting route usually, but classroomStore might have it from previous page
+    }
     await joinCall(roomId.value)
   }
 })

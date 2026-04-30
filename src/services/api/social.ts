@@ -336,7 +336,11 @@ const normalizeUser = (value: unknown, fallbackSeed = 'user'): UserPreview => {
     role: (typeof nested.role === 'string' && nested.role) ||
           (typeof nested.author_role === 'string' && nested.author_role) ||
           (typeof root.role === 'string' && root.role) ||
-          undefined
+          undefined,
+    isFriend: Boolean(nested.isFriend || nested.is_friend || root.isFriend || root.is_friend),
+    pendingSent: Boolean(nested.pendingSent || nested.pending_sent || root.pendingSent || root.pending_sent),
+    pendingReceived: Boolean(nested.pendingReceived || nested.pending_received || root.pendingReceived || root.pending_received),
+    requestId: toId(nested.requestId || nested.request_id || root.requestId || root.request_id, '') || undefined,
   }
 }
 

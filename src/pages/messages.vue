@@ -39,46 +39,73 @@
 
           <p v-if="searchError" class="mt-2 text-xs text-[rgba(239,68,68,0.9)]">{{ searchError }}</p>
 
-          <div v-if="searchedUsers.length" class="mt-2 max-h-40 overflow-y-auto space-y-1 pr-1">
-            <button
+          <div v-if="searchedUsers.length" class="mt-2 max-h-60 overflow-y-auto space-y-2 pr-1">
+            <div
               v-for="user in searchedUsers"
               :key="`search-${user.id}`"
-              type="button"
-              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg border border-transparent hover:bg-[var(--surface2)] hover:border-[var(--line)] transition-colors text-left"
-              @click="openConversation(user)"
+              class="w-full flex items-center gap-2 px-2 py-2 rounded-lg border border-[var(--line)] bg-[var(--surface2)] hover:border-[var(--line)] transition-colors text-left"
             >
               <UiAvatar :src="user.avatar" :name="user.displayName" size="sm" />
               <div class="min-w-0 flex-1">
                 <p class="text-xs text-[var(--t1)] truncate">{{ user.displayName }}</p>
                 <p class="mono-label text-[11px] text-[var(--t3)] truncate">@{{ user.username }}</p>
               </div>
-            </button>
+
+              <div class="shrink-0 flex gap-1">
+                <template v-if="user.isFriend">
+                  <UiButton size="sm" variant="secondary" @click="openConversation(user)">
+                    Message
+                  </UiButton>
+                </template>
+                <template v-else-if="user.pendingSent">
+                  <UiButton size="sm" variant="ghost" disabled>
+                    Sent
+                  </UiButton>
+                </template>
+                <template v-else-if="user.pendingReceived">
+                  <UiButton size="sm" variant="primary" @click="handleFriendAction(user, 'accept')">
+                    Accept
+                  </UiButton>
+                </template>
+                <template v-else>
+                  <UiButton size="sm" variant="secondary" @click="handleFriendAction(user, 'add')">
+                    Add
+                  </UiButton>
+                </template>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="px-3 py-3 border-b border-[var(--line)]">
-          <div class="flex items-center justify-between px-1">
+          <div class="flex items-center justify-between px-1 mb-2">
             <p class="section-label">Friends</p>
             <span class="text-[11px] font-semibold text-[var(--t3)]">{{ visibleFriends.length }}</span>
           </div>
 
-          <div v-if="friendsLoading" class="mt-2 flex gap-2 overflow-hidden">
-            <UiSkeleton v-for="idx in 5" :key="`friend-skeleton-${idx}`" variant="circular" class="w-12 h-12" />
+          <div v-if="friendsLoading" class="mt-2 space-y-2">
+            <UiSkeleton v-for="idx in 3" :key="`friend-skeleton-${idx}`" variant="rectangular" class="h-10 rounded-lg" />
           </div>
 
           <p v-else-if="friendsError" class="mt-2 text-xs text-[rgba(239,68,68,0.9)] px-1">{{ friendsError }}</p>
 
-          <div v-else class="mt-2 flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          <div v-else class="max-h-[200px] overflow-y-auto space-y-1">
             <button
               v-for="friend in visibleFriends"
               :key="`friend-${friend.id}`"
               type="button"
-              class="shrink-0 flex flex-col items-center gap-1.5 w-14"
+              class="w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--surface2)] text-left"
               @click="openConversation(friend)"
             >
-              <UiAvatar :src="friend.avatar" :name="friend.displayName" size="md" />
-              <span class="text-[11px] text-[var(--t2)] truncate w-full">{{ friend.displayName }}</span>
+              <UiAvatar :src="friend.avatar" :name="friend.displayName" size="sm" />
+              <div class="min-w-0 flex-1">
+                <p class="text-xs text-[var(--t1)] truncate">{{ friend.displayName }}</p>
+                <p class="text-[10px] text-[var(--t3)] truncate">@{{ friend.username }}</p>
+              </div>
             </button>
+            <p v-if="visibleFriends.length === 0" class="text-[11px] text-[var(--t3)] px-1 italic">
+              All friends are in recent chats.
+            </p>
           </div>
         </div>
 
@@ -86,12 +113,12 @@
           <p class="section-label mb-2">Course Groups</p>
           <div class="space-y-1">
             <button v-for="group in courseGroups" :key="'group-'+group.courseId" type="button" class="w-full text-left flex items-center gap-2 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--surface2)]" @click="openGroupChat(group)">
-              <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--gold)]/20 to-[var(--blue)]/20 flex items-center justify-center text-xs shrink-0">📚</div>
+              <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--primary)]/20 to-[var(--accent-dim)] flex items-center justify-center text-xs shrink-0">📚</div>
               <div class="min-w-0 flex-1">
                 <p class="text-xs text-[var(--t1)] truncate font-medium">{{ group.courseTitle }}</p>
                 <p class="text-[10px] text-[var(--t3)]">{{ group.memberCount }} members</p>
               </div>
-              <span v-if="group.unreadCount > 0" class="shrink-0 min-w-4 px-1 h-4 rounded-full bg-[var(--gold)] text-[#07090f] text-[10px] font-semibold inline-flex items-center justify-center">{{ group.unreadCount }}</span>
+              <span v-if="group.unreadCount > 0" class="shrink-0 min-w-4 px-1 h-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-semibold inline-flex items-center justify-center">{{ group.unreadCount }}</span>
             </button>
           </div>
         </div>
@@ -117,7 +144,7 @@
               class="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
               :class="[
                 selectedUserId === String(conversation.user.id)
-                  ? 'bg-[rgba(196,164,100,0.1)] border-l-2 border-l-[var(--gold)] border-[var(--line)]'
+                  ? 'bg-[var(--accent-subtle)] border-l-2 border-l-[var(--primary)] border-[var(--line)]'
                   : 'hover:bg-[var(--surface2)] border border-transparent',
               ]"
               @click="openConversation(conversation.user)"
@@ -140,7 +167,7 @@
 
               <span
                 v-if="conversation.unreadCount > 0"
-                class="shrink-0 min-w-5 px-1.5 h-5 rounded-full bg-[var(--gold)] text-[#07090f] text-[11px] font-semibold inline-flex items-center justify-center"
+                class="shrink-0 min-w-5 px-1.5 h-5 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold inline-flex items-center justify-center"
               >
                 {{ conversation.unreadCount }}
               </span>
@@ -194,14 +221,14 @@
                 class="max-w-[85%] sm:max-w-[68%] rounded-[12px] px-3 py-2"
                 :class="[
                   isOwnMessage(message)
-                    ? 'bg-[var(--gold)] text-[#07090f]'
+                    ? 'bg-[var(--primary)] text-[var(--on-primary)]'
                     : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
                 ]"
               >
                 <p class="text-[14px] whitespace-pre-wrap break-words">{{ message.messageText }}</p>
                 <p
                   class="mt-1 text-[10px]"
-                  :class="isOwnMessage(message) ? 'text-[#07090f]/65' : 'text-[rgba(244,241,235,0.3)]'"
+                  :class="isOwnMessage(message) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
                 >
                   {{ formatMessageTime(message.createdAt) }}
                   <span v-if="isOwnMessage(message)">· {{ message.isRead ? 'Seen' : 'Sent' }}</span>
@@ -247,6 +274,8 @@ import {
   sendDmMessage,
   type DmConversation,
   type DmMessage,
+  respondToFriendRequest,
+  sendFriendRequest,
   type SocialUserRole,
 } from '~/services/api/social'
 import type { UserPreview } from '~/types/user'
@@ -615,7 +644,43 @@ const loadMessages = async (options: { older?: boolean } = {}) => {
   await markVisibleMessagesRead()
 }
 
+const handleFriendAction = async (user: UserPreview, action: 'add' | 'accept') => {
+  if (searchLoading.value) return
+  searchLoading.value = true
+  searchError.value = ''
+
+  try {
+    if (action === 'add') {
+      const result = await sendFriendRequest(user.id)
+      if (result.success) {
+        user.pendingSent = true
+      } else {
+        searchError.value = result.error || 'Failed to send request'
+      }
+    } else if (action === 'accept' && user.requestId) {
+      const result = await respondToFriendRequest(user.requestId, 'accepted')
+      if (result.success) {
+        user.isFriend = true
+        user.pendingReceived = false
+        // Refresh friends list
+        loadFriends()
+      } else {
+        searchError.value = result.error || 'Failed to accept request'
+      }
+    }
+  } catch (err) {
+    searchError.value = 'An error occurred'
+  } finally {
+    searchLoading.value = false
+  }
+}
+
 const openConversation = async (user: UserPreview) => {
+  if (!user.isFriend && String(user.id) !== currentUserId.value) {
+    if (!conversationUserIds.value.has(String(user.id))) {
+      return
+    }
+  }
   const normalizedUserId = String(user.id)
 
   selectedUserId.value = normalizedUserId
