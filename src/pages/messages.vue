@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[calc(100vh-6.2rem)] lg:h-[calc(100vh-1.5rem)] p-2 lg:p-4 pb-24 lg:pb-4">
+  <div class="h-[calc(100vh-6.2rem)] lg:h-[calc(100vh-1.5rem)] p-0 lg:p-1 pb-20 lg:pb-1">
     <p v-if="pageError" class="mb-2 inline-flex rounded-full px-2.5 py-1 mono-label text-[11px] bg-[rgba(239,68,68,0.1)] text-[rgba(239,68,68,0.9)]">{{ pageError }}</p>
 
     <div class="h-full rounded-[14px] border border-[var(--line)] bg-[var(--ink2)] overflow-hidden grid lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -160,7 +160,10 @@
                     {{ formatRelativeTime(conversation.lastMessageAt) }}
                   </span>
                 </div>
-                <p class="text-xs truncate" :class="conversation.unreadCount > 0 ? 'text-[var(--t1)] font-medium' : 'text-[var(--t2)]'">
+                <p v-if="typingPartnerIds.has(String(conversation.user.id))" class="text-xs text-[var(--primary)] font-medium animate-pulse">
+                  typing...
+                </p>
+                <p v-else class="text-xs truncate" :class="conversation.unreadCount > 0 ? 'text-[var(--t1)] font-medium' : 'text-[var(--t2)]'">
                   {{ conversation.lastMessageText || 'No messages yet' }}
                 </p>
               </div>
@@ -185,10 +188,15 @@
             <UiAvatar :src="activeUser.avatar" :name="activeUser.displayName" size="md" />
             <div class="min-w-0 flex-1">
               <p class="text-[15px] font-semibold text-[var(--t1)] truncate">{{ activeUser.displayName }}</p>
-              <p class="text-[12px] text-[rgba(244,241,235,0.35)] truncate">@{{ activeUser.username }}</p>
+              <p class="text-[12px] text-[rgba(244,241,235,0.35)] truncate">@{{ activeUser.username }} • ID: {{ activeUser.id }}</p>
             </div>
-            <div class="hidden sm:flex items-center gap-2 text-[var(--t2)]">
-              <span class="text-[10px] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 uppercase tracking-[0.1em] font-semibold">DM</span>
+            <div class="flex items-center gap-1 sm:gap-2">
+              <UiButton variant="ghost" size="sm" icon class="text-[var(--t2)] hover:text-[var(--primary)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </UiButton>
+              <div class="hidden sm:flex items-center gap-2 text-[var(--t2)]">
+                <span class="text-[10px] rounded-full border border-[var(--line)] bg-[var(--surface2)] px-2 py-1 uppercase tracking-[0.1em] font-semibold">DM</span>
+              </div>
             </div>
           </header>
 
@@ -239,12 +247,17 @@
 
           <form class="px-3 sm:px-4 py-3 border-t border-[var(--line)] bg-[var(--ink2)]" @submit.prevent="handleSendMessage">
             <div class="flex items-center gap-2 rounded-[10px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+              <UiButton variant="ghost" size="sm" icon class="text-[var(--t3)] hover:text-[var(--primary)]" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+              </UiButton>
               <textarea
                 v-model="messageDraft"
                 rows="1"
                 class="flex-1 resize-none bg-transparent text-[14px] text-[var(--t1)] placeholder:text-[rgba(244,241,235,0.3)] focus:outline-none"
                 placeholder="Message..."
                 :disabled="sendingMessage"
+                @input="handleTyping"
+                @keydown.enter.exact.prevent="handleSendMessage"
               />
               <UiButton type="submit" size="sm" :disabled="sendingMessage || !messageDraft.trim()">
                 {{ sendingMessage ? '...' : 'Send' }}
@@ -312,6 +325,9 @@ const messageDraft = ref('')
 const showMobileConversation = ref(false)
 const courseGroups = ref<CourseGroupChatInfo[]>([])
 const activeGroupCourseId = ref('')
+
+const typingPartnerIds = ref(new Set<string>())
+let typingTimeout: any = null
 
 const socket = ref<Socket | null>(null)
 const pendingReadIds = new Set<string>()
@@ -790,6 +806,17 @@ const handleSendMessage = async () => {
   await scrollToBottom()
 }
 
+const handleTyping = () => {
+  if (!socket.value?.connected || !selectedUserId.value) return
+
+  socket.value.emit('dm-typing', { receiverId: selectedUserId.value })
+
+  if (typingTimeout) clearTimeout(typingTimeout)
+  typingTimeout = setTimeout(() => {
+    socket.value?.emit('dm-stop-typing', { receiverId: selectedUserId.value })
+  }, 3000)
+}
+
 const handleIncomingMessage = async (payload: unknown) => {
   const incoming = normalizeSocketMessage(payload)
   if (!incoming) return
@@ -875,6 +902,16 @@ const connectDmSocket = () => {
 
   socket.value.on('dm-message-read', (payload: unknown) => {
     handleIncomingReadReceipt(payload)
+  })
+
+  socket.value.on('dm-typing', (payload: any) => {
+    const partnerId = toId(payload.senderId || payload.partnerId)
+    if (partnerId) typingPartnerIds.value.add(partnerId)
+  })
+
+  socket.value.on('dm-stop-typing', (payload: any) => {
+    const partnerId = toId(payload.senderId || payload.partnerId)
+    if (partnerId) typingPartnerIds.value.delete(partnerId)
   })
 }
 
