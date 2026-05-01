@@ -220,27 +220,99 @@
             </p>
 
             <div
-              v-for="message in messages"
-              :key="message.id"
-              class="flex"
-              :class="isOwnMessage(message) ? 'justify-end' : 'justify-start'"
+              v-for="item in processedMessages"
+              :key="item.id"
+              class="flex flex-col"
             >
+              <div v-if="'type' in item && item.type === 'timestamp'" class="flex justify-center my-4">
+                <span class="text-[11px] font-medium text-[var(--t3)] uppercase tracking-wider bg-transparent px-3 py-1">
+                  {{ item.time }}
+                </span>
+              </div>
+
               <div
-                class="max-w-[85%] sm:max-w-[68%] rounded-2xl px-4 py-2.5"
-                :class="[
-                  isOwnMessage(message)
-                    ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-sm'
-                    : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
-                ]"
+                v-else-if="'messageText' in item"
+                class="flex group relative mb-3"
+                :class="isOwnMessage(item) ? 'justify-end' : 'justify-start'"
               >
-                <p class="text-[14.5px] font-body whitespace-pre-wrap break-words leading-relaxed">{{ message.messageText }}</p>
-                <p
-                  class="mt-1 text-[10px] font-medium"
-                  :class="isOwnMessage(message) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
+                <!-- Message Actions Overlay -->
+                <div 
+                  class="absolute top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] shadow-sm z-10"
+                  :class="isOwnMessage(item) ? 'right-full mr-2 flex-row-reverse' : 'left-full ml-2'"
                 >
-                  {{ formatMessageTime(message.createdAt) }}
-                  <span v-if="isOwnMessage(message)">· {{ message.isRead ? 'Seen' : 'Sent' }}</span>
-                </p>
+                  <button 
+                    type="button" 
+                    class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors"
+                    title="Reply"
+                    @click="handleReplyMessage(item)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+                  </button>
+                  
+                  <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div class="relative">
+                      <button 
+                        type="button" 
+                        class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors"
+                        title="React"
+                        @click="toggleReactionMenu(item.id)"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                      </button>
+                      
+                      <div v-if="activeReactionMenuId === item.id" class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex gap-1 p-1.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
+                        <button 
+                          v-for="emoji in ['👍', '❤️', '😂', '😮', '😢', '🔥']" 
+                          :key="emoji" 
+                          class="text-lg hover:scale-125 transition-transform"
+                          @click="handleReaction(item.id, emoji)"
+                        >
+                          {{ emoji }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="relative">
+                      <button 
+                        type="button" 
+                        class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors"
+                        title="More"
+                        @click="toggleMessageMenu(item.id)"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                      </button>
+                      
+                      <div v-if="activeMessageMenuId === item.id" class="absolute bottom-full mb-2 right-0 w-32 py-1 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
+                        <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] flex items-center gap-2" @click="handleForwardMessage(item.id)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
+                          Forward
+                        </button>
+                        <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] text-[rgba(239,68,68,0.9)] flex items-center gap-2" @click="handleDeleteMessage(item.id)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="max-w-[85%] sm:max-w-[68%] rounded-2xl px-4 py-2.5 transition-all duration-200"
+                  :class="[
+                    isOwnMessage(item)
+                      ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-sm'
+                      : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
+                  ]"
+                >
+                  <p class="text-[14.5px] font-body whitespace-pre-wrap break-words leading-relaxed">{{ item.messageText }}</p>
+                  <p
+                    class="mt-1 text-[10px] font-medium"
+                    :class="isOwnMessage(item) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
+                  >
+                    {{ formatMessageTime(item.createdAt) }}
+                    <span v-if="isOwnMessage(item)">· {{ item.isRead ? 'Seen' : 'Sent' }}</span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -258,10 +330,22 @@
           </div>
 
           <form class="px-4 py-2 border-t border-[var(--line)] bg-[var(--surface)]" @submit.prevent="handleSendMessage">
+            <input 
+              ref="fileInputRef" 
+              type="file" 
+              class="hidden" 
+              accept="image/*"
+              @change="handleImageSelection"
+            >
             <div class="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-1.5 shadow-sm">
-              <UiButton variant="ghost" size="sm" icon class="text-[var(--t3)] hover:text-[var(--primary)]" type="button" @click="showEmojiPicker = !showEmojiPicker">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-              </UiButton>
+              <div class="flex items-center gap-1">
+                <UiButton variant="ghost" size="sm" icon class="text-[var(--t3)] hover:text-[var(--primary)]" type="button" @click="showEmojiPicker = !showEmojiPicker">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                </UiButton>
+                <UiButton variant="ghost" size="sm" icon class="text-[var(--t3)] hover:text-[var(--primary)]" type="button" @click="triggerImageUpload">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </UiButton>
+              </div>
               <textarea
                 v-model="messageDraft"
                 rows="1"
@@ -338,6 +422,9 @@ const showMobileConversation = ref(false)
 const courseGroups = ref<CourseGroupChatInfo[]>([])
 const activeGroupCourseId = ref('')
 const showEmojiPicker = ref(false)
+const activeMessageMenuId = ref<string | null>(null)
+const activeReactionMenuId = ref<string | null>(null)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const typingPartnerIds = ref(new Set<string>())
 let typingTimeout: any = null
@@ -349,6 +436,28 @@ const messageListRef = ref<HTMLElement | null>(null)
 const currentUserId = computed(() => String(userStore.user?.id || ''))
 
 const activeUser = computed(() => selectedUser.value)
+
+const processedMessages = computed(() => {
+  const result: (DmMessage | { type: 'timestamp'; time: string; id: string })[] = []
+  let lastTimestamp: number | null = null
+
+  messages.value.forEach((msg, index) => {
+    const currentTimestamp = toEpoch(msg.createdAt)
+
+    if (lastTimestamp === null || currentTimestamp - lastTimestamp > 30 * 60 * 1000) {
+      result.push({
+        type: 'timestamp',
+        time: formatMessageTime(msg.createdAt),
+        id: `timestamp-${msg.id}`,
+      })
+    }
+
+    result.push(msg)
+    lastTimestamp = currentTimestamp
+  })
+
+  return result
+})
 
 const sortedConversations = computed(() => {
   return [...conversations.value].sort((a, b) => toEpoch(b.lastMessageAt) - toEpoch(a.lastMessageAt))
@@ -836,6 +945,55 @@ const handleTyping = () => {
   }, 3000)
 }
 
+const triggerImageUpload = () => {
+  fileInputRef.value?.click()
+}
+
+const handleImageSelection = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (!target.files?.length) return
+  
+  const file = target.files[0]
+  // In a real app, we would upload this file to a server
+  // For now, we'll just log it
+  console.log('Selected image:', file)
+  
+  // Show an optimistic message or just a placeholder
+  const text = `[Image: ${file.name}]`
+  messageDraft.value = text
+  await handleSendMessage()
+}
+
+const toggleMessageMenu = (id: string) => {
+  activeMessageMenuId.value = activeMessageMenuId.value === id ? null : id
+  activeReactionMenuId.value = null
+}
+
+const toggleReactionMenu = (id: string) => {
+  activeReactionMenuId.value = activeReactionMenuId.value === id ? null : id
+  activeMessageMenuId.value = null
+}
+
+const handleReaction = (messageId: string, emoji: string) => {
+  console.log(`Reacting to ${messageId} with ${emoji}`)
+  activeReactionMenuId.value = null
+}
+
+const handleDeleteMessage = (messageId: string) => {
+  console.log(`Deleting message ${messageId}`)
+  activeMessageMenuId.value = null
+}
+
+const handleForwardMessage = (messageId: string) => {
+  console.log(`Forwarding message ${messageId}`)
+  activeMessageMenuId.value = null
+}
+
+const handleReplyMessage = (message: DmMessage) => {
+  console.log(`Replying to message ${message.id}`)
+  messageDraft.value = `@${message.sender?.username || 'user'} `
+}
+
 const handleIncomingMessage = async (payload: unknown) => {
   const incoming = normalizeSocketMessage(payload)
   if (!incoming) return
@@ -962,9 +1120,12 @@ onMounted(async () => {
   // Handle group query param from classroom
   await handleGroupQueryParam()
 
+  // No conversation opened by default as requested
+  /*
   if (!activeGroupCourseId.value && conversations.value.length > 0) {
     await openConversation(conversations.value[0].user)
   }
+  */
 })
 
 onBeforeUnmount(() => {
