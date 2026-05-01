@@ -232,86 +232,98 @@
 
               <div
                 v-else-if="'messageText' in item"
-                class="flex group relative mb-3"
+                class="flex group relative mb-4"
                 :class="isOwnMessage(item) ? 'justify-end' : 'justify-start'"
               >
-                <!-- Message Actions Overlay -->
+                <!-- Message Actions Overlay - Tightly placed, no space, clear background -->
                 <div 
-                  class="absolute top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-1 rounded-full bg-[var(--surface2)] border border-[var(--line)] shadow-sm z-10"
-                  :class="isOwnMessage(item) ? 'right-full mr-2 flex-row-reverse' : 'left-full ml-2'"
+                  class="absolute top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                  :class="isOwnMessage(item) ? 'right-full' : 'left-full'"
                 >
                   <button 
                     type="button" 
-                    class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors"
+                    class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
                     title="Reply"
                     @click="handleReplyMessage(item)"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
                   </button>
                   
-                  <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div class="relative">
+                  <div class="relative">
+                    <button 
+                      type="button" 
+                      class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
+                      title="React"
+                      @click="toggleReactionMenu(item.id)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                    </button>
+                    
+                    <div v-if="activeReactionMenuId === item.id" class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex gap-1 p-1.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
                       <button 
-                        type="button" 
-                        class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors"
-                        title="React"
-                        @click="toggleReactionMenu(item.id)"
+                        v-for="emoji in ['👍', '❤️', '😂', '😮', '😢', '🔥']" 
+                        :key="emoji" 
+                        class="text-lg hover:scale-125 transition-transform"
+                        @click="handleReaction(item.id, emoji)"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                        {{ emoji }}
                       </button>
-                      
-                      <div v-if="activeReactionMenuId === item.id" class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex gap-1 p-1.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
-                        <button 
-                          v-for="emoji in ['👍', '❤️', '😂', '😮', '😢', '🔥']" 
-                          :key="emoji" 
-                          class="text-lg hover:scale-125 transition-transform"
-                          @click="handleReaction(item.id, emoji)"
-                        >
-                          {{ emoji }}
-                        </button>
-                      </div>
                     </div>
+                  </div>
 
-                    <div class="relative">
-                      <button 
-                        type="button" 
-                        class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors"
-                        title="More"
-                        @click="toggleMessageMenu(item.id)"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                  <div class="relative">
+                    <button 
+                      type="button" 
+                      class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
+                      title="More"
+                      @click="toggleMessageMenu(item.id)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                    </button>
+                    
+                    <div v-if="activeMessageMenuId === item.id" class="absolute bottom-full mb-2 right-0 w-32 py-1 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
+                      <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] flex items-center gap-2" @click="handleForwardMessage(item.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
+                        Forward
                       </button>
-                      
-                      <div v-if="activeMessageMenuId === item.id" class="absolute bottom-full mb-2 right-0 w-32 py-1 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
-                        <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] flex items-center gap-2" @click="handleForwardMessage(item.id)">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
-                          Forward
-                        </button>
-                        <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] text-[rgba(239,68,68,0.9)] flex items-center gap-2" @click="handleDeleteMessage(item.id)">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                          Delete
-                        </button>
-                      </div>
+                      <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] text-[rgba(239,68,68,0.9)] flex items-center gap-2" @click="handleDeleteMessage(item.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                <div
-                  class="max-w-[85%] sm:max-w-[68%] rounded-2xl px-4 py-2.5 transition-all duration-200"
-                  :class="[
-                    isOwnMessage(item)
-                      ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-sm'
-                      : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
-                  ]"
-                >
-                  <p class="text-[14.5px] font-body whitespace-pre-wrap break-words leading-relaxed">{{ item.messageText }}</p>
-                  <p
-                    class="mt-1 text-[10px] font-medium"
-                    :class="isOwnMessage(item) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
+                <div class="flex flex-col" :class="isOwnMessage(item) ? 'items-end' : 'items-start'">
+                  <div
+                    class="max-w-[85%] sm:max-w-[100%] rounded-2xl px-4 py-2.5 transition-all duration-200"
+                    :class="[
+                      isOwnMessage(item)
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-sm'
+                        : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
+                      replyingToMessage?.id === item.id ? 'opacity-50 scale-[0.98]' : ''
+                    ]"
                   >
-                    {{ formatMessageTime(item.createdAt) }}
-                    <span v-if="isOwnMessage(item)">· {{ item.isRead ? 'Seen' : 'Sent' }}</span>
-                  </p>
+                    <p class="text-[14.5px] font-body whitespace-pre-wrap break-words leading-relaxed">{{ item.messageText }}</p>
+                    <p
+                      class="mt-1 text-[10px] font-medium"
+                      :class="isOwnMessage(item) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
+                    >
+                      {{ formatMessageTime(item.createdAt) }}
+                      <span v-if="isOwnMessage(item)">· {{ item.isRead ? 'Seen' : 'Sent' }}</span>
+                    </p>
+                  </div>
+                  
+                  <!-- Reaction display just below the message -->
+                  <div v-if="reactionsMap[item.id]?.length" class="flex flex-wrap gap-1 mt-1 px-1">
+                    <span 
+                      v-for="emoji in reactionsMap[item.id]" 
+                      :key="emoji"
+                      class="text-[12px] bg-[var(--surface2)] border border-[var(--line)] rounded-full px-1.5 py-0.5 leading-none"
+                    >
+                      {{ emoji }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -326,6 +338,16 @@
               @click="addEmoji(emoji)"
             >
               {{ emoji }}
+            </button>
+          </div>
+
+          <div v-if="replyingToMessage" class="px-4 py-2 bg-[color-mix(in_srgb,var(--primary)_10%,transparent)] border-t border-[var(--line)] flex items-center justify-between">
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-bold text-[var(--primary)] uppercase tracking-wider">Replying to {{ replyingToMessage.sender?.displayName }}</p>
+              <p class="text-xs text-[var(--t2)] truncate">{{ replyingToMessage.messageText }}</p>
+            </div>
+            <button type="button" class="p-1 hover:text-[var(--primary)] transition-colors" @click="replyingToMessage = null">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
           </div>
 
@@ -425,6 +447,8 @@ const showEmojiPicker = ref(false)
 const activeMessageMenuId = ref<string | null>(null)
 const activeReactionMenuId = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const replyingToMessage = ref<DmMessage | null>(null)
+const reactionsMap = ref<Record<string, string[]>>({})
 
 const typingPartnerIds = ref(new Set<string>())
 let typingTimeout: any = null
@@ -893,6 +917,7 @@ const handleSendMessage = async () => {
 
   messages.value = mergeMessages([...messages.value, optimisticMessage])
   messageDraft.value = ''
+  replyingToMessage.value = null // Clear reply state
   await scrollToBottom()
 
   const useSocketSend = Boolean(socket.value?.connected)
@@ -975,12 +1000,19 @@ const toggleReactionMenu = (id: string) => {
 }
 
 const handleReaction = (messageId: string, emoji: string) => {
-  console.log(`Reacting to ${messageId} with ${emoji}`)
+  if (!reactionsMap.value[messageId]) {
+    reactionsMap.value[messageId] = []
+  }
+  if (!reactionsMap.value[messageId].includes(emoji)) {
+    reactionsMap.value[messageId].push(emoji)
+  } else {
+    reactionsMap.value[messageId] = reactionsMap.value[messageId].filter(e => e !== emoji)
+  }
   activeReactionMenuId.value = null
 }
 
 const handleDeleteMessage = (messageId: string) => {
-  console.log(`Deleting message ${messageId}`)
+  messages.value = messages.value.filter(m => m.id !== messageId)
   activeMessageMenuId.value = null
 }
 
@@ -990,8 +1022,9 @@ const handleForwardMessage = (messageId: string) => {
 }
 
 const handleReplyMessage = (message: DmMessage) => {
-  console.log(`Replying to message ${message.id}`)
-  messageDraft.value = `@${message.sender?.username || 'user'} `
+  replyingToMessage.value = message
+  activeMessageMenuId.value = null
+  activeReactionMenuId.value = null
 }
 
 const handleIncomingMessage = async (payload: unknown) => {
