@@ -237,7 +237,7 @@
               >
                 <!-- Message Actions Overlay - Tightly placed, no space, clear background -->
                 <div 
-                  class="absolute top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                  class="absolute top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out z-10 scale-95 group-hover:scale-100"
                   :class="isOwnMessage(item) ? 'right-full' : 'left-full'"
                 >
                   <button 
@@ -271,6 +271,15 @@
                     </div>
                   </div>
 
+                  <button 
+                    type="button" 
+                    class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
+                    title="Forward"
+                    @click="handleForwardMessage(item.id)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
+                  </button>
+
                   <div class="relative">
                     <button 
                       type="button" 
@@ -282,10 +291,6 @@
                     </button>
                     
                     <div v-if="activeMessageMenuId === item.id" class="absolute bottom-full mb-2 right-0 w-32 py-1 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
-                      <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] flex items-center gap-2" @click="handleForwardMessage(item.id)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
-                        Forward
-                      </button>
                       <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] text-[rgba(239,68,68,0.9)] flex items-center gap-2" @click="handleDeleteMessage(item.id)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                         Delete
@@ -295,15 +300,27 @@
                 </div>
 
                 <div class="flex flex-col" :class="isOwnMessage(item) ? 'items-end' : 'items-start'">
+                  <!-- Thread line indicator for replies -->
+                  <div v-if="item.replyToId" class="flex items-center gap-2 mb-1 px-2 opacity-60">
+                    <div class="h-[1px] w-4 bg-[var(--line)]"></div>
+                    <span class="text-[10px] font-medium text-[var(--t3)]">replied to {{ item.parentMessage?.sender }}</span>
+                  </div>
+
                   <div
-                    class="max-w-[85%] sm:max-w-[100%] rounded-2xl px-4 py-2.5 transition-all duration-200"
+                    class="max-w-[85%] sm:max-w-[100%] rounded-2xl px-4 py-2.5 transition-all duration-300"
                     :class="[
                       isOwnMessage(item)
                         ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-sm'
                         : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
-                      replyingToMessage?.id === item.id ? 'opacity-50 scale-[0.98]' : ''
+                      replyingToMessage?.id === item.id ? 'opacity-50 scale-[0.98]' : '',
+                      item.replyToId ? 'ml-4' : ''
                     ]"
                   >
+                    <!-- Reply Quote -->
+                    <div v-if="item.replyToId" class="mb-2 pb-2 border-b border-white/20 opacity-80 text-[11px] italic line-clamp-1">
+                      "{{ item.parentMessage?.text }}"
+                    </div>
+
                     <p class="text-[14.5px] font-body whitespace-pre-wrap break-words leading-relaxed">{{ item.messageText }}</p>
                     <p
                       class="mt-1 text-[10px] font-medium"
@@ -462,22 +479,45 @@ const currentUserId = computed(() => String(userStore.user?.id || ''))
 const activeUser = computed(() => selectedUser.value)
 
 const processedMessages = computed(() => {
-  const result: (DmMessage | { type: 'timestamp'; time: string; id: string })[] = []
+  const result: (any)[] = []
+  const roots: DmMessage[] = []
+  const replies = new Map<string, DmMessage[]>()
+
+  // Separate root messages from replies
+  messages.value.forEach(msg => {
+    const m = msg as any
+    if (m.replyToId) {
+      if (!replies.has(m.replyToId)) replies.set(m.replyToId, [])
+      replies.get(m.replyToId)!.push(msg)
+    } else {
+      roots.push(msg)
+    }
+  })
+
   let lastTimestamp: number | null = null
 
-  messages.value.forEach((msg, index) => {
-    const currentTimestamp = toEpoch(msg.createdAt)
+  // Flatten the structure: Parent -> its replies -> Next Parent
+  roots.forEach(root => {
+    const currentTimestamp = toEpoch(root.createdAt)
 
     if (lastTimestamp === null || currentTimestamp - lastTimestamp > 30 * 60 * 1000) {
       result.push({
         type: 'timestamp',
-        time: formatMessageTime(msg.createdAt),
-        id: `timestamp-${msg.id}`,
+        time: formatMessageTime(root.createdAt),
+        id: `timestamp-${root.id}`,
       })
     }
-
-    result.push(msg)
+    
+    result.push(root)
     lastTimestamp = currentTimestamp
+
+    // Add replies directly after the parent
+    const childReplies = replies.get(root.id)
+    if (childReplies) {
+      childReplies.forEach(reply => {
+        result.push(reply)
+      })
+    }
   })
 
   return result
@@ -906,13 +946,21 @@ const handleSendMessage = async () => {
   sendingMessage.value = true
 
   const tempId = `temp-${Date.now()}`
-  const optimisticMessage: DmMessage = {
+  const optimisticMessage: any = {
     id: tempId,
     senderId: currentUserId.value,
     receiverId: selectedUserId.value,
     messageText: text,
     isRead: false,
     createdAt: new Date().toISOString(),
+  }
+
+  if (replyingToMessage.value) {
+    optimisticMessage.replyToId = replyingToMessage.value.id
+    optimisticMessage.parentMessage = {
+      text: replyingToMessage.value.messageText,
+      sender: replyingToMessage.value.sender?.displayName || 'User'
+    }
   }
 
   messages.value = mergeMessages([...messages.value, optimisticMessage])
