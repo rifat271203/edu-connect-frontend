@@ -232,17 +232,20 @@
 
               <div
                 v-else-if="'messageText' in item"
-                class="flex group relative mb-4"
-                :class="isOwnMessage(item) ? 'justify-end' : 'justify-start'"
+                class="flex group relative"
+                :class="[
+                  isOwnMessage(item) ? 'justify-end' : 'justify-start',
+                  item.replyToId ? 'mb-2 mt-[-12px]' : 'mb-4'
+                ]"
               >
-                <!-- Message Actions Overlay - Tightly placed, no space, clear background -->
+                <!-- Message Actions Overlay - Attached to message edge -->
                 <div 
-                  class="absolute top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out z-10 scale-95 group-hover:scale-100"
-                  :class="isOwnMessage(item) ? 'right-full' : 'left-full'"
+                  class="absolute top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out z-10 scale-90 group-hover:scale-100"
+                  :class="isOwnMessage(item) ? 'right-[calc(100%-8px)] flex-row-reverse' : 'left-[calc(100%-8px)]'"
                 >
                   <button 
                     type="button" 
-                    class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
+                    class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
                     title="Reply"
                     @click="handleReplyMessage(item)"
                   >
@@ -252,7 +255,7 @@
                   <div class="relative">
                     <button 
                       type="button" 
-                      class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
+                      class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
                       title="React"
                       @click="toggleReactionMenu(item.id)"
                     >
@@ -271,19 +274,10 @@
                     </div>
                   </div>
 
-                  <button 
-                    type="button" 
-                    class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
-                    title="Forward"
-                    @click="handleForwardMessage(item.id)"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
-                  </button>
-
                   <div class="relative">
                     <button 
                       type="button" 
-                      class="p-1.5 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
+                      class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
                       title="More"
                       @click="toggleMessageMenu(item.id)"
                     >
@@ -297,52 +291,63 @@
                       </button>
                     </div>
                   </div>
+
+                  <button 
+                    type="button" 
+                    class="p-1 text-[var(--t3)] hover:text(--primary)] transition-colors bg-transparent border-none"
+                    title="Forward"
+                    @click="handleForwardMessage(item.id)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
+                  </button>
                 </div>
 
-                <div class="flex flex-col" :class="isOwnMessage(item) ? 'items-end' : 'items-start'">
+                <div class="flex flex-col relative" :class="isOwnMessage(item) ? 'items-end' : 'items-start'">
                   <!-- Thread line indicator for replies -->
-                  <div v-if="item.replyToId" class="flex items-center gap-2 mb-1 px-2 opacity-60">
-                    <div class="h-[1px] w-4 bg-[var(--line)]"></div>
-                    <span class="text-[10px] font-medium text-[var(--t3)]">replied to {{ item.parentMessage?.sender }}</span>
+                  <div v-if="item.replyToId" class="flex items-center gap-1 mb-0.5 px-3 opacity-60">
+                    <div class="h-3 w-[1.5px] bg-[var(--line)] rounded-full"></div>
+                    <span class="text-[9px] font-bold text-[var(--primary)] uppercase">Replied to {{ item.parentMessage?.sender }}</span>
                   </div>
 
                   <div
-                    class="max-w-[85%] sm:max-w-[100%] rounded-2xl px-4 py-2.5 transition-all duration-300"
+                    class="relative max-w-[85%] sm:max-w-[100%] rounded-2xl px-4 py-2.5 transition-all duration-300"
                     :class="[
                       isOwnMessage(item)
                         ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-sm'
                         : 'bg-[var(--surface2)] text-[var(--t1)] border border-[var(--line)]',
-                      replyingToMessage?.id === item.id ? 'opacity-50 scale-[0.98]' : '',
-                      item.replyToId ? 'ml-4' : ''
+                      replyingToMessage?.id === item.id ? 'opacity-40 scale-[0.98]' : '',
+                      item.replyToId ? 'ml-3' : ''
                     ]"
                   >
                     <!-- Reply Quote -->
-                    <div v-if="item.replyToId" class="mb-2 pb-2 border-b border-white/20 opacity-80 text-[11px] italic line-clamp-1">
-                      "{{ item.parentMessage?.text }}"
+                    <div v-if="item.replyToId" class="mb-1.5 pb-1.5 border-b border-white/10 opacity-70 text-[10px] italic line-clamp-1 max-w-[200px]">
+                      {{ item.parentMessage?.text }}
                     </div>
 
                     <p class="text-[14.5px] font-body whitespace-pre-wrap break-words leading-relaxed">{{ item.messageText }}</p>
+                    
                     <p
-                      class="mt-1 text-[10px] font-medium"
+                      class="mt-1 text-[9px] font-medium"
                       :class="isOwnMessage(item) ? 'text-[var(--on-primary)]/70' : 'text-[var(--t3)]'"
                     >
                       {{ formatMessageTime(item.createdAt) }}
                       <span v-if="isOwnMessage(item)">· {{ item.isRead ? 'Seen' : 'Sent' }}</span>
                     </p>
-                  </div>
-                  
-                  <!-- Reaction display just below the message -->
-                  <div v-if="reactionsMap[item.id]?.length" class="flex flex-wrap gap-1 mt-1 px-1">
-                    <span 
-                      v-for="emoji in reactionsMap[item.id]" 
-                      :key="emoji"
-                      class="text-[12px] bg-[var(--surface2)] border border-[var(--line)] rounded-full px-1.5 py-0.5 leading-none"
-                    >
-                      {{ emoji }}
-                    </span>
+
+                    <!-- Reaction pinned to the corner -->
+                    <div v-if="reactionsMap[item.id]?.length" class="absolute -bottom-2 flex -space-x-1" :class="isOwnMessage(item) ? '-left-1' : '-right-1'">
+                      <span 
+                        v-for="emoji in reactionsMap[item.id]" 
+                        :key="emoji"
+                        class="text-[10px] bg-[var(--surface)] border border-[var(--line)] rounded-full p-0.5 shadow-sm hover:scale-125 transition-transform"
+                      >
+                        {{ emoji }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
+                  
             </div>
           </div>
 
