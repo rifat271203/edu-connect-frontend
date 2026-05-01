@@ -238,11 +238,33 @@
                   item.replyToId ? 'mb-2 mt-[-12px]' : 'mb-4'
                 ]"
               >
-                <!-- Message Actions Overlay - Attached to message edge -->
+                <!-- Message Actions Overlay - Tightly attached, no gap, vertically centered -->
                 <div 
                   class="absolute top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out z-10 scale-90 group-hover:scale-100"
-                  :class="isOwnMessage(item) ? 'right-[calc(100%-8px)] flex-row-reverse' : 'left-[calc(100%-8px)]'"
+                  :class="isOwnMessage(item) ? 'right-[100%] flex-row-reverse mr-[-4px]' : 'left-[100%] ml-[-4px]'"
                 >
+                  <div class="relative">
+                    <button 
+                      type="button" 
+                      class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
+                      title="More"
+                      @click="toggleMessageMenu(item.id)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                    </button>
+                    
+                    <div v-if="activeMessageMenuId === item.id" class="absolute bottom-full mb-2 right-0 w-32 py-1 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
+                      <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] flex items-center gap-2" @click="handleForwardMessage(item.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
+                        Forward
+                      </button>
+                      <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] text-[rgba(239,68,68,0.9)] flex items-center gap-2" @click="handleDeleteMessage(item.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
                   <button 
                     type="button" 
                     class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
@@ -273,40 +295,13 @@
                       </button>
                     </div>
                   </div>
-
-                  <div class="relative">
-                    <button 
-                      type="button" 
-                      class="p-1 text-[var(--t3)] hover:text-[var(--primary)] transition-colors bg-transparent border-none"
-                      title="More"
-                      @click="toggleMessageMenu(item.id)"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                    </button>
-                    
-                    <div v-if="activeMessageMenuId === item.id" class="absolute bottom-full mb-2 right-0 w-32 py-1 rounded-xl bg-[var(--surface)] border border-[var(--line)] shadow-xl z-20">
-                      <button class="w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--surface2)] text-[rgba(239,68,68,0.9)] flex items-center gap-2" @click="handleDeleteMessage(item.id)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-
-                  <button 
-                    type="button" 
-                    class="p-1 text-[var(--t3)] hover:text(--primary)] transition-colors bg-transparent border-none"
-                    title="Forward"
-                    @click="handleForwardMessage(item.id)"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
-                  </button>
                 </div>
 
                 <div class="flex flex-col relative" :class="isOwnMessage(item) ? 'items-end' : 'items-start'">
-                  <!-- Thread line indicator for replies -->
-                  <div v-if="item.replyToId" class="flex items-center gap-1 mb-0.5 px-3 opacity-60">
-                    <div class="h-3 w-[1.5px] bg-[var(--line)] rounded-full"></div>
-                    <span class="text-[9px] font-bold text-[var(--primary)] uppercase">Replied to {{ item.parentMessage?.sender }}</span>
+                  <!-- Thread connector for replies -->
+                  <div v-if="item.replyToId" class="flex items-center gap-1 mb-[-4px] px-4 opacity-40">
+                    <div class="h-4 w-[1px] bg-[var(--line)]"></div>
+                    <span class="text-[8px] font-bold text-[var(--t3)] uppercase tracking-tighter">Replied</span>
                   </div>
 
                   <div
